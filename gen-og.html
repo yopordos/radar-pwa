@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,900;1,900&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #111; display: flex; flex-direction: column; align-items: center; padding: 40px; gap: 20px; font-family: sans-serif; color: #fff; }
+  canvas { max-width: 100%; border-radius: 8px; }
+  button { background: #e8ff47; color: #000; border: none; padding: 14px 32px; font-size: 15px; cursor: pointer; font-weight: bold; border-radius: 8px; letter-spacing: 1px; }
+  button:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<button onclick="download()">Descargar og-image.png</button>
+
+<script>
+document.fonts.ready.then(draw);
+
+function draw() {
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  const W = 1200, H = 630;
+  const cx = W / 2, cy = H / 2;
+
+  // ── Fondo ──
+  ctx.fillStyle = '#09090f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Glow radial central muy suave
+  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 560);
+  bg.addColorStop(0,   'rgba(232,255,71,0.05)');
+  bg.addColorStop(0.5, 'rgba(232,255,71,0.015)');
+  bg.addColorStop(1,   'rgba(0,0,0,0)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Waveform de audio sutil (fondo) ──
+  const wY = cy + 8;
+  for (let i = 0; i < W; i++) {
+    const t  = (i / W) * Math.PI * 14;
+    const env = Math.pow(Math.sin((i / W) * Math.PI), 0.6); // fade in/out en bordes
+    const amp  = env * 62 * Math.abs(Math.sin(t * 0.38)) * (0.4 + 0.6 * Math.abs(Math.sin(t * 0.17)));
+    const a    = 0.028 + 0.018 * Math.abs(Math.sin(t * 0.55));
+    ctx.fillStyle = `rgba(232,255,71,${a})`;
+    ctx.fillRect(i, wY - amp, 1, amp * 2);
+  }
+
+  // ── Persona-dots en las esquinas (muy sutiles) ──
+  const dots = [
+    { x: 95,   y: cy - 100, r: 5.5, a: 0.30 },
+    { x: 1105, y: cy + 85,  r: 5,   a: 0.24 },
+    { x: 155,  y: cy + 130, r: 4,   a: 0.20 },
+    { x: 1045, y: cy - 130, r: 4.5, a: 0.22 },
+    { x: 600,  y: 62,       r: 3.5, a: 0.16 },
+  ];
+  dots.forEach(p => {
+    const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
+    halo.addColorStop(0, `rgba(232,255,71,${p.a * 0.55})`);
+    halo.addColorStop(1, 'rgba(232,255,71,0)');
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 6, 0, Math.PI*2);
+    ctx.fillStyle = halo; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(232,255,71,${p.a + 0.22})`; ctx.fill();
+  });
+
+  // ── Logo RAdAR ──
+  const fontSize = 162;
+  const logoY   = cy + 32;
+
+  ctx.textAlign    = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  ctx.font = `900 ${fontSize}px 'Poppins', sans-serif`;
+  const wRA = ctx.measureText('RA').width;
+  ctx.font = `italic 900 ${fontSize}px 'Poppins', sans-serif`;
+  const wd  = ctx.measureText('d').width;
+  ctx.font = `900 ${fontSize}px 'Poppins', sans-serif`;
+  const wAR = ctx.measureText('AR').width;
+  const totalW = wRA + wd + wAR;
+  let x = cx - totalW / 2;
+
+  // RA — blanco, sombra suave
+  ctx.shadowColor = 'rgba(232,255,71,0.18)';
+  ctx.shadowBlur  = 38;
+  ctx.fillStyle   = '#ffffff';
+  ctx.font = `900 ${fontSize}px 'Poppins', sans-serif`;
+  ctx.fillText('RA', x, logoY);
+  x += wRA;
+
+  // d — amarillo néon con glow intenso
+  ctx.shadowColor = 'rgba(232,255,71,0.85)';
+  ctx.shadowBlur  = 48;
+  ctx.fillStyle   = '#e8ff47';
+  ctx.font = `italic 900 ${fontSize}px 'Poppins', sans-serif`;
+  ctx.fillText('d', x, logoY);
+  x += wd;
+
+  // AR — blanco
+  ctx.shadowColor = 'rgba(232,255,71,0.18)';
+  ctx.shadowBlur  = 38;
+  ctx.fillStyle   = '#ffffff';
+  ctx.font = `900 ${fontSize}px 'Poppins', sans-serif`;
+  ctx.fillText('AR', x, logoY);
+
+  ctx.shadowBlur = 0;
+
+  // ── Línea acento bajo el logo ──
+  const lineW  = 80;
+  const lineY  = logoY + 16;
+  const lg = ctx.createLinearGradient(cx - lineW/2, lineY, cx + lineW/2, lineY);
+  lg.addColorStop(0,   'rgba(232,255,71,0)');
+  lg.addColorStop(0.5, 'rgba(232,255,71,0.65)');
+  lg.addColorStop(1,   'rgba(232,255,71,0)');
+  ctx.fillStyle = lg;
+  ctx.fillRect(cx - lineW/2, lineY, lineW, 2);
+
+  // ── Tagline ──
+  ctx.textAlign  = 'center';
+  ctx.font       = `300 25px 'Poppins', sans-serif`;
+  ctx.fillStyle  = 'rgba(255,255,255,0.38)';
+  ctx.fillText('Descubre quién escucha lo mismo que tú', cx, cy + 120);
+
+  // ── URL ──
+  ctx.font      = `300 14px 'Poppins', sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  ctx.fillText('radarpin.me', cx, H - 28);
+}
+
+function download() {
+  const a = document.createElement('a');
+  a.download = 'og-image.png';
+  a.href = document.getElementById('c').toDataURL('image/png');
+  a.click();
+}
+</script>
+</body>
+</html>

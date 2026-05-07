@@ -1,0 +1,28 @@
+{
+  "name": "RAdAR — Descubre quién escucha lo mismo que tú",
+  "short_name": "RAdAR",
+  "description": "Conecta con personas cerca de ti que escuchan la misma música en este momento. Detecta tu canción vía Spotify o Last.fm y encuentra tu tribu musical.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0c0c",
+  "theme_color": "#0c0c0c",
+  "lang": "es",
+  "categories": ["music", "social", "entertainment"],
+  "screenshots": [],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
