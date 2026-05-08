@@ -1,7 +1,7 @@
 {
-  "name": "RAdAR — Descubre quién escucha lo mismo que tú",
+  "name": "RAdAR — la música que te gusta, o no.",
   "short_name": "RAdAR",
-  "description": "Conecta con personas cerca de ti que escuchan la misma música en este momento. Detecta tu canción vía Spotify o Last.fm y encuentra tu tribu musical.",
+  "description": "la música que te gusta, o no, cerca de ti en tiempo real",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
