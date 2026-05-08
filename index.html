@@ -996,10 +996,13 @@ function showLoading(show) {
 // ── Location ──
 function getLocation() {
   if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(
-    p => { S.coords = { lat: p.coords.latitude, lng: p.coords.longitude }; },
-    () => { S.coords = S.coords || { lat: 40.4168, lng: -3.7038 }; },
-    { timeout: 10000, maximumAge: 60000 }
+  navigator.geolocation.watchPosition(
+    p => {
+      if (p.coords.accuracy > 500) return; // ignorar lecturas muy imprecisas
+      S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+    },
+    () => { S.coords = S.coords || null; },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
   );
 }
 
@@ -1043,7 +1046,8 @@ async function fetchSpotifyCurrentTrack(token) {
 
 async function updateLocation(uid, token, lf) {
   if (!uid || (!token && !lf)) return;
-  const c = S.coords || { lat: 40.4168, lng: -3.7038 };
+  const c = S.coords;
+  if (!c) return; // esperar a tener GPS real
 
   // Lee directamente de Spotify desde el browser (CORS permitido)
   if (token) {
@@ -1072,7 +1076,8 @@ async function updateLocation(uid, token, lf) {
 
 async function refreshAll(uid) {
   if (!uid) return;
-  const c = S.coords || { lat: 40.4168, lng: -3.7038 };
+  const c = S.coords;
+  if (!c) return;
   try {
     const [feedRes, notifRes, chatsRes] = await Promise.all([
       fetch(`${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uid}`).then(r => r.json()),
@@ -1591,7 +1596,7 @@ function renderFeed(container) {
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
   document.getElementById('bottom-song-btn').onclick = () => {
     if (!S.spotifyToken && !S.lastfmUsername) { loginWithSpotify(); return; }
-    window.open('https://open.spotify.com/', '_blank');
+    window.location.href = 'https://open.spotify.com/';
   };
   attachFeedEvents();
   setTimeout(() => {
@@ -1715,7 +1720,7 @@ function attachFeedEvents() {
     const listenBtn = e.target.closest('[data-action="listen"]');
     const chatBtn   = e.target.closest('[data-action="chat"]');
     const card      = e.target.closest('.card.has-chat');
-    if (listenBtn) { e.stopPropagation(); window.open(`https://open.spotify.com/search/${listenBtn.dataset.query}`, '_blank'); }
+    if (listenBtn) { e.stopPropagation(); window.location.href = `https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`; }
     else if (chatBtn) { e.stopPropagation(); sendTap(chatBtn.dataset.userid); }
     else if (card) { const ec = chatMap.get(card.dataset.userid); if (ec) openChat(ec.chatId, 'feed', ec.expiresAt); }
   };
