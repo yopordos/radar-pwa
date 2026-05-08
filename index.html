@@ -1046,10 +1046,8 @@ async function fetchSpotifyCurrentTrack(token) {
 
 async function updateLocation(uid, token, lf) {
   if (!uid || (!token && !lf)) return;
-  const c = S.coords;
-  if (!c) return; // esperar a tener GPS real
 
-  // Lee directamente de Spotify desde el browser (CORS permitido)
+  // Siempre buscar canción, independiente del GPS
   if (token) {
     const track = await fetchSpotifyCurrentTrack(token);
     if (track) {
@@ -1059,14 +1057,16 @@ async function updateLocation(uid, token, lf) {
     }
   }
 
+  // Solo enviar ubicación al backend si tenemos GPS real
+  const c = S.coords;
+  if (!c) return;
+
   try {
     const res = await apiFetch('POST', '/update-location', {
       userId: uid, lat: c.lat, lng: c.lng,
       token: token || null, lastfmUsername: lf || null,
-      // Enviamos también la canción para que el backend la almacene si lo soporta
       song: S.mySong || null, artist: S.myArtist || null,
     });
-    // Si el backend devuelve algo, úsalo (Last.fm path)
     if (res.song && !token) { S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying(); }
     else if (!res.song && !token) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
   } catch(e) {
