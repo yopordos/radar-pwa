@@ -813,19 +813,24 @@
       padding: 40px 28px; overflow-y: auto;
     }
     .listen-brand {
+      font-family: 'Poppins', sans-serif;
       font-size: 52px; font-weight: 900; letter-spacing: -2px;
-      color: #f5f0e8; line-height: 1; margin-bottom: 4px;
+      color: #f5f0e8; line-height: 1; margin-bottom: 16px;
     }
     .listen-brand em { font-style: italic; color: #e8ff47; }
     .listen-tagline {
-      font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase;
-      margin-bottom: 44px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px; font-weight: 900; color: #f5f0e8;
+      line-height: 1.2; letter-spacing: -0.5px;
+      text-align: center; margin-bottom: 12px;
     }
+    .listen-tagline em { color: #e8ff47; font-style: normal; }
     .listen-sub {
-      font-size: 12px; color: #444; text-align: center; line-height: 1.6;
-      max-width: 280px; margin-bottom: 32px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300; font-size: 15px;
+      color: rgba(245,240,232,0.45); text-align: center; line-height: 1.6;
+      margin-bottom: 36px;
     }
-    .listen-sub em { color: #666; font-style: normal; }
     .listen-connect-btns { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
 
     @media (min-width: 1024px) {
@@ -934,11 +939,11 @@ const T = {
   loading:      isES ? 'CARGANDO...'      : 'LOADING...',
   chats:        isES ? 'CHATS'            : 'CHATS',
   noChat:       isES ? 'Sin chat activo.' : 'No active chat.',
-  tagline:      isES ? 'música que conecta' : 'music that connects',
+  tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
   connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
   connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
-  listenSub:    isES ? 'Conecta tu cuenta para compartir lo que escuchas con personas cerca tuyo.'
-                     : 'Connect your account to share what you listen to with people nearby.',
+  listenSub:    isES ? 'cerca de ti · en tiempo real'
+                     : 'near you · in real time',
   lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
                      : 'Last.fm syncs with Apple Music, YouTube Music and more',
 };
@@ -1490,7 +1495,7 @@ function renderListen(container) {
         <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
         <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
       </div>
-      <div style="font-size:10px;color:#3a3a3a;letter-spacing:0.5px;margin-top:16px;text-align:center;max-width:280px;">${T.lfmNote}</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:11px;color:rgba(245,240,232,0.25);letter-spacing:0.5px;margin-top:16px;text-align:center;max-width:280px;">${T.lfmNote}</div>
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
