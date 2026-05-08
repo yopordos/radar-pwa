@@ -453,7 +453,7 @@
     .btn-chat:hover { opacity: 0.85; }
 
     /* Login buttons */
-    .btn-login  { font-weight: 900; font-size: 15px; letter-spacing: 1px; padding: 18px; border-radius: 14px; width: 100%; transition: opacity 0.15s, transform 0.1s; }
+    .btn-login  { font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 1px; padding: 18px; border-radius: 14px; width: 100%; transition: opacity 0.15s, transform 0.1s; }
     .btn-login:active { opacity: 0.85; transform: scale(0.98); }
     .btn-spotify { background: #1DB954; color: #fff; margin-bottom: 12px; }
     .btn-lastfm  { background: #d51007; color: #fff; }
@@ -572,7 +572,7 @@
       border: 1px solid rgba(232,255,71,0.1);
       pointer-events: none;
     }
-    .or1 { width: 80px;  height: 80px;  border-color: rgba(232,255,71,0.35); }
+    .or1 { width: 120px; height: 120px; border-color: rgba(232,255,71,0.35); }
     .or2 { width: 155px; height: 155px; }
     .or3 { width: 240px; height: 240px; }
     .or4 { width: 340px; height: 340px; border-color: rgba(232,255,71,0.06); }
@@ -611,11 +611,11 @@
     /* Centro: botón RAdAR */
     .onb-center {
       position: relative; z-index: 3;
-      width: 80px; height: 80px;
+      width: 120px; height: 120px;
       border-radius: 50%;
       background: #e8ff47;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 36px rgba(232,255,71,0.3), 0 0 72px rgba(232,255,71,0.1);
+      box-shadow: 0 0 48px rgba(232,255,71,0.35), 0 0 96px rgba(232,255,71,0.12);
     }
     /* Anillos de pulso: generados por JS en #radar-ripple (z-index:0), pasan por detrás de todo */
     .onb-pulse-overlay-ring {
@@ -648,7 +648,8 @@
       85%, 100%{ opacity: 0; }
     }
     .onb-brand {
-      font-weight: 900; font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900; font-size: 24px;
       color: #0c0c0c; line-height: 1; user-select: none;
     }
     .onb-d { font-style: italic; }
@@ -698,7 +699,6 @@
       flex-direction: column;
       gap: 12px;
       width: 100%;
-      max-width: 260px;
     }
     .onb-bottom .btn-login {
       width: 100%;
@@ -715,8 +715,9 @@
     }
     .onb-wordmark-d { font-style: italic; }
     .onb-headline {
+      font-family: 'Poppins', sans-serif;
       font-weight: 900;
-      font-size: 32px;
+      font-size: 34px;
       color: #f5f0e8;
       line-height: 1.15;
       letter-spacing: -0.5px;
@@ -724,8 +725,10 @@
     }
     .onb-headline em { color: #e8ff47; font-style: normal; }
     .onb-sub {
-      color: #555;
-      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300;
+      color: rgba(245,240,232,0.45);
+      font-size: 15px;
       line-height: 1.6;
       margin-bottom: 28px;
     }
@@ -1509,7 +1512,6 @@ function renderLogin(container) {
         </div>
       </div>
       <div class="onb-bottom">
-        <div class="onb-wordmark">RA<span class="onb-wordmark-d">d</span>AR</div>
         <div class="onb-headline">${headline}</div>
         <div class="onb-sub">${sub}</div>
         <div class="onb-buttons">
