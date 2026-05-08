@@ -1,5 +1,5 @@
-const CACHE = 'radar-v17';
-const ASSETS = ['./', './manifest.json', './robots.txt', './sitemap.xml'];
+const CACHE = 'radar-v18';
+const ASSETS = ['./', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
