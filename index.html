@@ -1505,9 +1505,20 @@ function patchNowPlaying() {
   const el = document.getElementById('topbar-np');
   if (el) {
     const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-    el.innerHTML = S.mySong
-      ? `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
-      : `<span class="topbar-np-nothing">${T.nothing}</span>`;
+    const needsReconnect = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+    if (S.mySong) {
+      el.innerHTML = `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`;
+      el.style.cursor = 'pointer';
+      el.onclick = () => { window.location.href = 'https://open.spotify.com/'; };
+    } else if (needsReconnect) {
+      el.innerHTML = `<span class="topbar-np-nothing" style="cursor:pointer;text-decoration:underline;">${T.reconnect}</span>`;
+      el.style.cursor = 'pointer';
+      el.onclick = loginWithSpotify;
+    } else {
+      el.innerHTML = `<span class="topbar-np-nothing">${T.nothing}</span>`;
+      el.style.cursor = 'default';
+      el.onclick = null;
+    }
   }
   patchBottomBar(); // siempre actualiza — desktop Y mobile
 }
@@ -1596,6 +1607,8 @@ function renderFeed(container) {
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
   document.getElementById('bottom-song-btn').onclick = () => {
     if (!S.spotifyToken && !S.lastfmUsername) { loginWithSpotify(); return; }
+    const needsReconnect = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+    if (needsReconnect) { loginWithSpotify(); return; }
     window.location.href = 'https://open.spotify.com/';
   };
   attachFeedEvents();
