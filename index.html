@@ -1499,7 +1499,6 @@ function patchNowPlaying() {
 // ── Listen Screen — entrada sin login ──
 function renderListen(container) {
   container = container || document.getElementById('app');
-  triggerLoginDots();
   container.innerHTML = `
     <div class="listen-screen">
       <canvas id="listen-radar"></canvas>
@@ -1516,6 +1515,9 @@ function renderListen(container) {
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
+  // Apagar radar-ripple overlay — el canvas propio maneja las ondas
+  const ripple = document.getElementById('radar-ripple');
+  if (ripple) ripple.innerHTML = '';
   initListenRadar();
 }
 
