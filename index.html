@@ -812,34 +812,24 @@
       align-items: center; justify-content: center;
       padding: 40px 28px; overflow-y: auto;
     }
-    .listen-logo-wrap {
+    .listen-radar-container {
       position: relative;
-      width: 120px; height: 120px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 36px;
+      width: 320px; height: 320px;
+      margin-bottom: 24px; flex-shrink: 0;
     }
-    .listen-logo-ring {
-      position: absolute;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      border: 1px solid rgba(232,255,71,0.45);
-      animation: listen-ring-expand 3s ease-out infinite;
-    }
-    .listen-logo-ring:nth-child(2) { animation-delay: 1s; }
-    .listen-logo-ring:nth-child(3) { animation-delay: 2s; }
-    @keyframes listen-ring-expand {
-      0%   { transform: scale(1);   opacity: 0.5; }
-      100% { transform: scale(4);   opacity: 0;   }
+    #listen-radar {
+      position: absolute; inset: 0; width: 100%; height: 100%;
     }
     .listen-logo-center {
-      position: relative; z-index: 3;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: #e8ff47;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      width: 150px; height: 150px;
+      border-radius: 50%; background: #e8ff47;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 48px rgba(232,255,71,0.3), 0 0 96px rgba(232,255,71,0.1);
       font-family: 'Poppins', sans-serif;
-      font-weight: 900; font-size: 22px;
+      font-weight: 900; font-size: 26px; letter-spacing: -1px;
       color: #0c0c0c; user-select: none;
     }
     .listen-logo-center em { font-style: italic; }
@@ -1513,10 +1503,8 @@ function renderListen(container) {
   triggerLoginDots();
   container.innerHTML = `
     <div class="listen-screen">
-      <div class="listen-logo-wrap">
-        <div class="listen-logo-ring"></div>
-        <div class="listen-logo-ring"></div>
-        <div class="listen-logo-ring"></div>
+      <div class="listen-radar-container">
+        <canvas id="listen-radar" width="320" height="320"></canvas>
         <div class="listen-logo-center">RA<em>d</em>AR</div>
       </div>
       <div class="listen-tagline">${T.tagline}</div>
@@ -1529,6 +1517,85 @@ function renderListen(container) {
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
+  initListenRadar();
+}
+
+function initListenRadar() {
+  const canvas = document.getElementById('listen-radar');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const S = 320;
+  canvas.width  = S * dpr;
+  canvas.height = S * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const cx = S / 2, cy = S / 2;
+  const rings  = [80, 108, 135, 157];
+  const maxR   = 158;
+  const dotDefs = [
+    { a:  38, r: 108 }, { a: 118, r: 157 }, { a: 188, r: 135 },
+    { a: 258, r: 108 }, { a: 308, r: 157 }, { a: 228, r: 135 },
+  ];
+  const bright = new Array(dotDefs.length).fill(0);
+  let sweep = 0;
+  const spd = 1.2;
+  const trailRad = 80 * Math.PI / 180;
+
+  function frame() {
+    if (!document.body.contains(canvas)) return;
+    ctx.clearRect(0, 0, S, S);
+
+    // Anillos
+    rings.forEach((r, i) => {
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(232,255,71,${0.18 - i * 0.03})`;
+      ctx.lineWidth = 1; ctx.stroke();
+    });
+
+    // Ejes
+    ctx.strokeStyle = 'rgba(232,255,71,0.05)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR); ctx.stroke();
+
+    // Trail fosforescente
+    const sweepRad = (sweep - 90) * Math.PI / 180;
+    const N = 24;
+    for (let i = 0; i < N; i++) {
+      const a1 = sweepRad - (i + 1) * trailRad / N;
+      const a2 = sweepRad - i * trailRad / N;
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, maxR, a1, a2, false); ctx.closePath();
+      ctx.fillStyle = `rgba(232,255,71,${(1 - i / N) * 0.14})`; ctx.fill();
+    }
+
+    // Línea de barrido
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + maxR * Math.cos(sweepRad), cy + maxR * Math.sin(sweepRad));
+    ctx.strokeStyle = 'rgba(232,255,71,0.8)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Puntos — aparecen al paso del sweep
+    dotDefs.forEach((dot, idx) => {
+      const sn   = ((sweep % 360) + 360) % 360;
+      const diff = (sn - dot.a + 360) % 360;
+      if (diff < spd * 3) bright[idx] = 1.0;
+      else bright[idx] = Math.max(0, bright[idx] - 0.007);
+      if (bright[idx] < 0.03) return;
+      const b  = bright[idx];
+      const a  = (dot.a - 90) * Math.PI / 180;
+      const dx = cx + dot.r * Math.cos(a);
+      const dy = cy + dot.r * Math.sin(a);
+      const g  = ctx.createRadialGradient(dx, dy, 0, dx, dy, 12);
+      g.addColorStop(0, `rgba(232,255,71,${b * 0.55})`);
+      g.addColorStop(1, 'rgba(232,255,71,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(dx, dy, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(232,255,71,${b})`; ctx.fill();
+    });
+
+    sweep = (sweep + spd) % 360;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
 // [5] Login — onboarding con radar sweep
