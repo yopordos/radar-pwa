@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <!-- ── SEO básico ── -->
-  <title>RAdAR — Descubre quién escucha lo mismo que tú</title>
-  <meta name="description" content="Conecta con personas cerca de ti que escuchan la misma música en este momento. RAdAR detecta tu canción vía Spotify o Last.fm y te muestra quién comparte tu onda musical ahora.">
+  <title>RAdAR — la música que te gusta, o no.</title>
+  <meta name="description" content="la música que te gusta, o no, cerca de ti en tiempo real. Conecta tu Spotify o Last.fm y descubre qué escucha la gente cerca tuyo ahora mismo.">
   <meta name="keywords" content="app música social, radar musical, descubrir música, Spotify social, conocer personas por música, música cerca, qué escuchan cerca, conectar por música, red social musical">
   <meta name="author" content="RAdAR">
   <meta name="robots" content="index, follow">
@@ -17,8 +17,8 @@
   <meta property="og:url"         content="https://radarpin.me/">
   <meta property="og:site_name"   content="RAdAR">
   <meta property="og:locale"      content="es_CL">
-  <meta property="og:title"       content="RAdAR — Descubre quién escucha lo mismo que tú">
-  <meta property="og:description" content="Conecta con personas cerca de ti que escuchan la misma música ahora mismo. Conecta tu Spotify o Last.fm y encuentra tu tribu musical.">
+  <meta property="og:title"       content="RAdAR — la música que te gusta, o no.">
+  <meta property="og:description" content="la música que te gusta, o no, cerca de ti en tiempo real.">
   <meta property="og:image"       content="https://radarpin.me/og-image.png">
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
@@ -26,8 +26,8 @@
 
   <!-- ── Twitter / X Card ── -->
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="RAdAR — Descubre quién escucha lo mismo que tú">
-  <meta name="twitter:description" content="Conecta con personas cerca de ti que escuchan la misma música ahora mismo.">
+  <meta name="twitter:title"       content="RAdAR — la música que te gusta, o no.">
+  <meta name="twitter:description" content="la música que te gusta, o no, cerca de ti en tiempo real.">
   <meta name="twitter:image"       content="https://radarpin.me/og-image.png">
 
   <!-- ── PWA ── -->
@@ -47,7 +47,7 @@
     "@type": "WebApplication",
     "name": "RAdAR",
     "url": "https://radarpin.me/",
-    "description": "Descubre quién escucha lo mismo que tú cerca de ti en este momento. Conecta tu Spotify o Last.fm y encuentra personas con tu misma onda musical.",
+    "description": "la música que te gusta, o no, cerca de ti en tiempo real.",
     "applicationCategory": "MusicApplication",
     "operatingSystem": "Web, iOS, Android",
     "inLanguage": "es",
@@ -1496,11 +1496,11 @@ function renderListen(container) {
 // [5] Login — onboarding con radar sweep
 function renderLogin(container) {
   const headline = isES
-    ? `Descubre quién escucha<br><em>lo mismo que tú</em>`
-    : `Discover who listens to<br><em>the same as you</em>`;
+    ? `la música que te gusta,<br><em>o no.</em>`
+    : `the music you like,<br><em>or not.</em>`;
   const sub = isES
-    ? 'Personas cerca tuyo, en este momento, con tu misma onda musical.'
-    : 'People near you, right now, on the same musical wavelength.';
+    ? 'cerca de ti, en tiempo real.'
+    : 'near you, in real time.';
   container.innerHTML = `
     <div class="screen login-screen">
       <div class="onb-radar">
