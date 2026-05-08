@@ -1094,12 +1094,30 @@ async function refreshAll(uid) {
   } catch(e) {}
 }
 
+// ── Backend warm-up ──
+let _backendWarm = null;
+function warmBackend() {
+  _backendWarm = fetch(SERVER + '/health', { mode: 'no-cors', signal: AbortSignal.timeout(30000) })
+    .catch(() => {})
+    .finally(() => { _backendWarm = null; });
+}
+
 // ── Auth ──
-function loginWithSpotify() {
+async function loginWithSpotify() {
+  if (_backendWarm) {
+    showLoading(true);
+    await _backendWarm;
+    showLoading(false);
+  }
   const redirect = window.location.origin + window.location.pathname;
   window.location.href = `${SERVER}/login?redirect=${encodeURIComponent(redirect)}`;
 }
-function loginWithLastfm() {
+async function loginWithLastfm() {
+  if (_backendWarm) {
+    showLoading(true);
+    await _backendWarm;
+    showLoading(false);
+  }
   const redirect = window.location.origin + window.location.pathname;
   window.location.href = `${SERVER}/lastfm/login?redirect=${encodeURIComponent(redirect)}`;
 }
@@ -1919,6 +1937,7 @@ if ('serviceWorker' in navigator) {
 
 // ── Init ──
 async function init() {
+  warmBackend();
   setupVisualViewport();
   loadAuth();
   const params = new URLSearchParams(window.location.search);
