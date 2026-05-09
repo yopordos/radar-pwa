@@ -1,7 +1,7 @@
 {
   "name": "RAdAR — la música que te gusta, o no.",
   "short_name": "RAdAR",
-  "description": "la música que te gusta, o no, cerca de ti en tiempo real",
+  "description": "la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
