@@ -1572,7 +1572,6 @@ function renderListen(container) {
           <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
           <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
         </div>
-        <div style="font-family:'Poppins',sans-serif;font-size:11px;color:rgba(245,240,232,0.25);letter-spacing:0.5px;margin-top:16px;text-align:center;max-width:280px;">${T.lfmNote}</div>
         <button id="help-btn" style="background:none;border:none;color:#e8ff47;font-size:11px;font-weight:700;letter-spacing:1px;margin-top:20px;cursor:pointer;font-family:'Poppins',sans-serif;padding:4px 0;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
@@ -1777,6 +1776,7 @@ function showHelp() {
         <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
         <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tenéis unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
         <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
+        <div class="help-step" style="margin-top:8px;padding-top:16px;border-top:1px solid #222;"><div class="help-step-num" style="color:#888;">·</div><div class="help-step-text" style="color:#555;">${isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más.' : 'Last.fm syncs with Apple Music, YouTube Music and more.'}</div></div>
         <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
       </div>`;
     document.body.appendChild(overlay);
