@@ -1573,10 +1573,12 @@ function renderListen(container) {
           <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
         </div>
         <div style="font-family:'Poppins',sans-serif;font-size:11px;color:rgba(245,240,232,0.25);letter-spacing:0.5px;margin-top:16px;text-align:center;max-width:280px;">${T.lfmNote}</div>
+        <button id="help-btn" style="background:none;border:none;color:#e8ff47;font-size:11px;font-weight:700;letter-spacing:1px;margin-top:20px;cursor:pointer;font-family:'Poppins',sans-serif;padding:4px 0;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
+  document.getElementById('help-btn').onclick       = showHelp;
   triggerLoginDots(1);
 }
 
