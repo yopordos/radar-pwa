@@ -528,6 +528,38 @@
     }
     .loading-text { color: #e8ff47; font-size: 14px; font-weight: 700; letter-spacing: 3px; }
 
+    /* Help modal */
+    .help-btn {
+      background: none; border: none; color: #333; font-size: 13px; font-weight: 700;
+      cursor: pointer; padding: 4px 8px; border-radius: 50%; transition: color 0.15s;
+      font-family: 'Poppins', sans-serif; line-height: 1; flex-shrink: 0;
+    }
+    .help-btn:hover { color: #555; }
+    .help-overlay {
+      position: fixed; inset: 0; background: rgba(12,12,12,0.88);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 400; padding: 0 0 env(safe-area-inset-bottom);
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .help-overlay.show { opacity: 1; pointer-events: auto; }
+    .help-sheet {
+      background: #141414; border-radius: 20px 20px 0 0; padding: 28px 24px 36px;
+      width: 100%; max-width: 480px; border-top: 1px solid #222;
+      transform: translateY(20px); transition: transform 0.25s;
+    }
+    .help-overlay.show .help-sheet { transform: translateY(0); }
+    .help-sheet-title { color: #e8ff47; font-size: 13px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
+    .help-step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+    .help-step-num { color: #e8ff47; font-size: 11px; font-weight: 900; letter-spacing: 1px; min-width: 18px; padding-top: 1px; }
+    .help-step-text { color: #888; font-size: 13px; line-height: 1.5; }
+    .help-step-text strong { color: #f5f0e8; font-weight: 700; }
+    .help-close { margin-top: 24px; width: 100%; background: #1e1e1e; border: none; color: #555; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 14px; border-radius: 10px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: color 0.15s; }
+    .help-close:hover { color: #888; }
+    @media (min-width: 1024px) {
+      .help-overlay { align-items: center; }
+      .help-sheet { border-radius: 16px; max-width: 400px; }
+    }
+
     /* Desktop side panel tabs */
     .side-tabs {
       display: flex; gap: 0; border-bottom: 1px solid #1a1a1a;
@@ -953,8 +985,8 @@ const T = {
   tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
   connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
   connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
-  listenSub:    isES ? 'cerca de ti · en tiempo real'
-                     : 'near you · in real time',
+  listenSub:    isES ? 'cerca de ti · en tiempo real · para conversar o escuchar'
+                     : 'near you · in real time · to talk or just listen',
   lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
                      : 'Last.fm syncs with Apple Music, YouTube Music and more',
 };
@@ -1554,8 +1586,8 @@ function renderLogin(container) {
     ? `la música que te gusta,<br><em>o no.</em>`
     : `the music you like,<br><em>or not.</em>`;
   const sub = isES
-    ? 'cerca de ti, en tiempo real.'
-    : 'near you, in real time.';
+    ? 'cerca de ti · en tiempo real · para conversar o escuchar'
+    : 'near you · in real time · to talk or just listen';
   container.innerHTML = `
     <div class="screen login-screen">
       <div class="onb-radar">
@@ -1569,13 +1601,15 @@ function renderLogin(container) {
         <div class="onb-buttons">
           <button class="btn-login btn-spotify" id="btn-spotify">${isES ? 'Continuar con Spotify' : 'Continue with Spotify'}</button>
           <button class="btn-login btn-lastfm"  id="btn-lastfm">${isES ? 'Continuar con Last.fm' : 'Continue with Last.fm'}</button>
+          <button id="help-btn" style="background:none;border:none;color:#e8ff47;font-size:12px;font-weight:700;letter-spacing:1px;margin-top:8px;cursor:pointer;font-family:'Poppins',sans-serif;padding:8px 0;width:100%;text-align:center;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
         </div>
-        <button id="btn-back-listen" style="background:none;border:none;color:#444;font-size:12px;letter-spacing:1px;margin-top:20px;cursor:pointer;padding:8px 0;">${isES ? '← volver' : '← back'}</button>
+        <button id="btn-back-listen" style="background:none;border:none;color:#555;font-size:12px;letter-spacing:1px;margin-top:16px;cursor:pointer;padding:8px 0;">${isES ? '← volver' : '← back'}</button>
       </div>
     </div>`;
   document.getElementById('btn-spotify').onclick     = loginWithSpotify;
   document.getElementById('btn-lastfm').onclick      = loginWithLastfm;
   document.getElementById('btn-back-listen').onclick = () => setScreen('listen');
+  document.getElementById('help-btn').onclick        = showHelp;
   triggerLoginDots();
 }
 
@@ -1605,6 +1639,7 @@ function renderFeed(container) {
     </div>`;
   document.getElementById('radar-btn').onclick      = doRadar;
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
+  document.getElementById('help-btn').onclick       = showHelp;
   document.getElementById('bottom-song-btn').onclick = () => {
     if (!S.spotifyToken && !S.lastfmUsername) { loginWithSpotify(); return; }
     const needsReconnect = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
@@ -1723,6 +1758,34 @@ function buildBottomSong() {
     return `<div class="bottom-song-title" style="font-size:12px;opacity:0.7;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
   }
   return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
+}
+
+function showHelp() {
+  let overlay = document.getElementById('help-overlay');
+  if (!overlay) {
+    const isES = navigator.language?.startsWith('es') ?? true;
+    overlay = document.createElement('div');
+    overlay.className = 'help-overlay';
+    overlay.id = 'help-overlay';
+    overlay.innerHTML = `
+      <div class="help-sheet">
+        <div class="help-sheet-title">${isES ? 'CÓMO FUNCIONA' : 'HOW IT WORKS'}</div>
+        <div class="help-step"><div class="help-step-num">01</div><div class="help-step-text">${isES ? 'Conecta <strong>Spotify</strong> o <strong>Last.fm</strong> y activa tu ubicación.' : 'Connect <strong>Spotify</strong> or <strong>Last.fm</strong> and allow location.'}</div></div>
+        <div class="help-step"><div class="help-step-num">02</div><div class="help-step-text">${isES ? 'RAdAR muestra las personas cerca tuyo que están escuchando música ahora mismo.' : 'RAdAR shows people near you listening to music right now.'}</div></div>
+        <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
+        <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tenéis unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
+        <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
+        <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) hideHelp(); });
+    document.getElementById('help-close').onclick = hideHelp;
+  }
+  requestAnimationFrame(() => overlay.classList.add('show'));
+}
+function hideHelp() {
+  const overlay = document.getElementById('help-overlay');
+  if (overlay) overlay.classList.remove('show');
 }
 
 function attachFeedEvents() {
