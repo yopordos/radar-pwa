@@ -1086,6 +1086,9 @@ async function updateLocation(uid, token, lf) {
       S.mySong = track.song; S.myArtist = track.artist;
       S._nullSongCount = 0;
       patchNowPlaying();
+    } else {
+      S._nullSongCount = (S._nullSongCount || 0) + 1;
+      patchBottomBar();
     }
   }
 
