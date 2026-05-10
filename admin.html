@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAdAR — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0c0c0c; color: #f5f0e8; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+
+  /* Auth */
+  #auth-screen {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px; padding: 24px;
+  }
+  #auth-screen h1 { color: #e8ff47; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+  #auth-screen p  { color: #444; font-size: 12px; letter-spacing: 1px; }
+  #key-input {
+    background: #141414; border: 1px solid #222; color: #f5f0e8;
+    font-family: 'Poppins', sans-serif; font-size: 14px;
+    padding: 14px 18px; border-radius: 10px; width: 100%; max-width: 320px;
+    outline: none; transition: border-color 0.15s;
+  }
+  #key-input:focus { border-color: #e8ff47; }
+  #auth-btn {
+    background: #e8ff47; color: #0c0c0c; border: none; font-family: 'Poppins', sans-serif;
+    font-size: 13px; font-weight: 900; letter-spacing: 2px; padding: 14px 32px;
+    border-radius: 10px; cursor: pointer; width: 100%; max-width: 320px;
+    transition: opacity 0.15s;
+  }
+  #auth-btn:hover { opacity: 0.85; }
+  #auth-error { color: #ff4757; font-size: 12px; display: none; }
+
+  /* Dashboard */
+  #dashboard { display: none; padding: 32px 24px 64px; max-width: 960px; margin: 0 auto; }
+
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 36px; flex-wrap: wrap; gap: 12px;
+  }
+  .top-bar h1 { color: #e8ff47; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+  .top-bar-right { display: flex; align-items: center; gap: 16px; }
+  .ts { color: #333; font-size: 11px; letter-spacing: 1px; }
+  .refresh-btn {
+    background: #1a1a1a; border: none; color: #e8ff47; font-family: 'Poppins', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 8px 16px;
+    border-radius: 8px; cursor: pointer; transition: background 0.15s;
+  }
+  .refresh-btn:hover { background: #222; }
+
+  .totals {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+    margin-bottom: 40px;
+  }
+  @media (min-width: 600px) { .totals { grid-template-columns: repeat(4, 1fr); } }
+  .stat-card {
+    background: #141414; border: 1px solid #1a1a1a; border-radius: 12px;
+    padding: 20px 16px; text-align: center;
+  }
+  .stat-num  { color: #e8ff47; font-size: 32px; font-weight: 900; line-height: 1; }
+  .stat-label { color: #444; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; margin-top: 6px; }
+
+  .sections { display: grid; gap: 28px; }
+  @media (min-width: 800px) { .sections { grid-template-columns: repeat(3, 1fr); } }
+
+  .section-title {
+    color: #e8ff47; font-size: 10px; font-weight: 900; letter-spacing: 2px;
+    margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #1a1a1a;
+  }
+  .song-list { list-style: none; }
+  .song-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid #141414;
+  }
+  .song-item:last-child { border-bottom: none; }
+  .song-rank { color: #333; font-size: 10px; font-weight: 900; min-width: 18px; padding-top: 2px; }
+  .song-info { flex: 1; min-width: 0; }
+  .song-name { color: #f5f0e8; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-artist { color: #555; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-count {
+    background: #1a1a1a; color: #e8ff47; font-size: 10px; font-weight: 900;
+    padding: 3px 8px; border-radius: 6px; flex-shrink: 0; align-self: center;
+  }
+
+  .empty { color: #2a2a2a; font-size: 13px; font-style: italic; padding: 16px 0; }
+  .loading { color: #333; font-size: 12px; letter-spacing: 1px; padding: 16px 0; }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <h1>RAdAR</h1>
+  <p>ACCESO PRIVADO</p>
+  <input id="key-input" type="password" placeholder="clave de acceso" autocomplete="off">
+  <button id="auth-btn">ENTRAR</button>
+  <span id="auth-error">clave incorrecta</span>
+</div>
+
+<div id="dashboard">
+  <div class="top-bar">
+    <h1>RA<em>d</em>AR · stats</h1>
+    <div class="top-bar-right">
+      <span class="ts" id="ts"></span>
+      <button class="refresh-btn" id="refresh-btn">↻ ACTUALIZAR</button>
+    </div>
+  </div>
+
+  <div class="totals">
+    <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-label">USUARIOS TOTALES</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-active">—</div><div class="stat-label">ACTIVOS AHORA</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-taps">—</div><div class="stat-label">SEÑALES ENVIADAS</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-chats">—</div><div class="stat-label">CHATS CREADOS</div></div>
+  </div>
+
+  <div class="sections">
+    <div>
+      <div class="section-title">🎵 MÁS ESCUCHADAS AHORA</div>
+      <ul class="song-list" id="list-active"><li class="loading">cargando...</li></ul>
+    </div>
+    <div>
+      <div class="section-title">📡 MÁS GENERAN SEÑAL</div>
+      <ul class="song-list" id="list-tapped"><li class="loading">cargando...</li></ul>
+    </div>
+    <div>
+      <div class="section-title">💬 MÁS CONECTAN</div>
+      <ul class="song-list" id="list-chatted"><li class="loading">cargando...</li></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const SERVER = 'https://radar-mvp.onrender.com';
+let adminKey = '';
+
+function renderList(id, items) {
+  const el = document.getElementById(id);
+  if (!items || items.length === 0) {
+    el.innerHTML = '<li class="empty">sin datos aún</li>';
+    return;
+  }
+  el.innerHTML = items.map((item, i) => `
+    <li class="song-item">
+      <span class="song-rank">${String(i + 1).padStart(2, '0')}</span>
+      <div class="song-info">
+        <div class="song-name">${item.song}</div>
+        <div class="song-artist">${item.artist || '—'}</div>
+      </div>
+      <span class="song-count">${item.count}</span>
+    </li>`).join('');
+}
+
+async function loadStats() {
+  document.getElementById('ts').textContent = 'actualizando...';
+  try {
+    const res = await fetch(`${SERVER}/admin/stats?key=${encodeURIComponent(adminKey)}`);
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    document.getElementById('s-users').textContent  = data.totals.totalUsers;
+    document.getElementById('s-active').textContent = data.totals.activeUsers;
+    document.getElementById('s-taps').textContent   = data.totals.totalTaps;
+    document.getElementById('s-chats').textContent  = data.totals.totalChats;
+    renderList('list-active',  data.topActive);
+    renderList('list-tapped',  data.topTapped);
+    renderList('list-chatted', data.topChatted);
+    document.getElementById('ts').textContent = new Date(data.ts).toLocaleTimeString('es-CL');
+  } catch (e) {
+    document.getElementById('ts').textContent = 'error al cargar';
+  }
+}
+
+function logout() {
+  adminKey = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-error').style.display = 'block';
+}
+
+document.getElementById('auth-btn').onclick = async () => {
+  const key = document.getElementById('key-input').value.trim();
+  if (!key) return;
+  adminKey = key;
+  const res = await fetch(`${SERVER}/admin/stats?key=${encodeURIComponent(key)}`);
+  if (res.status === 401) {
+    document.getElementById('auth-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  const data = await res.json();
+  document.getElementById('s-users').textContent  = data.totals.totalUsers;
+  document.getElementById('s-active').textContent = data.totals.activeUsers;
+  document.getElementById('s-taps').textContent   = data.totals.totalTaps;
+  document.getElementById('s-chats').textContent  = data.totals.totalChats;
+  renderList('list-active',  data.topActive);
+  renderList('list-tapped',  data.topTapped);
+  renderList('list-chatted', data.topChatted);
+  document.getElementById('ts').textContent = new Date(data.ts).toLocaleTimeString('es-CL');
+
+  // Auto-refresh cada 60s
+  setInterval(loadStats, 60000);
+};
+
+document.getElementById('key-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-btn').click();
+});
+
+document.getElementById('refresh-btn').onclick = loadStats;
+</script>
+</body>
+</html>
