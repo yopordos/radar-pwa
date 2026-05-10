@@ -835,6 +835,9 @@ function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function formatDist(m) {
+  return m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`;
+}
 
 function isDesktop() { return window.matchMedia('(min-width: 1024px)').matches; }
 
@@ -904,16 +907,6 @@ async function fetchSpotifyCurrentTrack(token) {
     if (res.status === 200) {
       const data = await res.json();
       if (data?.item) return { song: data.item.name, artist: data.item.artists?.[0]?.name || '' };
-    }
-    // Fallback: currently-playing
-    if (res.status === 204 || res.status === 200) {
-      const res2 = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res2.status === 200) {
-        const data2 = await res2.json();
-        if (data2?.item) return { song: data2.item.name, artist: data2.item.artists?.[0]?.name || '' };
-      }
     }
   } catch(e) {}
   return null;
@@ -1520,7 +1513,7 @@ function buildFeedItems() {
         <div class="card-info">
           <div class="song-name">${esc(item.song)}</div>
           <div class="artist-name">${esc(item.artist)}</div>
-          <div class="distance">${esc(String(item.distance))}m</div>
+          <div class="distance">${formatDist(item.distance)}</div>
         </div>
         <div class="card-btns">
           <button class="btn-listen" data-action="listen" data-query="${esc(q)}">♫</button>
