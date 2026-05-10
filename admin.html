@@ -34,13 +34,14 @@
   #auth-error { color: #ff4757; font-size: 12px; display: none; }
 
   /* Dashboard */
-  #dashboard { display: none; padding: 32px 24px 64px; max-width: 960px; margin: 0 auto; }
+  #dashboard { display: none; padding: 28px 32px 64px; width: 100%; }
 
   .top-bar {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 36px; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 12px;
+    padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;
   }
-  .top-bar h1 { color: #e8ff47; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+  .top-bar h1 { color: #e8ff47; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
   .top-bar-right { display: flex; align-items: center; gap: 16px; }
   .ts { color: #333; font-size: 11px; letter-spacing: 1px; }
   .refresh-btn {
@@ -51,19 +52,19 @@
   .refresh-btn:hover { background: #222; }
 
   .totals {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-    margin-bottom: 40px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 36px;
   }
-  @media (min-width: 600px) { .totals { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 600px) { .totals { grid-template-columns: repeat(2, 1fr); } }
   .stat-card {
     background: #141414; border: 1px solid #1a1a1a; border-radius: 12px;
     padding: 20px 16px; text-align: center;
   }
-  .stat-num  { color: #e8ff47; font-size: 32px; font-weight: 900; line-height: 1; }
+  .stat-num  { color: #e8ff47; font-size: 36px; font-weight: 900; line-height: 1; }
   .stat-label { color: #444; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; margin-top: 6px; }
 
-  .sections { display: grid; gap: 28px; }
-  @media (min-width: 800px) { .sections { grid-template-columns: repeat(3, 1fr); } }
+  .sections { display: grid; gap: 24px; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 800px) { .sections { grid-template-columns: 1fr; } }
 
   .section-title {
     color: #e8ff47; font-size: 10px; font-weight: 900; letter-spacing: 2px;
