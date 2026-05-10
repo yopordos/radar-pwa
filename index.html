@@ -1143,21 +1143,11 @@ function warmBackend() {
 }
 
 // ── Auth ──
-async function loginWithSpotify() {
-  if (_backendWarm) {
-    showLoading(true);
-    await _backendWarm;
-    showLoading(false);
-  }
+function loginWithSpotify() {
   const redirect = window.location.origin + window.location.pathname;
   window.location.href = `${SERVER}/login?redirect=${encodeURIComponent(redirect)}`;
 }
-async function loginWithLastfm() {
-  if (_backendWarm) {
-    showLoading(true);
-    await _backendWarm;
-    showLoading(false);
-  }
+function loginWithLastfm() {
   const redirect = window.location.origin + window.location.pathname;
   window.location.href = `${SERVER}/lastfm/login?redirect=${encodeURIComponent(redirect)}`;
 }
