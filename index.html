@@ -577,40 +577,8 @@
     .side-tab-content { flex: 1; overflow-y: auto; padding: 20px 28px 24px; }
 
     /* ═══════════════════════════════════════════
-       [5] ONBOARDING — radar sweep hero
+       LOGIN DOTS — usados por triggerLoginDots
     ═══════════════════════════════════════════ */
-    .login-screen {
-      padding: 0;
-      justify-content: flex-start;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Radar hero — ocupa el 60% superior */
-    .onb-radar {
-      position: relative;
-      width: 100%;
-      height: 58vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    /* Anillos estáticos concéntricos */
-    .onb-ring {
-      position: absolute;
-      border-radius: 50%;
-      border: 1px solid rgba(232,255,71,0.1);
-      pointer-events: none;
-    }
-    .or1 { width: 120px; height: 120px; border-color: rgba(232,255,71,0.35); }
-    .or2 { width: 155px; height: 155px; }
-    .or3 { width: 240px; height: 240px; }
-    .or4 { width: 340px; height: 340px; border-color: rgba(232,255,71,0.06); }
-    .or5 { width: 460px; height: 460px; border-color: rgba(232,255,71,0.04); }
-
-    /* Sweep eliminado — las ondas vienen del overlay #radar-ripple */
 
     /* Puntos de conexión distribuidos por todo el viewport (login) */
     .login-dot {
@@ -640,15 +608,6 @@
       90%      { transform: scale(4);   opacity: 0; }
     }
 
-    /* Centro: botón RAdAR */
-    .onb-center {
-      position: relative; z-index: 3;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: #e8ff47;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 48px rgba(232,255,71,0.35), 0 0 96px rgba(232,255,71,0.12);
-    }
     /* Anillos de pulso: generados por JS en #radar-ripple (z-index:0), pasan por detrás de todo */
     .onb-pulse-overlay-ring {
       position: absolute;
@@ -679,128 +638,6 @@
       30%, 60% { opacity: 1; }
       85%, 100%{ opacity: 0; }
     }
-    .onb-brand {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 900; font-size: 24px;
-      color: #0c0c0c; line-height: 1; user-select: none;
-    }
-    .onb-d { font-style: italic; }
-
-    /* Dots: personas cercanas animadas */
-    .onb-dot {
-      position: absolute;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #e8ff47;
-      z-index: 4;
-      opacity: 0;
-      animation: onb-dot-appear 3s ease-out infinite;
-    }
-    .onb-dot::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 1px solid rgba(232,255,71,0.4);
-      animation: onb-dot-ring 3s ease-out infinite;
-    }
-    @keyframes onb-dot-appear {
-      0%, 20%  { opacity: 0; transform: scale(0.5); }
-      30%, 70% { opacity: 1; transform: scale(1); }
-      90%, 100% { opacity: 0; }
-    }
-    @keyframes onb-dot-ring {
-      0%, 20%  { transform: scale(0.5); opacity: 0; }
-      30%      { transform: scale(1); opacity: 0.6; }
-      90%      { transform: scale(2.5); opacity: 0; }
-    }
-
-    /* Contenido inferior — gradiente para que las ondas pasen por detrás */
-    .onb-bottom {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 0 28px 40px;
-      position: relative; z-index: 2;
-      background: linear-gradient(to bottom, transparent 0%, #0c0c0c 22%);
-    }
-    /* [botones] contenedor con ancho controlado */
-    .onb-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-    }
-    .onb-bottom .btn-login {
-      width: 100%;
-      padding: 16px 24px;
-      font-size: 14px;
-    }
-    .onb-wordmark {
-      font-weight: 900;
-      font-size: 72px;
-      color: #e8ff47;
-      letter-spacing: -3px;
-      line-height: 1;
-      margin-bottom: 16px;
-    }
-    .onb-wordmark-d { font-style: italic; }
-    .onb-headline {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 900;
-      font-size: 34px;
-      color: #f5f0e8;
-      line-height: 1.15;
-      letter-spacing: -0.5px;
-      margin-bottom: 10px;
-    }
-    .onb-headline em { color: #e8ff47; font-style: normal; }
-    .onb-sub {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 300;
-      color: rgba(245,240,232,0.45);
-      font-size: 15px;
-      line-height: 1.6;
-      margin-bottom: 28px;
-    }
-
-    @media (min-width: 768px) {
-      .onb-wordmark { font-size: 88px; }
-      .onb-headline { font-size: 38px; }
-      .onb-bottom   { padding: 0 40px 48px; }
-      .or4 { width: 440px; height: 440px; }
-      .or5 { width: 580px; height: 580px; }
-    }
-
-    @media (min-width: 1024px) {
-      /* login ocupa toda la cuadrícula */
-      .login-screen {
-        grid-column: 1 / -1 !important;
-        grid-row: 1 / -1 !important;
-        flex-direction: row;
-        padding: 0 !important;
-        align-items: stretch;
-      }
-      .onb-radar {
-        flex: 1;
-        height: 100vh;
-      }
-      .or4 { width: 560px; height: 560px; }
-      .or5 { width: 720px; height: 720px; }
-      .onb-bottom {
-        width: 420px;
-        flex-shrink: 0;
-        padding: 0 56px;
-        justify-content: center;
-        border-left: 1px solid #1a1a1a;
-        background: #0c0c0c;
-        position: relative; z-index: 2;
-      }
-      .onb-wordmark { font-size: 80px; }
-      .onb-headline { font-size: 32px; }
-    }
-
     /* ═══════════════════════════════════════════
        [6] Ecualizador animado
     ═══════════════════════════════════════════ */
@@ -830,7 +667,8 @@
     .eq-light .eq-bar { background: #e8ff47; opacity: 0.6; }
 
     @media (prefers-reduced-motion: reduce) {
-      .eq-bar, .radar-ring, .pulse-ring, .inbox-ring, .login-ring, .lr1, .lr2, .lr3 {
+      .eq-bar, .inbox-ring, .topbar-inbox-ring, .ripple-ring,
+      .onb-pulse-overlay-ring, .login-dot, .login-connect-line {
         animation: none;
       }
     }
@@ -897,6 +735,7 @@ const S = {
   spotifyToken: null,
   lastfmUsername: null,
   feed: [],
+  feedLoaded: false,
   notifications: [],
   chats: [],
   activeChatId: null,
@@ -1033,7 +872,11 @@ function getLocation() {
       if (p.coords.accuracy > 500) return; // ignorar lecturas muy imprecisas
       S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
     },
-    () => { S.coords = S.coords || null; },
+    err => {
+      if (err.code === 1) { // PERMISSION_DENIED
+        showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
+      }
+    },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
   );
 }
@@ -1120,6 +963,7 @@ async function refreshAll(uid) {
       fetch(`${SERVER}/my-chats?userId=${uid}`).then(r => r.json()),
     ]);
     S.feed          = feedRes.nearby || [];
+    S.feedLoaded    = true;
     S.notifications = notifRes.notifications || notifRes.taps || [];
     // Filter out expired chats client-side (server may still return them briefly)
     S.chats         = (chatsRes.chats || []).filter(c => !c.expiresAt || new Date(c.expiresAt) > Date.now());
@@ -1210,6 +1054,7 @@ async function handleCallback() {
 }
 
 function afterLogin() {
+  S.feedLoaded = false;
   getLocation();
   setScreen('feed');
   startPolling(S.userId, S.spotifyToken, S.lastfmUsername);
@@ -1321,11 +1166,9 @@ function render() {
   const app = document.getElementById('app');
   if (!app) return;
   if (S.screen !== 'feed') stopRippleLoop();
-  const authScreens = ['login', 'listen'];
-  if (isDesktop() && !authScreens.includes(S.screen)) { renderDesktop(app); return; }
+  if (isDesktop() && S.screen !== 'listen') { renderDesktop(app); return; }
   switch (S.screen) {
     case 'listen': renderListen(app); break;
-    case 'login':  renderLogin(app);  break;
     case 'feed':   renderFeed(app);   break;
     case 'inbox':  renderInbox(app);  break;
     case 'chat':   renderChat(app);   break;
@@ -1419,36 +1262,13 @@ function buildDesktopSide() {
 }
 
 function buildInboxContent() {
-  const signals = S.notifications.map(item => `
-    <div class="card" data-tap-id="${esc(item.tapId)}">
-      <div class="card-info">
-        <div class="signal-label">${T.wasListening}</div>
-        <div class="song-name">${esc(item.fromSong || item.song)}</div>
-        <div class="artist-name">${esc(item.fromArtist || item.artist)}</div>
-      </div>
-      <button class="btn-connect" data-action="connect" data-tap="${esc(item.tapId)}">${T.connect}</button>
-      <button class="btn-ignore"  data-action="ignore"  data-tap="${esc(item.tapId)}">${T.ignore}</button>
-    </div>`).join('');
-
-  const chatItems = S.chats.map(item => `
-    <div class="card has-chat" data-chat-id="${esc(item.chatId)}" data-chat-expires="${esc(item.expiresAt||'')}">
-      <div class="card-info">
-        <div class="signal-label">${T.activeChat}</div>
-        <div class="song-name">${esc(item.song)}</div>
-        <div class="artist-name">${esc(item.artist)}</div>
-        <div class="distance">${T.expiresIn} ${esc(String(item.minutesLeft))} ${T.min}</div>
-      </div>
-      <button class="btn-close-chat" data-action="close-chat" data-chat-id="${esc(item.chatId)}">✕</button>
-    </div>`).join('');
-
   const empty = !S.notifications.length && !S.chats.length
     ? `<span class="empty">${T.noMessages}</span>` : '';
-
   return `
     ${S.notifications.length ? `<div class="section-label" style="margin-bottom:12px;">${T.sigRec}</div>` : ''}
-    ${signals}
+    ${buildNotificationCards()}
     ${S.chats.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:12px;">${T.activeChats}</div>` : ''}
-    ${chatItems}
+    ${buildActiveChatCards()}
     ${empty}`;
 }
 
@@ -1565,7 +1385,7 @@ function renderListen(container) {
           <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
           <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
         </div>
-        <button id="help-btn" style="background:none;border:none;color:#e8ff47;font-size:11px;font-weight:700;letter-spacing:1px;margin-top:20px;cursor:pointer;font-family:'Poppins',sans-serif;padding:4px 0;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
+        <button id="help-btn" class="help-btn" style="color:#e8ff47;margin-top:20px;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
@@ -1574,38 +1394,6 @@ function renderListen(container) {
   triggerLoginDots(1);
 }
 
-// [5] Login — onboarding con radar sweep
-function renderLogin(container) {
-  const headline = isES
-    ? `la música que te gusta,<br><em>o no.</em>`
-    : `the music you like,<br><em>or not.</em>`;
-  const sub = isES
-    ? 'cerca de ti · en tiempo real · para conversar o escuchar'
-    : 'near you · in real time · to talk or just listen';
-  container.innerHTML = `
-    <div class="screen login-screen">
-      <div class="onb-radar">
-        <div class="onb-center">
-          <span class="onb-brand">RA<span class="onb-d">d</span>AR</span>
-        </div>
-      </div>
-      <div class="onb-bottom">
-        <div class="onb-headline">${headline}</div>
-        <div class="onb-sub">${sub}</div>
-        <div class="onb-buttons">
-          <button class="btn-login btn-spotify" id="btn-spotify">${isES ? 'Continuar con Spotify' : 'Continue with Spotify'}</button>
-          <button class="btn-login btn-lastfm"  id="btn-lastfm">${isES ? 'Continuar con Last.fm' : 'Continue with Last.fm'}</button>
-          <button id="help-btn" style="background:none;border:none;color:#e8ff47;font-size:12px;font-weight:700;letter-spacing:1px;margin-top:8px;cursor:pointer;font-family:'Poppins',sans-serif;padding:8px 0;width:100%;text-align:center;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
-        </div>
-        <button id="btn-back-listen" style="background:none;border:none;color:#555;font-size:12px;letter-spacing:1px;margin-top:16px;cursor:pointer;padding:8px 0;">${isES ? '← volver' : '← back'}</button>
-      </div>
-    </div>`;
-  document.getElementById('btn-spotify').onclick     = loginWithSpotify;
-  document.getElementById('btn-lastfm').onclick      = loginWithLastfm;
-  document.getElementById('btn-back-listen').onclick = () => setScreen('listen');
-  document.getElementById('help-btn').onclick        = showHelp;
-  triggerLoginDots();
-}
 
 function renderFeed(container) {
   container = container || document.getElementById('app');
@@ -1633,12 +1421,8 @@ function renderFeed(container) {
     </div>`;
   document.getElementById('radar-btn').onclick      = doRadar;
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
-  document.getElementById('help-btn').onclick       = showHelp;
   document.getElementById('bottom-song-btn').onclick = () => {
-    if (!S.spotifyToken && !S.lastfmUsername) { loginWithSpotify(); return; }
-    const needsReconnect = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
-    if (needsReconnect) { loginWithSpotify(); return; }
-    window.location.href = 'https://open.spotify.com/';
+    if (S.mySong) window.open('https://open.spotify.com/', '_blank', 'noopener');
   };
   attachFeedEvents();
   setTimeout(() => {
@@ -1655,28 +1439,10 @@ function renderInbox(container) {
       <button class="back-btn" id="inbox-back">${T.back}</button>
       <div class="section-title">${T.messages}</div>
       ${S.notifications.length ? `<div class="section-label">${T.sigRec}</div>` : ''}
-      ${S.notifications.map(item => `
-        <div class="card" data-tap-id="${esc(item.tapId)}">
-          <div class="card-info">
-            <div class="signal-label">${T.wasListening}</div>
-            <div class="song-name">${esc(item.fromSong || item.song)}</div>
-            <div class="artist-name">${esc(item.fromArtist || item.artist)}</div>
-          </div>
-          <button class="btn-connect" data-action="connect" data-tap="${esc(item.tapId)}">${T.connect}</button>
-          <button class="btn-ignore"  data-action="ignore"  data-tap="${esc(item.tapId)}">${T.ignore}</button>
-        </div>`).join('')}
+      ${buildNotificationCards()}
       ${S.chats.length ? `<div class="section-label" style="margin-top:12px;">${T.activeChats}</div>` : ''}
       <div class="scroll-area" id="chat-list" style="margin-top:0;">
-        ${S.chats.map(item => `
-          <div class="card has-chat" data-chat-id="${esc(item.chatId)}" data-chat-expires="${esc(item.expiresAt||'')}">
-            <div class="card-info">
-              <div class="signal-label">${T.activeChat}</div>
-              <div class="song-name">${esc(item.song)}</div>
-              <div class="artist-name">${esc(item.artist)}</div>
-              <div class="distance">${T.expiresIn} ${esc(String(item.minutesLeft))} ${T.min}</div>
-            </div>
-            <button class="btn-close-chat" data-action="close-chat" data-chat-id="${esc(item.chatId)}">✕</button>
-          </div>`).join('')}
+        ${buildActiveChatCards()}
         ${!S.notifications.length && !S.chats.length ? `<span class="empty">${T.noMessages}</span>` : ''}
       </div>
     </div>`;
@@ -1714,8 +1480,36 @@ function renderChat(container) {
   scrollToBottom();
 }
 
+// ── Shared card builders ──
+function buildNotificationCards() {
+  return S.notifications.map(item => `
+    <div class="card" data-tap-id="${esc(item.tapId)}">
+      <div class="card-info">
+        <div class="signal-label">${T.wasListening}</div>
+        <div class="song-name">${esc(item.fromSong || item.song)}</div>
+        <div class="artist-name">${esc(item.fromArtist || item.artist)}</div>
+      </div>
+      <button class="btn-connect" data-action="connect" data-tap="${esc(item.tapId)}">${T.connect}</button>
+      <button class="btn-ignore"  data-action="ignore"  data-tap="${esc(item.tapId)}">${T.ignore}</button>
+    </div>`).join('');
+}
+
+function buildActiveChatCards() {
+  return S.chats.map(item => `
+    <div class="card has-chat" data-chat-id="${esc(item.chatId)}" data-chat-expires="${esc(item.expiresAt||'')}">
+      <div class="card-info">
+        <div class="signal-label">${T.activeChat}</div>
+        <div class="song-name">${esc(item.song)}</div>
+        <div class="artist-name">${esc(item.artist)}</div>
+        <div class="distance">${T.expiresIn} ${esc(String(item.minutesLeft))} ${T.min}</div>
+      </div>
+      <button class="btn-close-chat" data-action="close-chat" data-chat-id="${esc(item.chatId)}">✕</button>
+    </div>`).join('');
+}
+
 // Shared build/patch helpers
 function buildFeedItems() {
+  if (!S.feedLoaded) return `<span class="empty" style="color:#444;">${isES ? 'Buscando cerca de ti...' : 'Looking nearby...'}</span>`;
   if (!S.feed.length) return `<span class="empty">${T.nobody}</span>`;
   return S.feed.map(item => {
     const existingChat = chatMap.get(item.userId);
@@ -1745,11 +1539,9 @@ function buildBottomSong() {
       <span class="eq eq-dark"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>
     </div>
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
-  const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-  if (!S.spotifyToken && !S.lastfmUsername) {
-    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
-  }
-  if ((S._nullSongCount || 0) >= 3) {
+  const needsReconnect = (!S.spotifyToken && !S.lastfmUsername) || (S._nullSongCount || 0) >= 3;
+  if (needsReconnect) {
+    const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
     return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
   }
   return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
@@ -1758,7 +1550,6 @@ function buildBottomSong() {
 function showHelp() {
   let overlay = document.getElementById('help-overlay');
   if (!overlay) {
-    const isES = navigator.language?.startsWith('es') ?? true;
     overlay = document.createElement('div');
     overlay.className = 'help-overlay';
     overlay.id = 'help-overlay';
@@ -1792,7 +1583,7 @@ function attachFeedEvents() {
     const listenBtn = e.target.closest('[data-action="listen"]');
     const chatBtn   = e.target.closest('[data-action="chat"]');
     const card      = e.target.closest('.card.has-chat');
-    if (listenBtn) { e.stopPropagation(); window.location.href = `https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`; }
+    if (listenBtn) { e.stopPropagation(); window.open(`https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`, '_blank', 'noopener'); }
     else if (chatBtn) { e.stopPropagation(); sendTap(chatBtn.dataset.userid); }
     else if (card) { const ec = chatMap.get(card.dataset.userid); if (ec) openChat(ec.chatId, 'feed', ec.expiresAt); }
   };
@@ -1802,8 +1593,6 @@ function attachFeedEvents() {
 function patchFeedList() {
   const list = document.getElementById('feed-list');
   if (!list) return;
-  feedMap.clear(); S.feed.forEach(i => feedMap.set(i.userId, i));
-  chatMap.clear(); S.chats.forEach(c => chatMap.set(c.otherUserId, c));
   list.innerHTML = buildFeedItems();
   attachFeedEvents();
 }
@@ -1844,7 +1633,7 @@ function triggerLoginDots(ringCount) {
   const borders = ['rgba(232,255,71,0.35)', 'rgba(232,255,71,0.2)', 'rgba(232,255,71,0.12)'];
   const allDelays = [0, 1.6, 3.2];
   requestAnimationFrame(() => {
-    const center = document.querySelector('.onb-center') || document.querySelector('.listen-logo-center');
+    const center = document.querySelector('.listen-logo-center');
     let cx = window.innerWidth / 2, cy = window.innerHeight * 0.34;
     if (center) {
       const r = center.getBoundingClientRect();
@@ -1957,9 +1746,12 @@ async function doRadar() {
 }
 
 // ── Swipe (mobile) ──
-let swipeSX = 0, swipeSY = 0;
+let swipeSX = 0, swipeSY = 0, swipeController = null;
 function attachSwipe(el) {
-  el.addEventListener('touchstart', e => { swipeSX = e.touches[0].clientX; swipeSY = e.touches[0].clientY; }, { passive: true });
+  if (swipeController) swipeController.abort();
+  swipeController = new AbortController();
+  const { signal } = swipeController;
+  el.addEventListener('touchstart', e => { swipeSX = e.touches[0].clientX; swipeSY = e.touches[0].clientY; }, { passive: true, signal });
   el.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - swipeSX;
     const dy = e.changedTouches[0].clientY - swipeSY;
@@ -1967,7 +1759,7 @@ function attachSwipe(el) {
     if (S.screen === 'feed'  && dx < 0) { setScreen('inbox'); return; }
     if (S.screen === 'inbox' && dx > 0) { setScreen('feed');  return; }
     if (S.screen === 'chat'  && dx > 0) { exitChat(); return; }
-  }, { passive: true });
+  }, { passive: true, signal });
 }
 
 // ── Resize ──
