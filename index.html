@@ -907,6 +907,7 @@ const S = {
   myArtist: null,
   coords: null,
   sideTab: 'inbox',
+  _nullSongCount: 0,
 };
 
 const feedMap = new Map();
@@ -1745,11 +1746,15 @@ function buildBottomSong() {
       <span class="eq eq-dark"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>
     </div>
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
-  const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+  const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+  const isLastfm  = !S.spotifyToken && !!S.lastfmUsername;
+  const loginUrl  = isLastfm
+    ? `${SERVER}/lastfm/login?redirect=${redirect}`
+    : `${SERVER}/login?redirect=${redirect}`;
   if (!S.spotifyToken && !S.lastfmUsername) {
     return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
   }
-  if ((S._nullSongCount || 0) >= 3) {
+  if (S._nullSongCount >= 3) {
     return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
   }
   return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
