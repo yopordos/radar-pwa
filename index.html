@@ -1745,11 +1745,12 @@ function buildBottomSong() {
       <span class="eq eq-dark"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>
     </div>
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
+  const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
   if (!S.spotifyToken && !S.lastfmUsername) {
-    return `<div class="bottom-song-title" style="font-size:12px;opacity:0.7;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
+    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
   }
   if ((S._nullSongCount || 0) >= 3) {
-    return `<div class="bottom-song-title" style="font-size:12px;opacity:0.7;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
+    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
   }
   return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
 }
