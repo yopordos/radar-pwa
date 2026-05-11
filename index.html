@@ -967,7 +967,12 @@ async function fetchLastfmNowPlaying(username) {
     const res = await fetch(`${SERVER}/lastfm/now-playing?username=${encodeURIComponent(username)}`);
     if (!res.ok) return null;
     const data = await res.json();
-    return data?.playing ? { song: data.song, artist: data.artist } : null;
+    if (!data?.song) return null;
+    if (data.playing) return { song: data.song, artist: data.artist };
+    // Fallback: use the most recent scrobble if it was within 3 minutes.
+    // Requires Spotify (or other apps) to be disconnected from Last.fm on other devices.
+    const recentEnough = data.scrobbledAt && (Date.now() - data.scrobbledAt) < 3 * 60 * 1000;
+    return recentEnough ? { song: data.song, artist: data.artist } : null;
   } catch(e) {}
   return null;
 }
