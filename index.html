@@ -157,9 +157,10 @@
     }
     .loc-toggle-btn {
       background: none; border: none; cursor: pointer;
-      font-size: 15px; padding: 6px; line-height: 1;
-      transition: opacity 0.2s;
+      padding: 6px; line-height: 0; transition: opacity 0.2s;
+      display: flex; align-items: center; justify-content: center;
     }
+    .loc-toggle-btn svg { display: block; }
     .inbox-dot {
       width: 24px; height: 24px; border-radius: 50%;
       background: #2a2a2a; display: flex; align-items: center;
@@ -890,6 +891,19 @@ function getDeviceId() {
   return did;
 }
 
+function locIcon(on) {
+  // Pin shape: filled = sharing, outline = not sharing
+  return on
+    ? `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#f5f0e8"/>
+        <circle cx="8" cy="7" r="2.5" fill="#0c0c0c"/>
+       </svg>`
+    : `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#555" stroke-width="1.5" fill="none"/>
+        <circle cx="8" cy="7" r="2.5" stroke="#555" stroke-width="1.5" fill="none"/>
+       </svg>`;
+}
+
 // ── Location toggle ──
 function toggleLocation() {
   S.shareLocation = !S.shareLocation;
@@ -901,8 +915,7 @@ function toggleLocation() {
   }
   // Patch toggle icons in both layouts
   document.querySelectorAll('.loc-toggle-btn').forEach(btn => {
-    btn.textContent = S.shareLocation ? '📍' : '📍';
-    btn.style.opacity = S.shareLocation ? '1' : '0.35';
+    btn.innerHTML = locIcon(S.shareLocation);
     btn.title = S.shareLocation
       ? (isES ? 'Ubicación activa — toca para desactivar' : 'Location on — tap to disable')
       : (isES ? 'Ubicación desactivada — toca para activar' : 'Location off — tap to enable');
@@ -1339,7 +1352,7 @@ function buildDesktopTopbar() {
       </div>
       <div class="topbar-divider"></div>
       <div class="topbar-now-playing" id="topbar-np">${npHtml}</div>
-      <button class="loc-toggle-btn" id="loc-toggle-desktop" style="opacity:${S.shareLocation ? '1' : '0.35'};" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">📍</button>
+      <button class="loc-toggle-btn" id="loc-toggle-desktop" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
       <button class="topbar-inbox-btn" id="topbar-inbox">
         ${hasActivity ? '<div class="topbar-inbox-ring"></div>' : ''}
         <div class="topbar-inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
@@ -1524,7 +1537,7 @@ function renderFeed(container) {
       <div class="scroll-area" id="feed-list">${buildFeedItems()}</div>
       <div class="bottom-bar">
         <button class="bottom-song" id="bottom-song-btn">${buildBottomSong()}</button>
-        <button class="loc-toggle-btn" id="loc-toggle-mobile" style="opacity:${S.shareLocation ? '1' : '0.35'};" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">📍</button>
+        <button class="loc-toggle-btn" id="loc-toggle-mobile" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
         <button class="inbox-btn" id="inbox-btn">
           ${hasActivity ? '<div class="inbox-ring"></div>' : ''}
           <div class="inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
