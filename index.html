@@ -872,13 +872,18 @@ function getLocation() {
   if (!navigator.geolocation) return;
   navigator.geolocation.watchPosition(
     p => {
-      // Accept any reading for the initial fix so the feed loads immediately;
-      // reject only truly broken readings (cell-tower-only at >5km accuracy)
       if (p.coords.accuracy > 5000) return;
+      const firstFix = !S.coords;
       S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+      // Trigger immediate feed load + location post on first GPS fix,
+      // instead of waiting up to 15s for the next poll cycle
+      if (firstFix && S.userId) {
+        updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
+        refreshAll(S.userId);
+      }
     },
     err => {
-      if (err.code === 1) { // PERMISSION_DENIED
+      if (err.code === 1) {
         showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
       }
     },
