@@ -1,4 +1,4 @@
-const CACHE = 'radar-v42';
+const CACHE = 'radar-v43';
 const ASSETS = ['./', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
@@ -16,10 +16,20 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Only cache same-origin GET requests (not API calls to render.com)
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
 
+  // Navigation requests (page loads): always serve the root document from cache.
+  // This prevents auth callback URLs (?lastfm_token=, ?access_token=, etc.) from
+  // being cached and re-served on refresh, which would trigger a stale token exchange.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      caches.match('./').then(cached => cached || fetch('./'))
+    );
+    return;
+  }
+
+  // Assets: stale-while-revalidate
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetchPromise = fetch(e.request).then(res => {

@@ -1115,7 +1115,11 @@ async function handleCallback() {
       S.lastfmUsername = res.username; S.userId = res.username; saveAuth();
       showLoading(false); afterLogin();
     } catch(e) {
-      showLoading(false); setScreen('listen');
+      showLoading(false);
+      // Token already consumed (stale URL from SW cache or browser history).
+      // If loadAuth() already restored a valid session, just continue.
+      if (S.userId) { afterLogin(); return; }
+      setScreen('listen');
       showToast(isES ? 'Error al conectar con Last.fm. Intenta de nuevo.' : 'Last.fm connection failed. Please try again.');
     }
     return;
