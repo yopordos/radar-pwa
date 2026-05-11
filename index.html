@@ -867,28 +867,42 @@ function showLoading(show) {
   } else if (!show && ex) { ex.remove(); }
 }
 
+// ── Device ID ──
+function getDeviceId() {
+  let did = localStorage.getItem('radar_device_id');
+  if (!did) {
+    did = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('radar_device_id', did);
+  }
+  return did;
+}
+
 // ── Location ──
 function getLocation() {
   if (!navigator.geolocation) return;
-  navigator.geolocation.watchPosition(
-    p => {
-      if (p.coords.accuracy > 5000) return;
-      const firstFix = !S.coords;
-      S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
-      // Trigger immediate feed load + location post on first GPS fix,
-      // instead of waiting up to 15s for the next poll cycle
-      if (firstFix && S.userId) {
-        updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
-        refreshAll(S.userId);
-      }
-    },
-    err => {
-      if (err.code === 1) {
-        showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
-      }
-    },
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
-  );
+
+  function handlePos(p) {
+    if (p.coords.accuracy > 5000) return;
+    const firstFix = !S.coords;
+    S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+    if (firstFix && S.userId) {
+      updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
+      refreshAll(S.userId);
+    }
+  }
+
+  function handleErr(err) {
+    if (err.code === 1) {
+      showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
+    }
+  }
+
+  const opts = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
+
+  // Fast initial fix (especially helpful on iOS Chrome where watchPosition is slow)
+  navigator.geolocation.getCurrentPosition(handlePos, () => {}, opts);
+
+  navigator.geolocation.watchPosition(handlePos, handleErr, opts);
 }
 
 // ── Polling ──
@@ -944,6 +958,7 @@ async function updateLocation(uid, token, lf) {
       userId: uid, lat: c.lat, lng: c.lng,
       token: token || null, lastfmUsername: lf || null,
       song: S.mySong || null, artist: S.myArtist || null,
+      deviceId: getDeviceId(),
     });
     if (res.song && !token) { S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying(); }
     else if (!res.song && !token) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
