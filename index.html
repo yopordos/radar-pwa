@@ -892,15 +892,14 @@ function getDeviceId() {
 }
 
 function locIcon(on) {
-  // Pin shape: filled = sharing, outline = not sharing
   return on
     ? `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#f5f0e8"/>
+        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4ade80"/>
         <circle cx="8" cy="7" r="2.5" fill="#0c0c0c"/>
        </svg>`
     : `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#555" stroke-width="1.5" fill="none"/>
-        <circle cx="8" cy="7" r="2.5" stroke="#555" stroke-width="1.5" fill="none"/>
+        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#f5f0e8" stroke-width="1.5"/>
+        <circle cx="8" cy="7" r="2.5" stroke="#f5f0e8" stroke-width="1.5"/>
        </svg>`;
 }
 
@@ -1005,9 +1004,9 @@ async function fetchLastfmNowPlaying(username) {
     const data = await res.json();
     if (!data?.song) return null;
     if (data.playing) return { song: data.song, artist: data.artist };
-    // Fallback: use the most recent scrobble if it was within 3 minutes.
-    // Requires Spotify (or other apps) to be disconnected from Last.fm on other devices.
-    const recentEnough = data.scrobbledAt && (Date.now() - data.scrobbledAt) < 3 * 60 * 1000;
+    // Fallback: use the most recent scrobble if it was within 10 minutes.
+    // Requires other devices' scrobblers to be disconnected from this Last.fm account.
+    const recentEnough = data.scrobbledAt && (Date.now() - data.scrobbledAt) < 10 * 60 * 1000;
     return recentEnough ? { song: data.song, artist: data.artist } : null;
   } catch(e) {}
   return null;
