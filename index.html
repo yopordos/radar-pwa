@@ -957,12 +957,14 @@ async function refreshAll(uid) {
   const c = S.coords;
   if (!c) return;
   try {
+    const uidEnc = encodeURIComponent(uid);
     const [feedRes, notifRes, chatsRes] = await Promise.all([
-      fetch(`${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uid}`).then(r => r.json()),
-      fetch(`${SERVER}/notifications?userId=${uid}`).then(r => r.json()),
-      fetch(`${SERVER}/my-chats?userId=${uid}`).then(r => r.json()),
+      fetch(`${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uidEnc}`).then(r => r.json()),
+      fetch(`${SERVER}/notifications?userId=${uidEnc}`).then(r => r.json()),
+      fetch(`${SERVER}/my-chats?userId=${uidEnc}`).then(r => r.json()),
     ]);
-    S.feed          = feedRes.nearby || [];
+    // Double-filter: backend already excludes own userId, but guard against encoding mismatches
+    S.feed          = (feedRes.nearby || []).filter(u => u.userId !== uid);
     S.feedLoaded    = true;
     S.notifications = notifRes.notifications || notifRes.taps || [];
     // Filter out expired chats client-side (server may still return them briefly)
