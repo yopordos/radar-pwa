@@ -1419,7 +1419,10 @@ function patchNowPlaying() {
   const el = document.getElementById('topbar-np');
   if (el) {
     const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-    const needsReconnect = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+    const spotifyExpired = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+    const notLoggedIn = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+    const needsReconnect = spotifyExpired || notLoggedIn;
+    const waitingLfm = !S.mySong && S.lastfmUsername;
     if (S.mySong) {
       el.innerHTML = `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`;
       el.style.cursor = 'pointer';
@@ -1428,6 +1431,10 @@ function patchNowPlaying() {
       el.innerHTML = `<span class="topbar-np-nothing" style="cursor:pointer;text-decoration:underline;">${T.reconnect}</span>`;
       el.style.cursor = 'pointer';
       el.onclick = loginWithSpotify;
+    } else if (waitingLfm) {
+      el.innerHTML = `<span class="topbar-np-nothing">${T.waitingLfm}</span>`;
+      el.style.cursor = 'default';
+      el.onclick = null;
     } else {
       el.innerHTML = `<span class="topbar-np-nothing">${T.nothing}</span>`;
       el.style.cursor = 'default';
@@ -1491,7 +1498,12 @@ function renderFeed(container) {
   document.getElementById('radar-btn').onclick      = doRadar;
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
   document.getElementById('bottom-song-btn').onclick = () => {
-    if (S.mySong) window.location.href = 'https://open.spotify.com/';
+    if (S.mySong) {
+      window.location.href = 'https://open.spotify.com/';
+    } else if (!S.lastfmUsername && (!S.spotifyToken || (S._nullSongCount || 0) >= 3)) {
+      const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+      window.location.href = loginUrl;
+    }
   };
   attachFeedEvents();
   setTimeout(() => {
@@ -1610,15 +1622,13 @@ function buildBottomSong() {
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
   // Not logged in at all
   if (!S.spotifyToken && !S.lastfmUsername) {
-    const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
+    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
   }
-  // Spotify token expired (repeated failures polling Spotify)
+  // Spotify token expired
   if (S.spotifyToken && (S._nullSongCount || 0) >= 3) {
-    const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
+    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
   }
-  // Last.fm connected but no nowplaying yet — show waiting state, not reconnect
+  // Last.fm connected but no nowplaying yet
   if (S.lastfmUsername) {
     return `<div class="bottom-song-title" style="font-size:12px;">${T.waitingLfm}</div><div class="bottom-artist">Last.fm</div>`;
   }
