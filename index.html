@@ -838,6 +838,7 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function formatDist(m) {
+  if (m === null || m === undefined) return '';
   return m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`;
 }
 
@@ -997,13 +998,11 @@ async function updateLocation(uid, token, lf) {
     }
   }
 
-  // Solo enviar ubicación al backend si tenemos GPS real
   const c = S.coords;
-  if (!c) return;
-
   try {
     const res = await apiFetch('POST', '/update-location', {
-      userId: uid, lat: c.lat, lng: c.lng,
+      userId: uid,
+      ...(c ? { lat: c.lat, lng: c.lng } : {}),
       token: token || null, lastfmUsername: lf || null,
       song: S.mySong || null, artist: S.myArtist || null,
       deviceId: getDeviceId(),
@@ -1021,11 +1020,13 @@ async function updateLocation(uid, token, lf) {
 async function refreshAll(uid) {
   if (!uid) return;
   const c = S.coords;
-  if (!c) return;
   try {
     const uidEnc = encodeURIComponent(uid);
+    const nearbyUrl = c
+      ? `${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uidEnc}`
+      : `${SERVER}/nearby?userId=${uidEnc}`;
     const [feedRes, notifRes, chatsRes] = await Promise.all([
-      fetch(`${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uidEnc}`).then(r => r.json()),
+      fetch(nearbyUrl).then(r => r.json()),
       fetch(`${SERVER}/notifications?userId=${uidEnc}`).then(r => r.json()),
       fetch(`${SERVER}/my-chats?userId=${uidEnc}`).then(r => r.json()),
     ]);
@@ -1588,7 +1589,7 @@ function buildFeedItems() {
         <div class="card-info">
           <div class="song-name">${esc(item.song)}</div>
           <div class="artist-name">${esc(item.artist)}</div>
-          <div class="distance">${formatDist(item.distance)}</div>
+          ${item.distance !== null ? `<div class="distance">${formatDist(item.distance)}</div>` : ''}
         </div>
         <div class="card-btns">
           <button class="btn-listen" data-action="listen" data-query="${esc(q)}">♫</button>
