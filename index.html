@@ -872,7 +872,9 @@ function getLocation() {
   if (!navigator.geolocation) return;
   navigator.geolocation.watchPosition(
     p => {
-      if (p.coords.accuracy > 500) return; // ignorar lecturas muy imprecisas
+      // Accept any reading for the initial fix so the feed loads immediately;
+      // reject only truly broken readings (cell-tower-only at >5km accuracy)
+      if (p.coords.accuracy > 5000) return;
       S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
     },
     err => {
@@ -880,7 +882,7 @@ function getLocation() {
         showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
       }
     },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
   );
 }
 
@@ -1415,7 +1417,7 @@ function renderFeed(container) {
   document.getElementById('radar-btn').onclick      = doRadar;
   document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
   document.getElementById('bottom-song-btn').onclick = () => {
-    if (S.mySong) window.open('https://open.spotify.com/', '_blank', 'noopener');
+    if (S.mySong) window.location.href = 'https://open.spotify.com/';
   };
   attachFeedEvents();
   setTimeout(() => {
@@ -1576,7 +1578,7 @@ function attachFeedEvents() {
     const listenBtn = e.target.closest('[data-action="listen"]');
     const chatBtn   = e.target.closest('[data-action="chat"]');
     const card      = e.target.closest('.card.has-chat');
-    if (listenBtn) { e.stopPropagation(); window.open(`https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`, '_blank', 'noopener'); }
+    if (listenBtn) { e.stopPropagation(); window.location.href = `https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`; }
     else if (chatBtn) { e.stopPropagation(); sendTap(chatBtn.dataset.userid); }
     else if (card) { const ec = chatMap.get(card.dataset.userid); if (ec) openChat(ec.chatId, 'feed', ec.expiresAt); }
   };
