@@ -881,28 +881,36 @@ function getDeviceId() {
 function getLocation() {
   if (!navigator.geolocation) return;
 
-  function handlePos(p) {
-    if (p.coords.accuracy > 5000) return;
+  function applyFix(lat, lng) {
     const firstFix = !S.coords;
-    S.coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+    S.coords = { lat, lng };
     if (firstFix && S.userId) {
       updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
       refreshAll(S.userId);
     }
   }
 
-  function handleErr(err) {
-    if (err.code === 1) {
-      showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
-    }
-  }
+  // Coarse fast fix — no accuracy filter, uses cached WiFi/cell position.
+  // Gets S.coords set immediately so the feed loads without waiting for GPS lock.
+  navigator.geolocation.getCurrentPosition(
+    p => applyFix(p.coords.latitude, p.coords.longitude),
+    () => {},
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+  );
 
-  const opts = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
-
-  // Fast initial fix (especially helpful on iOS Chrome where watchPosition is slow)
-  navigator.geolocation.getCurrentPosition(handlePos, () => {}, opts);
-
-  navigator.geolocation.watchPosition(handlePos, handleErr, opts);
+  // Precise ongoing watch — refines coords as GPS lock improves.
+  navigator.geolocation.watchPosition(
+    p => {
+      if (p.coords.accuracy > 5000) return;
+      applyFix(p.coords.latitude, p.coords.longitude);
+    },
+    err => {
+      if (err.code === 1) {
+        showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
+      }
+    },
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
+  );
 }
 
 // ── Polling ──
