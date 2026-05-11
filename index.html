@@ -155,6 +155,11 @@
       justify-content: center; position: relative;
       background: transparent; flex-shrink: 0;
     }
+    .loc-toggle-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 15px; padding: 6px; line-height: 1;
+      transition: opacity 0.2s;
+    }
     .inbox-dot {
       width: 24px; height: 24px; border-radius: 50%;
       background: #2a2a2a; display: flex; align-items: center;
@@ -745,6 +750,7 @@ const S = {
   mySong: null,
   myArtist: null,
   coords: null,
+  shareLocation: localStorage.getItem('radar_loc') !== '0',
   sideTab: 'inbox',
 };
 
@@ -839,7 +845,11 @@ function esc(s) {
 }
 function formatDist(m) {
   if (m === null || m === undefined) return '';
-  return m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`;
+  if (m < 500)   return isES ? 'Aquí' : 'Here';
+  if (m < 2000)  return isES ? 'Cerca' : 'Nearby';
+  if (m < 10000) return isES ? 'Tu zona' : 'Your area';
+  if (m < 50000) return isES ? 'Tu ciudad' : 'Your city';
+  return isES ? 'Tu región' : 'Your region';
 }
 
 function isDesktop() { return window.matchMedia('(min-width: 1024px)').matches; }
@@ -880,6 +890,25 @@ function getDeviceId() {
   return did;
 }
 
+// ── Location toggle ──
+function toggleLocation() {
+  S.shareLocation = !S.shareLocation;
+  localStorage.setItem('radar_loc', S.shareLocation ? '1' : '0');
+  if (!S.shareLocation) {
+    S.coords = null; // stop sending coords immediately
+  } else {
+    getLocation();   // restart GPS
+  }
+  // Patch toggle icons in both layouts
+  document.querySelectorAll('.loc-toggle-btn').forEach(btn => {
+    btn.textContent = S.shareLocation ? '📍' : '📍';
+    btn.style.opacity = S.shareLocation ? '1' : '0.35';
+    btn.title = S.shareLocation
+      ? (isES ? 'Ubicación activa — toca para desactivar' : 'Location on — tap to disable')
+      : (isES ? 'Ubicación desactivada — toca para activar' : 'Location off — tap to enable');
+  });
+}
+
 // ── Location ──
 async function ipFallbackLocation() {
   try {
@@ -891,6 +920,8 @@ async function ipFallbackLocation() {
 }
 
 function getLocation() {
+  if (!S.shareLocation) return;
+
   function applyFix(lat, lng) {
     const firstFix = !S.coords;
     S.coords = { lat, lng };
@@ -909,7 +940,6 @@ function getLocation() {
   navigator.geolocation.getCurrentPosition(
     p => applyFix(p.coords.latitude, p.coords.longitude),
     async () => {
-      // GPS denied or unavailable — try IP geolocation silently
       const c = await ipFallbackLocation();
       if (c) applyFix(c.lat, c.lng);
     },
@@ -922,14 +952,7 @@ function getLocation() {
       if (p.coords.accuracy > 5000) return;
       applyFix(p.coords.latitude, p.coords.longitude);
     },
-    err => {
-      if (err.code === 1) {
-        const msg = isES
-          ? 'Ubicación bloqueada. En Chrome: toca ⓘ → Permisos del sitio → Ubicación → Permitir'
-          : 'Location blocked. In Chrome: tap ⓘ → Site settings → Location → Allow';
-        showToast(msg);
-      }
-    },
+    () => {},
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
   );
 }
@@ -1285,6 +1308,8 @@ function renderDesktop(container) {
   if (tbRadar) tbRadar.onclick = doRadar;
   const tbInbox = document.getElementById('topbar-inbox');
   if (tbInbox) tbInbox.onclick = () => { S.sideTab = 'inbox'; patchDesktopSide(); };
+  const tbLoc = document.getElementById('loc-toggle-desktop');
+  if (tbLoc) tbLoc.onclick = toggleLocation;
 
   attachFeedEvents();
   attachSideEvents();
@@ -1314,6 +1339,7 @@ function buildDesktopTopbar() {
       </div>
       <div class="topbar-divider"></div>
       <div class="topbar-now-playing" id="topbar-np">${npHtml}</div>
+      <button class="loc-toggle-btn" id="loc-toggle-desktop" style="opacity:${S.shareLocation ? '1' : '0.35'};" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">📍</button>
       <button class="topbar-inbox-btn" id="topbar-inbox">
         ${hasActivity ? '<div class="topbar-inbox-ring"></div>' : ''}
         <div class="topbar-inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
@@ -1498,15 +1524,17 @@ function renderFeed(container) {
       <div class="scroll-area" id="feed-list">${buildFeedItems()}</div>
       <div class="bottom-bar">
         <button class="bottom-song" id="bottom-song-btn">${buildBottomSong()}</button>
+        <button class="loc-toggle-btn" id="loc-toggle-mobile" style="opacity:${S.shareLocation ? '1' : '0.35'};" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">📍</button>
         <button class="inbox-btn" id="inbox-btn">
           ${hasActivity ? '<div class="inbox-ring"></div>' : ''}
           <div class="inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
         </button>
       </div>
     </div>`;
-  document.getElementById('radar-btn').onclick      = doRadar;
-  document.getElementById('inbox-btn').onclick      = () => setScreen('inbox');
-  document.getElementById('bottom-song-btn').onclick = () => {
+  document.getElementById('radar-btn').onclick        = doRadar;
+  document.getElementById('inbox-btn').onclick        = () => setScreen('inbox');
+  document.getElementById('loc-toggle-mobile').onclick = toggleLocation;
+  document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
       window.location.href = 'https://open.spotify.com/';
     } else if (!S.lastfmUsername && (!S.spotifyToken || (S._nullSongCount || 0) >= 3)) {
@@ -1610,7 +1638,7 @@ function buildFeedItems() {
         <div class="card-info">
           <div class="song-name">${esc(item.song)}</div>
           <div class="artist-name">${esc(item.artist)}</div>
-          ${item.distance !== null ? `<div class="distance">${formatDist(item.distance)}</div>` : ''}
+          <div class="distance">${item.distance !== null ? formatDist(item.distance) : '·'}</div>
         </div>
         <div class="card-btns">
           <button class="btn-listen" data-action="listen" data-query="${esc(q)}">♫</button>
