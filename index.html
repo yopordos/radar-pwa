@@ -941,12 +941,32 @@ async function fetchSpotifyCurrentTrack(token) {
   return null;
 }
 
+async function fetchLastfmNowPlaying(username) {
+  try {
+    const res = await fetch(`${SERVER}/lastfm/now-playing?username=${encodeURIComponent(username)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.playing ? { song: data.song, artist: data.artist } : null;
+  } catch(e) {}
+  return null;
+}
+
 async function updateLocation(uid, token, lf) {
   if (!uid || (!token && !lf)) return;
 
-  // Siempre buscar canción, independiente del GPS
+  // Buscar canción independiente del GPS (igual que Spotify)
   if (token) {
     const track = await fetchSpotifyCurrentTrack(token);
+    if (track) {
+      S.mySong = track.song; S.myArtist = track.artist;
+      S._nullSongCount = 0;
+      patchNowPlaying();
+    } else {
+      S._nullSongCount = (S._nullSongCount || 0) + 1;
+      patchBottomBar();
+    }
+  } else if (lf) {
+    const track = await fetchLastfmNowPlaying(lf);
     if (track) {
       S.mySong = track.song; S.myArtist = track.artist;
       S._nullSongCount = 0;
@@ -968,10 +988,13 @@ async function updateLocation(uid, token, lf) {
       song: S.mySong || null, artist: S.myArtist || null,
       deviceId: getDeviceId(),
     });
-    if (res.song && !token) { S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying(); }
-    else if (!res.song && !token) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
+    if (res.song) {
+      S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying();
+    } else if (!S.mySong) {
+      S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar();
+    }
   } catch(e) {
-    if (!token) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
+    if (!S.mySong) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
   }
 }
 
