@@ -815,6 +815,8 @@ const T = {
   nothing:      isES ? 'Nada sonando'     : 'Nothing playing',
   putMusic:     isES ? 'Ponle música →'   : 'Put some music on →',
   reconnect:    isES ? 'Reconectar Spotify' : 'Reconnect Spotify',
+  reconnectLfm: isES ? 'Reconectar Last.fm' : 'Reconnect Last.fm',
+  waitingLfm:   isES ? 'Esperando canción de Last.fm...' : 'Waiting for Last.fm song...',
   tokenExpired: isES ? 'Sesión de Spotify expirada. Reconecta para seguir compartiendo.' : 'Spotify session expired. Reconnect to keep sharing.',
   activeChats:  isES ? 'CHATS ACTIVOS'    : 'ACTIVE CHATS',
   delConfirm:   isES ? '¿Eliminar esta conversación?' : 'Delete this conversation?',
@@ -878,9 +880,16 @@ function getDeviceId() {
 }
 
 // ── Location ──
-function getLocation() {
-  if (!navigator.geolocation) return;
+async function ipFallbackLocation() {
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    if (d.latitude && d.longitude) return { lat: d.latitude, lng: d.longitude };
+  } catch(e) {}
+  return null;
+}
 
+function getLocation() {
   function applyFix(lat, lng) {
     const firstFix = !S.coords;
     S.coords = { lat, lng };
@@ -890,11 +899,19 @@ function getLocation() {
     }
   }
 
+  if (!navigator.geolocation) {
+    ipFallbackLocation().then(c => { if (c) applyFix(c.lat, c.lng); });
+    return;
+  }
+
   // Coarse fast fix — no accuracy filter, uses cached WiFi/cell position.
-  // Gets S.coords set immediately so the feed loads without waiting for GPS lock.
   navigator.geolocation.getCurrentPosition(
     p => applyFix(p.coords.latitude, p.coords.longitude),
-    () => {},
+    async () => {
+      // GPS denied or unavailable — try IP geolocation silently
+      const c = await ipFallbackLocation();
+      if (c) applyFix(c.lat, c.lng);
+    },
     { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
   );
 
@@ -906,7 +923,10 @@ function getLocation() {
     },
     err => {
       if (err.code === 1) {
-        showToast(isES ? 'Activa la ubicación para ver quién está cerca.' : 'Enable location to see who\'s nearby.');
+        const msg = isES
+          ? 'Ubicación bloqueada. En Chrome: toca ⓘ → Permisos del sitio → Ubicación → Permitir'
+          : 'Location blocked. In Chrome: tap ⓘ → Site settings → Location → Allow';
+        showToast(msg);
       }
     },
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
@@ -1587,10 +1607,19 @@ function buildBottomSong() {
       <span class="eq eq-dark"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>
     </div>
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
-  const needsReconnect = (!S.spotifyToken && !S.lastfmUsername) || (S._nullSongCount || 0) >= 3;
-  if (needsReconnect) {
+  // Not logged in at all
+  if (!S.spotifyToken && !S.lastfmUsername) {
     const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
     return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
+  }
+  // Spotify token expired (repeated failures polling Spotify)
+  if (S.spotifyToken && (S._nullSongCount || 0) >= 3) {
+    const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+    return `<a href="${loginUrl}" style="display:block;text-decoration:none;color:inherit;width:100%;"><div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div></a>`;
+  }
+  // Last.fm connected but no nowplaying yet — show waiting state, not reconnect
+  if (S.lastfmUsername) {
+    return `<div class="bottom-song-title" style="font-size:12px;">${T.waitingLfm}</div><div class="bottom-artist">Last.fm</div>`;
   }
   return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
 }
