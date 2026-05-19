@@ -1137,9 +1137,25 @@ async function handleCallback() {
   // Legacy: backend passed raw code (kept as fallback for old redirects)
   const code        = params.get('code');
 
-  if (accessToken && userId) {
-    S.spotifyToken = accessToken; S.userId = userId; saveAuth();
-    afterLogin();
+  if (accessToken) {
+    if (userId) {
+      S.spotifyToken = accessToken; S.userId = userId; saveAuth();
+      afterLogin();
+    } else {
+      // user_id missing from redirect — fetch it directly from Spotify
+      showLoading(true);
+      try {
+        const me = await fetch('https://api.spotify.com/v1/me', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        }).then(r => r.json());
+        if (!me.id) throw new Error('no id');
+        S.spotifyToken = accessToken; S.userId = me.id; saveAuth();
+        showLoading(false); afterLogin();
+      } catch(e) {
+        showLoading(false); setScreen('listen');
+        showToast(isES ? 'Error al conectar con Spotify. Intenta de nuevo.' : 'Spotify connection failed. Please try again.');
+      }
+    }
     return;
   }
 
@@ -1184,6 +1200,9 @@ async function handleCallback() {
     }
     return;
   }
+
+  // No recognized params — don't leave #app blank
+  setScreen('listen');
 }
 
 function afterLogin() {
