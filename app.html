@@ -86,6 +86,25 @@
       overflow-x: hidden;
     }
 
+    /* CRT scanlines — matches landing page */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+      );
+    }
+
+    /* Grain noise — matches landing page */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 300px 300px;
+    }
+
     button {
       font-family: 'Poppins', sans-serif;
       cursor: pointer;
@@ -677,6 +696,7 @@
       .onb-pulse-overlay-ring, .login-dot, .login-connect-line {
         animation: none;
       }
+      body::before, body::after { display: none; }
     }
 
     /* ═══════════════════════════════════════════

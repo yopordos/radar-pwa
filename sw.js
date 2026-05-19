@@ -1,5 +1,5 @@
-const CACHE = 'radar-v47';
-const ASSETS = ['./', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
+const CACHE = 'radar-v48';
+const ASSETS = ['./', './app.html', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -19,12 +19,13 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
 
-  // Navigation requests (page loads): always serve the root document from cache.
-  // This prevents auth callback URLs (?lastfm_token=, ?access_token=, etc.) from
-  // being cached and re-served on refresh, which would trigger a stale token exchange.
+  // Navigation requests: serve the correct shell, stripping any auth callback params
+  // (?access_token=, ?lastfm_token=, etc.) to prevent stale token re-exchange on refresh.
   if (e.request.mode === 'navigate') {
+    const url = new URL(e.request.url);
+    const shell = url.pathname.endsWith('app.html') ? './app.html' : './';
     e.respondWith(
-      caches.match('./').then(cached => cached || fetch('./'))
+      caches.match(shell).then(cached => cached || fetch(shell))
     );
     return;
   }
