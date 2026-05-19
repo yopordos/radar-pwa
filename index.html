@@ -2,1959 +2,867 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-  <!-- ── SEO básico ── -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RAdAR — la música que te gusta, o no.</title>
-  <meta name="description" content="la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar. Conecta tu Spotify o Last.fm.">
-  <meta name="keywords" content="app música social, radar musical, descubrir música, Spotify social, conocer personas por música, música cerca, qué escuchan cerca, conectar por música, red social musical">
+  <meta name="description" content="Ve qué está escuchando la gente cerca de ti en tiempo real. Conecta Spotify o Last.fm. Webapp gratuita. Sin cuenta.">
+  <meta name="keywords" content="app música social, radar musical, descubrir música, Spotify social, música cerca, qué escuchan cerca">
   <meta name="author" content="RAdAR">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://radarpin.me/">
 
-  <!-- ── Open Graph (WhatsApp, Facebook, LinkedIn) ── -->
-  <meta property="og:type"        content="website">
-  <meta property="og:url"         content="https://radarpin.me/">
-  <meta property="og:site_name"   content="RAdAR">
-  <meta property="og:locale"      content="es_CL">
-  <meta property="og:title"       content="RAdAR — la música que te gusta, o no.">
-  <meta property="og:description" content="la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar.">
-  <meta property="og:image"       content="https://radarpin.me/og-image.png">
+  <meta property="og:type"         content="website">
+  <meta property="og:url"          content="https://radarpin.me/">
+  <meta property="og:site_name"    content="RAdAR">
+  <meta property="og:locale"       content="es_CL">
+  <meta property="og:title"        content="RAdAR — la música que te gusta, o no.">
+  <meta property="og:description"  content="Ve qué está escuchando la gente cerca de ti en tiempo real. Webapp gratuita.">
+  <meta property="og:image"        content="https://radarpin.me/og-image.png">
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt"   content="RAdAR — la música que te gusta, o no. Cerca de ti, en tiempo real.">
+  <meta property="og:image:alt"    content="RAdAR — la música que te gusta, o no. Cerca de ti, en tiempo real.">
 
-  <!-- ── Twitter / X Card ── -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="RAdAR — la música que te gusta, o no.">
-  <meta name="twitter:description" content="la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar.">
+  <meta name="twitter:description" content="Ve qué está escuchando la gente cerca de ti en tiempo real.">
   <meta name="twitter:image"       content="https://radarpin.me/og-image.png">
 
-  <!-- ── PWA ── -->
   <meta name="theme-color" content="#0c0c0c">
-  <meta name="application-name" content="RAdAR">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="RAdAR">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icon.png">
 
-  <!-- ── JSON-LD Structured Data ── -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "RAdAR",
-    "url": "https://radarpin.me/",
-    "description": "la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar.",
+    "url": "https://radarpin.me/app.html",
+    "description": "Ve qué está escuchando la gente cerca de ti en tiempo real. Conecta Spotify o Last.fm.",
     "applicationCategory": "MusicApplication",
     "operatingSystem": "Web, iOS, Android",
     "inLanguage": "es",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "featureList": [
-      "Detección de música en tiempo real vía Spotify",
-      "Compatibilidad con Last.fm, Apple Music y YouTube Music",
-      "Chat anónimo con personas cercanas",
-      "Funciona como app instalable (PWA)"
-    ]
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Radar musical en tiempo real","Spotify y Last.fm","GPS opcional","Sin cuenta propia","PWA instalable"]
   }
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box; margin: 0; padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    /* ─── tokens ─── */
+    :root {
+      --ink:     #0c0c0c;
+      --surface: #111113;
+      --card:    #161618;
+      --border:  #1e1e20;
+      --border-hi: #2c2c2e;
+      --accent:  #e8ff47;
+      --text:    #e4e4dc;
+      --muted:   #44444a;
+      --subtle:  #28282c;
+      --sans:    'Poppins', sans-serif;
+      --mono:    'IBM Plex Mono', monospace;
     }
 
-    /* [2] Fondo con gradiente radial sutil */
-    html, body {
-      height: 100%;
-      background: radial-gradient(ellipse at 50% 35%, #141416 0%, #0c0c0c 65%);
-      overscroll-behavior: none;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
-      color: #f5f0e8;
-      font-family: 'Poppins', sans-serif;
+      font-family: var(--sans);
+      background: var(--ink);
+      color: var(--text);
       overflow-x: hidden;
     }
 
-    button {
-      font-family: 'Poppins', sans-serif;
-      cursor: pointer;
+    /* CRT scanlines overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+      );
+    }
+
+    /* Grain noise — low opacity SVG fractal */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 300px 300px;
+    }
+
+    /* ─── nav ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.25rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(12,12,12,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; text-decoration: none; line-height: 0;
+    }
+    .nav-logo img { height: 30px; width: 30px; display: block; }
+
+    .nav-meta {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--muted); letter-spacing: 0.12em;
+      text-transform: uppercase; display: none;
+    }
+    @media (min-width: 640px) { .nav-meta { display: block; } }
+
+    .nav-cta {
+      background: var(--accent); color: var(--ink);
+      padding: 0.5rem 1.25rem;
+      text-decoration: none; font-family: var(--mono);
+      font-size: 0.6875rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.15s;
       border: none;
-      -webkit-appearance: none;
+    }
+    .nav-cta:hover { opacity: 0.82; }
+    .nav-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ─── section marker ─── */
+    .sect-id {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--muted); letter-spacing: 0.15em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .sect-id::after {
+      content: '';
+      flex: 1; height: 1px; background: var(--border);
+      max-width: 120px;
     }
 
-    /* ═══════════════════════════════════════════
-       MOBILE — single column, app-like
-    ═══════════════════════════════════════════ */
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      height: 100dvh;
-      max-width: 480px;
-      margin: 0 auto;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      transition: height 0.05s;
-      /* Las ondas quedan detrás del app */
+    /* ─── hero ─── */
+    .hero {
+      min-height: 100svh;
+      background: radial-gradient(ellipse at 50% 35%, #141416 0%, #0c0c0c 65%);
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem 2rem 0;
+      position: relative; overflow: hidden;
+    }
+
+    /* radar ripple rings */
+    .hero-ripple {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .rring {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(232,255,71,0.22);
+      top: 38%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.05);
+      animation: rexpand 7s cubic-bezier(0.15,0,0.55,1) infinite;
+    }
+    .rring:nth-child(2) { animation-delay: 2s; border-color: rgba(232,255,71,0.12); }
+    .rring:nth-child(3) { animation-delay: 4s; border-color: rgba(232,255,71,0.06); }
+    @keyframes rexpand {
+      0%   { transform: translate(-50%,-50%) scale(0.05); opacity: 0.8; }
+      12%  { opacity: 0.5; }
+      100% { transform: translate(-50%,-50%) scale(60);   opacity: 0; }
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-tag {
+      font-family: var(--mono); font-size: 0.6rem;
+      font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted);
+      position: absolute; top: 5.5rem; left: 2rem;
+    }
+
+    .hero-title {
+      font-size: clamp(5.5rem, 30vw, 26rem);
+      font-weight: 900; line-height: 0.88;
+      letter-spacing: -0.04em; color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+    .hero-tagline {
+      font-size: clamp(1.375rem, 4vw, 3rem);
+      font-weight: 900; line-height: 1.1; max-width: 22ch;
+      letter-spacing: -0.02em;
+    }
+    .hero-tagline em { color: var(--accent); font-style: normal; }
+
+    .hero-meta {
+      margin-top: 1rem;
+      font-family: var(--mono); font-size: clamp(0.575rem, 1.2vw, 0.75rem);
+      color: var(--muted); letter-spacing: 0.1em;
+      text-transform: uppercase; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .hero-rule {
+      margin-top: 3rem;
+      height: 1px; background: var(--border);
       position: relative;
-      z-index: 1;
+    }
+    .hero-rule::before {
+      content: attr(data-label);
+      font-family: var(--mono); font-size: 0.55rem;
+      color: var(--muted); letter-spacing: 0.1em;
+      text-transform: uppercase;
+      position: absolute; right: 0; top: -0.85rem;
     }
 
-    .screen {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding: 28px 20px 20px;
-      overflow: hidden;
+    /* ─── grid divider trick — 1px borders via gap ─── */
+    .grid-div {
+      display: grid; gap: 1px;
+      background: var(--border);
+    }
+    .grid-div > * { background: var(--ink); }
+    .grid-div-surface > * { background: var(--surface); }
+
+    /* ─── about ─── */
+    .about {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+      display: grid; gap: 4rem; align-items: center;
+    }
+    @media (min-width: 768px) {
+      .about {
+        grid-template-columns: 1fr 1fr;
+        padding: 7rem 5rem; gap: 5rem;
+      }
     }
 
-    /* Mobile header */
-    .header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 24px;
-      margin-top: 10px;
+    .about-text p {
+      font-size: clamp(1rem, 2.25vw, 1.375rem);
+      line-height: 1.6; max-width: 38ch; color: var(--text);
+    }
+    .about-text strong { font-weight: 900; }
+    .about-text em { color: var(--accent); font-style: normal; font-weight: 700; }
+
+    /* ─── terminal (phone mockup) ─── */
+    .phone-wrap { display: flex; justify-content: center; }
+
+    .phone {
+      width: min(235px, 60vw);
+      aspect-ratio: 9/19.5;
+      background: var(--ink);
+      border: 1.5px solid var(--accent);
+      display: flex; flex-direction: column;
+      box-shadow: 0 0 32px rgba(232,255,71,0.1), 0 0 80px rgba(232,255,71,0.04);
+    }
+
+    .term-bar {
+      background: var(--accent);
+      color: var(--ink);
+      font-family: var(--mono); font-size: 0.48rem;
+      font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      display: flex; justify-content: space-between; align-items: center;
       flex-shrink: 0;
     }
-    .header-titles { flex: 1; }
-    .big-title      { font-weight: 900; font-size: 34px; color: #e8ff47; letter-spacing: -1px; line-height: 36px; margin-bottom: 2px; }
-    .big-title-gray { font-weight: 900; font-size: 34px; color: #333;   letter-spacing: -1px; line-height: 36px; }
 
-    /* Bottom bar (mobile only) */
-    .bottom-bar {
-      display: flex; align-items: center; gap: 10px;
-      height: 68px; flex-shrink: 0; padding-top: 8px;
-    }
-    .bottom-song {
-      flex: 1; background: #e8ff47; border-radius: 14px;
-      padding: 12px 14px; min-height: 68px;
-      border: none; text-align: left;
-      display: flex; flex-direction: column; justify-content: center;
-      overflow: hidden; cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .bottom-song:active { opacity: 0.85; }
-    .bottom-label       { color: rgba(0,0,0,0.45); font-size: 8px; font-weight: 700; letter-spacing: 2px; margin-bottom: 1px; }
-    .bottom-song-row    { display: flex; align-items: center; gap: 6px; overflow: hidden; }
-    .bottom-song-title  { color: #0c0c0c; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-    .bottom-artist      { color: rgba(0,0,0,0.5); font-size: 12px; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .inbox-btn {
-      width: 54px; height: 54px; display: flex; align-items: center;
-      justify-content: center; position: relative;
-      background: transparent; flex-shrink: 0;
-    }
-    .loc-toggle-btn {
-      background: none; border: none; cursor: pointer;
-      padding: 6px; line-height: 0; transition: opacity 0.2s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .loc-toggle-btn svg { display: block; }
-    .inbox-dot {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: #2a2a2a; display: flex; align-items: center;
-      justify-content: center; font-size: 12px; font-weight: 900;
-      color: #444; position: relative; z-index: 2; transition: background 0.2s, color 0.2s;
-    }
-    .inbox-dot.has-activity { background: #e8ff47; color: #0c0c0c; }
-    .inbox-ring {
-      position: absolute; width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid #e8ff47;
-      animation: inbox-pulse 1.5s ease-out infinite; pointer-events: none;
-    }
-    @keyframes inbox-pulse {
-      0%   { transform: scale(1);   opacity: 0.85; }
-      100% { transform: scale(3.2); opacity: 0; }
+    .phone-screen {
+      flex: 1; display: flex; flex-direction: column;
+      padding: 8px 10px; overflow: hidden;
     }
 
-    /* Back / section title */
-    .back-btn {
-      background: transparent; color: #e8ff47;
-      font-size: 12px; font-weight: 700; letter-spacing: 2px;
-      margin-bottom: 16px; padding: 0; display: block; flex-shrink: 0;
-    }
-    .section-title {
-      font-size: 28px; color: #f5f0e8; letter-spacing: 2px;
-      margin-bottom: 16px; font-weight: 900; flex-shrink: 0;
+    .p-hdr {
+      color: var(--accent); font-family: var(--mono);
+      font-size: 0.48rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 6px; flex-shrink: 0;
     }
 
-    /* ═══════════════════════════════════════════
-       TABLET — single column, wider
-    ═══════════════════════════════════════════ */
-    @media (min-width: 768px) and (max-width: 1023px) {
-      #app {
-        max-width: 680px;
-      }
-      .screen { padding: 36px 32px 24px; }
-      .big-title      { font-size: 42px; line-height: 44px; }
-      .big-title-gray { font-size: 42px; line-height: 44px; }
-      .radar-wrap     { width: 120px; height: 120px; }
-      .radar-circle-btn { width: 100px; height: 100px; }
-      .radar-label    { font-size: 22px; }
-      .song-name      { font-size: 19px; }
-      .bottom-song    { border-radius: 16px; }
+    /* card matching app exactly — no border-radius */
+    .p-card {
+      background: var(--card);
+      padding: 7px 8px; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid transparent;
+      border-left: 2px solid transparent;
+      flex-shrink: 0;
+    }
+    .p-card.active {
+      border-color: rgba(232,255,71,0.3);
+      border-left-color: var(--accent);
     }
 
-    /* ═══════════════════════════════════════════
-       DESKTOP — two-column layout
-    ═══════════════════════════════════════════ */
-    @media (min-width: 1024px) {
-      #app {
-        max-width: none;
-        width: 100%;
-        display: grid;
-        grid-template-rows: 68px 1fr;
-        grid-template-columns: minmax(0, 1fr) 360px;
-        grid-template-areas:
-          "topbar topbar"
-          "feed   side";
-        height: 100vh;
-      }
+    .p-card-info { flex: 1; min-width: 0; }
+    .p-song  { color: var(--text); font-size: 0.575rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-artist { color: #555; font-size: 0.5rem; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-      /* Hide mobile-only elements on desktop */
-      .mobile-only { display: none !important; }
-
-      /* ── Top bar ── */
-      .desktop-topbar {
-        grid-area: topbar;
-        display: flex;
-        align-items: center;
-        padding: 0 32px;
-        border-bottom: 1px solid #1a1a1a;
-        gap: 24px;
-        flex-shrink: 0;
-        background: #0c0c0c;
-        position: relative; z-index: 2;
-      }
-
-      .topbar-logo {
-        display: flex;
-        align-items: baseline;
-        gap: 0;
-        flex-shrink: 0;
-      }
-      .topbar-logo-text  { font-weight: 900; font-size: 22px; color: #e8ff47; letter-spacing: -0.5px; }
-      .topbar-logo-d     { font-weight: 900; font-style: italic; font-size: 22px; color: #e8ff47; }
-
-      .topbar-divider {
-        width: 1px; height: 28px; background: #222; flex-shrink: 0;
-      }
-
-      .topbar-now-playing {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-      }
-      .topbar-np-label {
-        color: #444; font-size: 9px; font-weight: 700;
-        letter-spacing: 2px; white-space: nowrap; flex-shrink: 0;
-      }
-      .topbar-np-song {
-        color: #f5f0e8; font-size: 14px; font-weight: 700;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .topbar-np-artist {
-        color: #555; font-size: 13px; font-style: italic;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        flex-shrink: 0;
-      }
-      .topbar-np-nothing {
-        color: #333; font-size: 13px; font-style: italic;
-      }
-
-      .topbar-radar-btn {
-        width: 44px; height: 44px; border-radius: 50%;
-        background: #e8ff47; display: flex; align-items: center;
-        justify-content: center; flex-shrink: 0;
-        font-weight: 900; font-size: 10px; color: #0c0c0c;
-        letter-spacing: 0; transition: opacity 0.15s, transform 0.1s;
-        position: relative;
-        /* [4] Glow en el radar btn del topbar */
-        box-shadow: 0 0 20px rgba(232,255,71,0.2), 0 0 40px rgba(232,255,71,0.06);
-      }
-      .topbar-radar-btn:active { opacity: 0.7; transform: scale(0.95); }
-      .topbar-radar-label { font-weight: 900; font-size: 10px; color: #0c0c0c; line-height: 1; }
-      .topbar-radar-d { font-style: italic; }
-
-      .topbar-inbox-btn {
-        position: relative; width: 40px; height: 40px;
-        display: flex; align-items: center; justify-content: center;
-        background: transparent; flex-shrink: 0;
-        border-radius: 8px; transition: background 0.15s;
-      }
-      .topbar-inbox-btn:hover { background: #1a1a1a; }
-      .topbar-inbox-btn.active .topbar-inbox-dot { background: #e8ff47; }
-
-      .topbar-inbox-dot {
-        width: 22px; height: 22px; border-radius: 50%;
-        background: #2a2a2a; display: flex; align-items: center;
-        justify-content: center; font-size: 11px; font-weight: 900;
-        color: #444; position: relative; z-index: 2; transition: background 0.2s, color 0.2s;
-      }
-      .topbar-inbox-dot.has-activity { background: #e8ff47; color: #0c0c0c; }
-      .topbar-inbox-ring {
-        position: absolute; width: 22px; height: 22px; border-radius: 50%;
-        border: 2px solid #e8ff47;
-        animation: inbox-pulse 1.5s ease-out infinite; pointer-events: none;
-      }
-
-      /* ── Feed panel ── */
-      .desktop-feed {
-        grid-area: feed;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        min-width: 0;
-        padding: 32px 32px 24px;
-        border-right: 1px solid #1a1a1a;
-      }
-
-      .desktop-feed-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 24px;
-        flex-shrink: 0;
-      }
-
-      .desktop-feed-titles { flex: 1; }
-      .desktop-big         { font-weight: 900; font-size: 42px; color: #e8ff47; letter-spacing: -1px; line-height: 44px; margin-bottom: 2px; }
-      .desktop-big-gray    { font-weight: 900; font-size: 42px; color: #2a2a2a; letter-spacing: -1px; line-height: 44px; }
-
-      /* ── Side panel — fondo opaco para bloquear ondas ── */
-      .desktop-side {
-        grid-area: side;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        background: #0c0c0c;
-        position: relative; z-index: 2;
-      }
-
-      .side-panel {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 32px 28px 24px;
-        overflow: hidden;
-      }
-
-      .side-title {
-        font-size: 11px; font-weight: 700; letter-spacing: 3px;
-        color: #444; margin-bottom: 20px; flex-shrink: 0;
-        text-transform: uppercase;
-      }
-
-      /* Override screen/header for desktop */
-      .screen { padding: 0; }
-      .header { display: none; }
-      .bottom-bar { display: none !important; }
+    .p-dist {
+      color: var(--accent); font-family: var(--mono);
+      font-size: 0.45rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0;
+      display: flex; align-items: center; gap: 3px;
     }
-
-    /* ═══════════════════════════════════════════
-       SHARED COMPONENTS
-    ═══════════════════════════════════════════ */
-
-    /* ── Overlay de ondas — posición fija, detrás de todo el contenido ── */
-    #radar-ripple {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .ripple-ring {
-      position: absolute;
-      border-radius: 50%;
-      border: 0.5px solid rgba(232,255,71,0.28);
-      animation: ripple-expand 5s cubic-bezier(0.2, 0, 0.6, 1) 1 forwards;
-    }
-    .ripple-ring:nth-child(2) { animation-delay: 0.6s; border-color: rgba(232,255,71,0.16); }
-    .ripple-ring:nth-child(3) { animation-delay: 1.2s; border-color: rgba(232,255,71,0.08); }
-    @keyframes ripple-expand {
-      0%   { transform: scale(0.1); opacity: 0.6; }
-      15%  { opacity: 0.4; }
-      100% { transform: scale(60);  opacity: 0; }
-    }
-
-    /* Radar */
-    .radar-wrap {
-      width: 110px; height: 110px; display: flex;
-      align-items: center; justify-content: center;
-      position: relative; flex-shrink: 0;
-    }
-    .radar-circle-btn {
-      width: 90px; height: 90px; border-radius: 50%;
-      background: #e8ff47; display: flex; align-items: center;
-      justify-content: center; cursor: pointer; position: relative;
-      z-index: 2; border: none; transition: transform 0.1s, opacity 0.1s;
-      box-shadow: 0 0 32px rgba(232,255,71,0.22), 0 0 64px rgba(232,255,71,0.07);
-    }
-    .radar-circle-btn:active { transform: scale(0.95); opacity: 0.8; }
-    .radar-label { font-size: 19px; color: #0c0c0c; line-height: 22px; user-select: none; font-weight: 900; }
-    .radar-d     { font-style: italic; }
-
-    /* Scroll area */
-    .scroll-area {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-      -webkit-overflow-scrolling: touch; margin-top: 12px;
-    }
-
-    /* [3] Cards con profundidad, hover y acento izquierdo en chat activo */
-    .card {
-      background: #1a1a1a; border-radius: 12px; padding: 14px;
-      margin-bottom: 10px; display: flex; align-items: center;
-      gap: 8px; border: 1px solid transparent;
-      transition: background 0.15s, border-color 0.15s;
-      cursor: pointer;
-    }
-    .card:hover { background: #1e1e1e; }
-    .card.has-chat {
-      border-color: rgba(232,255,71,0.4);
-      border-left: 3px solid #e8ff47;
-      padding-left: 11px;
-    }
-    .card-info      { flex: 1; min-width: 0; }
-    .song-name      { color: #f5f0e8; font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .artist-name    { color: #777; font-size: 14px; font-style: italic; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* [9] Distancia con dot pulsante vía pseudo-elemento */
-    .distance {
-      color: #e8ff47; font-size: 11px; margin-top: 4px;
-      font-weight: 700; letter-spacing: 1px;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .distance::before {
+    .p-dist::before {
       content: '';
-      display: inline-block;
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: #e8ff47;
-      flex-shrink: 0;
-      animation: dist-pulse 2s ease-in-out infinite;
+      display: inline-block; width: 3px; height: 3px;
+      background: var(--accent);
+      animation: pdpulse 2s ease-in-out infinite;
     }
-    @keyframes dist-pulse {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50%       { opacity: 1;   transform: scale(1.4); }
+    @keyframes pdpulse {
+      0%,100% { opacity: 0.35; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.6); }
     }
 
-    .card-btns      { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-    .chat-active-dot { width: 10px; height: 10px; border-radius: 50%; background: #e8ff47; }
-
-    .btn-listen { background: #1e1e1e; border: 1px solid #333; color: #e8ff47; font-size: 14px; padding: 8px 10px; border-radius: 8px; transition: border-color 0.15s; }
-    .btn-listen:hover { border-color: #555; }
-    .btn-chat   { background: #e8ff47; color: #0c0c0c; font-size: 10px; font-weight: 900; letter-spacing: 1px; padding: 8px 12px; border-radius: 8px; transition: opacity 0.15s; }
-    .btn-chat:hover { opacity: 0.85; }
-
-    /* Login buttons */
-    .btn-login  { font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 1px; padding: 18px; border-radius: 14px; width: 100%; transition: opacity 0.15s, transform 0.1s; }
-    .btn-login:active { opacity: 0.85; transform: scale(0.98); }
-    .btn-spotify { background: #1DB954; color: #fff; margin-bottom: 12px; }
-    .btn-lastfm  { background: #d51007; color: #fff; }
-    .login-buttons { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-
-    @media (min-width: 1024px) {
-      .login-buttons { max-width: 400px; }
+    .p-eq {
+      display: inline-flex; align-items: flex-end; gap: 1.5px;
+      height: 9px; flex-shrink: 0;
     }
-
-    /* Section labels */
-    .section-label  { color: #e8ff47; font-size: 9px; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; flex-shrink: 0; }
-    .signal-label   { color: #e8ff47; font-size: 9px; font-weight: 700; letter-spacing: 2px; margin-bottom: 3px; }
-
-    /* Tap buttons */
-    .btn-connect { background: #e8ff47; color: #0c0c0c; font-size: 10px; font-weight: 900; letter-spacing: 1px; padding: 8px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; transition: opacity 0.15s; }
-    .btn-connect:hover { opacity: 0.85; }
-    .btn-ignore  { background: transparent; color: #555; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 8px 4px; white-space: nowrap; flex-shrink: 0; transition: color 0.15s; }
-    .btn-ignore:hover { color: #777; }
-    .btn-close-chat { background: transparent; color: #e8ff47; font-size: 16px; font-weight: 700; padding: 4px 0 4px 12px; flex-shrink: 0; transition: opacity 0.15s; }
-    .btn-close-chat:hover { opacity: 0.7; }
-
-    .empty { color: #333; font-size: 15px; text-align: center; margin-top: 40px; font-style: italic; line-height: 26px; padding: 0 10px; display: block; }
-
-    /* [7] Chat bubbles con mayor contraste y border-radius asimétrico */
-    .chat-screen    { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-    .chat-header    { padding: 28px 20px 0; flex-shrink: 0; }
-    .chat-anon      { color: #555; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; text-align: center; }
-    .chat-warning   { color: #333; font-size: 10px; text-align: center; margin-bottom: 8px; font-style: italic; padding: 0 16px; line-height: 1.4; }
-    .messages-area  { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 16px; }
-    .bubble         { max-width: 80%; padding: 10px 12px; margin-bottom: 8px; word-break: break-word; }
-    .bubble-me      {
-      background: rgba(232,255,71,0.18);
-      border: 1px solid rgba(232,255,71,0.25);
-      border-radius: 16px 16px 4px 16px;
-      margin-left: auto;
-    }
-    .bubble-them    {
-      background: #1a1a1a;
-      border-radius: 16px 16px 16px 4px;
-      margin-right: auto;
-    }
-    .bubble-text    { color: #f5f0e8; font-size: 13px; line-height: 1.5; }
-    .input-row      { display: flex; gap: 8px; padding: 10px 16px 16px; border-top: 1px solid #1e1e1e; flex-shrink: 0; }
-    .chat-input     { flex: 1; background: #1a1a1a; color: #f5f0e8; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; transition: background 0.15s; }
-    .chat-input:focus { background: #1e1e1e; }
-    .chat-input::placeholder { color: #444; }
-    .send-btn       { background: #e8ff47; color: #0c0c0c; border: none; border-radius: 8px; padding: 0 16px; font-size: 16px; font-weight: 900; cursor: pointer; transition: opacity 0.15s; }
-    .send-btn:hover { opacity: 0.85; }
-
-    @media (min-width: 1024px) {
-      .chat-header { padding: 0 0 16px; }
-      .input-row   { padding: 10px 0 0; }
-    }
-
-    /* [10] Toast aparece arriba, fondo diferenciado */
-    .toast {
-      position: fixed;
-      top: calc(env(safe-area-inset-top) + 16px);
-      bottom: auto;
-      left: 50%; transform: translateX(-50%);
-      white-space: nowrap; background: #1e1e1e; border: 1px solid #e8ff47;
-      padding: 10px 20px; border-radius: 10px; z-index: 200;
-      opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    }
-    .toast.show { opacity: 1; }
-    .toast-text { color: #e8ff47; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
-
-    /* Loading */
-    .loading-overlay {
-      position: fixed; inset: 0; background: rgba(12,12,12,0.92);
-      display: flex; align-items: center; justify-content: center; z-index: 300;
-    }
-    .loading-text { color: #e8ff47; font-size: 14px; font-weight: 700; letter-spacing: 3px; }
-
-    /* Help modal */
-    .help-btn {
-      background: none; border: none; color: #333; font-size: 13px; font-weight: 700;
-      cursor: pointer; padding: 4px 8px; border-radius: 50%; transition: color 0.15s;
-      font-family: 'Poppins', sans-serif; line-height: 1; flex-shrink: 0;
-    }
-    .help-btn:hover { color: #555; }
-    .help-overlay {
-      position: fixed; inset: 0; background: rgba(12,12,12,0.88);
-      display: flex; align-items: flex-end; justify-content: center;
-      z-index: 400; padding: 0 0 env(safe-area-inset-bottom);
-      opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    }
-    .help-overlay.show { opacity: 1; pointer-events: auto; }
-    .help-sheet {
-      background: #141414; border-radius: 20px 20px 0 0; padding: 28px 24px 36px;
-      width: 100%; max-width: 480px; border-top: 1px solid #222;
-      transform: translateY(20px); transition: transform 0.25s;
-    }
-    .help-overlay.show .help-sheet { transform: translateY(0); }
-    .help-sheet-title { color: #e8ff47; font-size: 13px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
-    .help-step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
-    .help-step-num { color: #e8ff47; font-size: 11px; font-weight: 900; letter-spacing: 1px; min-width: 18px; padding-top: 1px; }
-    .help-step-text { color: #888; font-size: 13px; line-height: 1.5; }
-    .help-step-text strong { color: #f5f0e8; font-weight: 700; }
-    .help-close { margin-top: 24px; width: 100%; background: #1e1e1e; border: none; color: #555; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 14px; border-radius: 10px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: color 0.15s; }
-    .help-close:hover { color: #888; }
-    @media (min-width: 1024px) {
-      .help-overlay { align-items: center; }
-      .help-sheet { border-radius: 16px; max-width: 400px; }
-    }
-
-    /* Desktop side panel tabs */
-    .side-tabs {
-      display: flex; gap: 0; border-bottom: 1px solid #1a1a1a;
-      flex-shrink: 0; margin-bottom: 0;
-    }
-    .side-tab {
-      flex: 1; padding: 14px 16px; font-size: 11px; font-weight: 700;
-      letter-spacing: 2px; color: #444; background: transparent;
-      border: none; cursor: pointer; transition: color 0.15s;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-    }
-    .side-tab.active { color: #e8ff47; border-bottom-color: #e8ff47; }
-    .side-tab:hover:not(.active) { color: #777; }
-
-    .side-tab-content { flex: 1; overflow-y: auto; padding: 20px 28px 24px; }
-
-    /* ═══════════════════════════════════════════
-       LOGIN DOTS — usados por triggerLoginDots
-    ═══════════════════════════════════════════ */
-
-    /* Puntos de conexión distribuidos por todo el viewport (login) */
-    .login-dot {
-      position: absolute;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #e8ff47;
-      opacity: 0;
-      animation: login-dot-show 5s ease-in-out infinite;
-    }
-    .login-dot::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1px solid rgba(232,255,71,0.25);
-      animation: login-dot-ring 5s ease-in-out infinite;
-    }
-    @keyframes login-dot-show {
-      0%, 10%   { opacity: 0; transform: scale(0.4); }
-      25%, 65%  { opacity: 1; transform: scale(1);   }
-      90%, 100% { opacity: 0; transform: scale(0.6); }
-    }
-    @keyframes login-dot-ring {
-      0%, 10%  { transform: scale(0.4); opacity: 0; }
-      30%      { transform: scale(1);   opacity: 0.5; }
-      90%      { transform: scale(4);   opacity: 0; }
-    }
-
-    /* Anillos de pulso: generados por JS en #radar-ripple (z-index:0), pasan por detrás de todo */
-    .onb-pulse-overlay-ring {
-      position: absolute;
-      width: 80px; height: 80px;
-      margin-left: -40px; margin-top: -40px;
-      border-radius: 50%;
-      border: 0.5px solid rgba(232,255,71,0.35);
-      animation: onb-pulse-expand 5s ease-out infinite;
-      pointer-events: none;
-    }
-    @keyframes onb-pulse-expand {
-      0%   { transform: scale(1);  opacity: 0.7; }
-      8%   { opacity: 0.5; }
-      100% { transform: scale(25); opacity: 0; }
-    }
-    /* Líneas de conexión entre pares de puntos */
-    .login-connect-line {
-      position: absolute;
-      height: 1px;
-      transform-origin: left center;
-      background: linear-gradient(to right, transparent, rgba(232,255,71,0.25), transparent);
-      opacity: 0;
-      pointer-events: none;
-      animation: login-line-show 5s ease-in-out infinite;
-    }
-    @keyframes login-line-show {
-      0%, 15%  { opacity: 0; }
-      30%, 60% { opacity: 1; }
-      85%, 100%{ opacity: 0; }
-    }
-    /* ═══════════════════════════════════════════
-       [6] Ecualizador animado
-    ═══════════════════════════════════════════ */
-    .eq {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 14px;
-      flex-shrink: 0;
-    }
-    .eq-bar {
-      width: 3px;
-      border-radius: 2px;
+    .p-eq span {
+      width: 2px; background: var(--accent); opacity: 0.7;
       transform-origin: bottom;
-      animation: eq-dance 0.75s ease-in-out infinite;
+      animation: eqdance 0.75s ease-in-out infinite;
     }
-    .eq-bar:nth-child(1) { animation-delay: 0s; }
-    .eq-bar:nth-child(2) { animation-delay: 0.2s; }
-    .eq-bar:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes eq-dance {
-      0%, 100% { height: 4px; }
-      50%       { height: 14px; }
-    }
-    /* Versión oscura para usar sobre fondos claros (bottom-bar amarilla) */
-    .eq-dark .eq-bar  { background: rgba(0,0,0,0.5); }
-    /* Versión clara para usar sobre fondos oscuros (topbar) */
-    .eq-light .eq-bar { background: #e8ff47; opacity: 0.6; }
+    .p-eq span:nth-child(2) { animation-delay: 0.2s; }
+    .p-eq span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes eqdance { 0%,100% { height: 2px; } 50% { height: 9px; } }
 
-    @media (prefers-reduced-motion: reduce) {
-      .eq-bar, .inbox-ring, .topbar-inbox-ring, .ripple-ring,
-      .onb-pulse-overlay-ring, .login-dot, .login-connect-line {
-        animation: none;
-      }
-    }
-
-    /* ═══════════════════════════════════════════
-       LISTEN SCREEN (entrada sin login)
-    ═══════════════════════════════════════════ */
-    .listen-screen {
-      position: fixed; inset: 0; z-index: 10;
+    /* login screen */
+    .p-login {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      overflow: hidden;
+      height: 100%; gap: 0;
     }
-    .listen-content {
-      position: relative; z-index: 2;
-      width: 100%; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      flex: 1; padding: 40px 28px;
+    .p-logo-circle {
+      width: 52px; height: 52px; overflow: hidden;
+      margin-bottom: 10px; flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(232,255,71,0.25);
     }
-    .listen-logo-center {
-      width: 150px; height: 150px;
-      border-radius: 50%; background: #e8ff47;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 48px rgba(232,255,71,0.3), 0 0 96px rgba(232,255,71,0.1);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 900; font-size: 26px; letter-spacing: -1px;
-      color: #0c0c0c; user-select: none;
-      margin-bottom: 28px;
+    .p-logo-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .p-tagline {
+      font-size: 0.52rem; font-weight: 900; color: var(--text);
+      text-align: center; line-height: 1.3; margin-bottom: 12px; padding: 0 4px;
     }
-    .listen-logo-center em { font-style: italic; }
-    .listen-tagline {
-      font-family: 'Poppins', sans-serif;
-      font-size: 28px; font-weight: 900; color: #f5f0e8;
-      line-height: 1.2; letter-spacing: -0.5px;
-      text-align: center; margin-bottom: 12px;
+    .p-tagline em { color: var(--accent); font-style: normal; }
+    .p-btn-spotify {
+      background: #1DB954; color: #fff; font-family: var(--mono);
+      font-size: 0.48rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 8px; width: 100%; text-align: center; margin-bottom: 4px;
     }
-    .listen-tagline em { color: #e8ff47; font-style: normal; }
-    .listen-sub {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 300; font-size: 15px;
-      color: rgba(245,240,232,0.45); text-align: center; line-height: 1.6;
-      margin-bottom: 36px;
+    .p-btn-lastfm {
+      background: #d51007; color: #fff; font-family: var(--mono);
+      font-size: 0.48rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 8px; width: 100%; text-align: center;
     }
-    .listen-connect-btns { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
 
-    @media (min-width: 1024px) {
-      .listen-screen { grid-column: 1 / -1 !important; grid-row: 1 / -1 !important; }
+    /* chat screen */
+    .p-chat { display: flex; flex-direction: column; height: 100%; gap: 4px; }
+    .p-chat-meta { color: var(--muted); font-family: var(--mono); font-size: 0.43rem; text-align: center; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 0 4px; flex-shrink: 0; }
+    .p-messages { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+    .p-bubble { font-size: 0.52rem; line-height: 1.4; color: var(--text); padding: 5px 7px; max-width: 82%; }
+    .p-bubble-me {
+      background: rgba(232,255,71,0.12); border: 1px solid rgba(232,255,71,0.2);
+      align-self: flex-end;
+    }
+    .p-bubble-them { background: var(--card); align-self: flex-start; }
+    .p-chat-input {
+      background: var(--card); padding: 5px 7px; flex-shrink: 0;
+      color: #333; font-family: var(--mono); font-size: 0.45rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── statement ─── */
+    .statement {
+      background: var(--accent);
+      padding: 5rem 2rem;
+      border-bottom: 1px solid #c8df27;
+    }
+    .statement .sect-id { color: rgba(0,0,0,0.35); }
+    .statement .sect-id::after { background: rgba(0,0,0,0.15); }
+    .statement h2 {
+      font-size: clamp(4rem, 20vw, 17rem);
+      font-weight: 900; line-height: 0.88;
+      letter-spacing: -0.04em; color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    /* ─── how-to header ─── */
+    .howto-hdr {
+      background: var(--ink);
+      padding: 5rem 2rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .howto-hdr .pre {
+      font-family: var(--mono); font-size: 0.65rem;
+      color: var(--muted); letter-spacing: 0.15em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+      display: block;
+    }
+    .howto-hdr h2 {
+      font-size: clamp(3.5rem, 15vw, 13rem);
+      font-weight: 900; line-height: 0.88;
+      letter-spacing: -0.04em; color: var(--text);
+      text-transform: uppercase;
+    }
+    .howto-hdr h2 em { color: var(--accent); font-style: normal; }
+
+    /* ─── steps ─── */
+    .step {
+      padding: 5rem 2rem;
+      display: grid; gap: 2.5rem; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-a { background: var(--ink); }
+    .step-b { background: var(--surface); }
+
+    @media (min-width: 768px) {
+      .step { grid-template-columns: 1fr 1fr; padding: 6.5rem 5rem; gap: 5rem; }
+      .step-b .step-phone { order: -1; }
+    }
+
+    .step-num {
+      font-size: clamp(6rem, 25vw, 20rem);
+      font-weight: 900; line-height: 0.8;
+      letter-spacing: -0.06em; color: var(--accent);
+      font-style: normal;
+    }
+
+    .step-body h3 {
+      font-size: clamp(2rem, 5.5vw, 4rem);
+      font-weight: 900; line-height: 0.92;
+      letter-spacing: -0.03em; color: var(--text);
+      text-transform: uppercase; margin-bottom: 1.25rem;
+    }
+    .step-body p {
+      font-size: clamp(0.875rem, 1.75vw, 1.125rem);
+      line-height: 1.65; max-width: 36ch; color: var(--muted);
+    }
+    .step-body p strong { color: var(--text); font-weight: 700; }
+
+    /* ─── services ─── */
+    .services {
+      background: var(--surface);
+      padding: 5rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .services h3 {
+      font-size: clamp(1.75rem, 5vw, 3.5rem);
+      font-weight: 900; letter-spacing: -0.03em;
+      line-height: 1; margin-bottom: 3rem;
+      color: var(--text); text-transform: uppercase;
+    }
+    .services h3 em { color: var(--accent); font-style: normal; }
+
+    .svc-table {
+      width: 100%; max-width: 600px;
+      border-top: 1px solid var(--border);
+    }
+    .svc-row {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0;
+    }
+    .svc-label {
+      font-family: var(--mono); font-size: clamp(0.65rem, 1.5vw, 0.8125rem);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: rgba(228,228,220,0.6);
+    }
+    .svc-val {
+      font-family: var(--mono); font-size: 0.75rem;
+      font-weight: 700; color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── free punchline ─── */
+    .free {
+      background: var(--ink);
+      padding: 5rem 2rem 6.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .free h2 {
+      font-size: clamp(4.5rem, 22vw, 19rem);
+      font-weight: 900; line-height: 0.85;
+      letter-spacing: -0.04em; color: var(--text);
+      text-transform: uppercase;
+    }
+    .free h2 em { color: var(--accent); font-style: normal; }
+
+    .free-note {
+      margin-top: 2rem;
+      font-family: var(--mono);
+      font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+      color: var(--muted); letter-spacing: 0.1em;
+      text-transform: uppercase; line-height: 1.8;
+    }
+
+    /* ─── cta ─── */
+    .cta-section {
+      background: var(--accent);
+      padding: 6rem 2rem;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: 3rem;
+    }
+    @media (min-width: 768px) {
+      .cta-section { padding: 7rem 5rem; flex-direction: row; align-items: flex-end; justify-content: space-between; }
+    }
+
+    .cta-section h2 {
+      font-size: clamp(2.5rem, 9vw, 7.5rem);
+      font-weight: 900; line-height: 0.9;
+      letter-spacing: -0.04em; color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      background: var(--ink); color: var(--accent);
+      font-family: var(--mono); font-weight: 700;
+      font-size: clamp(0.7rem, 1.5vw, 0.875rem);
+      padding: 1.125rem 2.5rem;
+      text-decoration: none; letter-spacing: 0.1em;
+      text-transform: uppercase; white-space: nowrap;
+      cursor: pointer; transition: opacity 0.15s;
+      flex-shrink: 0;
+      border: 2px solid var(--ink);
+    }
+    .cta-btn:hover { opacity: 0.85; }
+    .cta-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+    /* ─── footer ─── */
+    footer {
+      background: var(--ink);
+      padding: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-logo { display: flex; align-items: center; opacity: 0.3; line-height: 0; }
+    .footer-logo img { height: 26px; width: 26px; display: block; }
+
+    .footer-links { list-style: none; display: flex; gap: 1.75rem; }
+    .footer-links a {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--muted); text-decoration: none;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-links a:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+    .footer-build {
+      font-family: var(--mono); font-size: 0.55rem;
+      color: var(--subtle); letter-spacing: 0.08em;
+      text-transform: uppercase; width: 100%;
+      border-top: 1px solid var(--border); padding-top: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ─── reveal ─── */
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        opacity: 0; transform: translateY(20px);
+        transition: opacity 0.55s ease, transform 0.55s ease;
+      }
+      .reveal.in { opacity: 1; transform: none; }
+      .reveal-d { transition-delay: 0.1s; }
+    }
+
+    /* reduced motion — disable all animations */
+    @media (prefers-reduced-motion: reduce) {
+      .rring, .p-dist::before, .p-eq span { animation: none !important; }
     }
   </style>
 </head>
 <body>
-<div id="radar-ripple"></div>
-<div id="app"></div>
-<div class="toast" id="toast"><span class="toast-text" id="toast-text"></span></div>
 
-<script>
-'use strict';
+  <!-- NAV -->
+  <nav aria-label="Navegación principal">
+    <a href="/" class="nav-logo" aria-label="RAdAR — inicio"><img src="logo.png" alt="RAdAR"></a>
+    <span class="nav-meta">[ WEBAPP · RADAR MUSICAL ]</span>
+    <a href="./app.html" class="nav-cta">ABRIR RADAR ///</a>
+  </nav>
 
-const SERVER = 'https://radar-mvp.onrender.com';
+  <!-- ① HERO -->
+  <section class="hero" aria-label="Inicio">
+    <div class="hero-ripple" aria-hidden="true">
+      <div class="rring" style="width:130vmax;height:130vmax;"></div>
+      <div class="rring" style="width:130vmax;height:130vmax;"></div>
+      <div class="rring" style="width:130vmax;height:130vmax;"></div>
+    </div>
 
-const S = {
-  screen: 'listen',
-  userId: null,
-  spotifyToken: null,
-  lastfmUsername: null,
-  feed: [],
-  feedLoaded: false,
-  notifications: [],
-  chats: [],
-  activeChatId: null,
-  chatOrigin: 'inbox',
-  chatCountdown: '60:00',
-  messages: [],
-  mySong: null,
-  myArtist: null,
-  coords: null,
-  shareLocation: localStorage.getItem('radar_loc') !== '0',
-  sideTab: 'inbox',
-};
+    <span class="hero-tag" aria-hidden="true">&lt; WEBAPP · RADAR MUSICAL · V1.0 &gt;</span>
 
-const feedMap = new Map();
-const chatMap = new Map();
+    <div class="hero-content">
+      <h1 class="hero-title">R<i>A</i>d<i>A</i>R</h1>
+      <p class="hero-tagline">la música que te gusta, <em>o no.</em></p>
+      <p class="hero-meta">WEBAPP &nbsp;·&nbsp; CERCA DE TI &nbsp;·&nbsp; EN TIEMPO REAL &nbsp;·&nbsp; GRATIS</p>
+    </div>
 
-let pollInterval    = null;
-let songInterval    = null;
-let chatPollInt     = null;
-let countdownInt    = null;
-let toastTimer      = null;
-let feedClickHandler = null;
+    <div class="hero-rule" data-label="SCROLL ///"></div>
+  </section>
 
-// ── Persist ──
-const SPOTIFY_TOKEN_TTL = 3500 * 1000; // 3500s (~58min) — expire slightly early
-
-function saveAuth() {
-  try {
-    localStorage.setItem('radar_auth', JSON.stringify({
-      userId: S.userId,
-      spotifyToken: S.spotifyToken,
-      spotifyTokenAt: S.spotifyToken ? Date.now() : null,
-      lastfmUsername: S.lastfmUsername,
-    }));
-  } catch(e) {}
-}
-function loadAuth() {
-  try {
-    const raw = localStorage.getItem('radar_auth');
-    if (!raw) return;
-    const { userId, spotifyToken, spotifyTokenAt, lastfmUsername } = JSON.parse(raw);
-    // No timestamp = token saved before tracking was added → treat as expired
-    const noTimestamp = spotifyToken && !spotifyTokenAt;
-    const tooOld      = spotifyToken && spotifyTokenAt && (Date.now() - spotifyTokenAt > SPOTIFY_TOKEN_TTL);
-    const badToken    = noTimestamp || tooOld;
-    S.userId         = userId || null;
-    S.spotifyToken   = badToken ? null : (spotifyToken || null);
-    S.lastfmUsername = lastfmUsername || null;
-    if (badToken && !S.lastfmUsername) {
-      // Keep userId — user stays on feed with reconnect prompt, token just needs renewal
-      showToast(T.tokenExpired);
-    }
-  } catch(e) {}
-}
-
-// ── i18n ──
-const isES = (navigator.language || '').toLowerCase().startsWith('es');
-const T = {
-  youListen:    isES ? 'ESCUCHAS.'        : 'YOU LISTEN.',
-  theyListen:   isES ? 'TE ESCUCHAN.'     : 'THEY LISTEN.',
-  nowPlaying:   isES ? 'ESCUCHANDO AHORA' : 'NOW PLAYING',
-  signalSent:   isES ? 'Señal enviada'    : 'Signal sent',
-  back:         isES ? '← VOLVER'         : '← BACK',
-  messages:     isES ? 'MENSAJES'         : 'MESSAGES',
-  signals:      isES ? 'SEÑALES'          : 'SIGNALS',
-  sigRec:       isES ? 'SEÑALES RECIBIDAS': 'SIGNALS RECEIVED',
-  ignore:       isES ? 'IGNORAR'          : 'IGNORE',
-  wasListening: isES ? 'ESCUCHABA'        : 'WAS LISTENING TO',
-  connect:      isES ? 'CONECTAR'         : 'CONNECT',
-  activeChat:   isES ? 'CHAT ACTIVO'      : 'ACTIVE CHAT',
-  expiresIn:    isES ? 'expira en'        : 'expires in',
-  min:          isES ? 'min'              : 'min',
-  noMessages:   isES ? 'Sin mensajes ni señales, aún.' : 'No messages or signals yet.',
-  nobody:       isES ? 'Nadie está escuchando música a tu alrededor...' : "Nobody is listening to music around you...",
-  anonChat:     isES ? 'chat anónimo'     : 'anonymous chat',
-  safetyWarn:   isES ? 'No compartas información personal — números, redes, apellidos.' : 'Do not share personal info — numbers, handles, last names.',
-  typeHere:     isES ? 'Escribe...'       : 'Type...',
-  nothing:      isES ? 'Nada sonando'     : 'Nothing playing',
-  putMusic:     isES ? 'Ponle música →'   : 'Put some music on →',
-  reconnect:    isES ? 'Reconectar Spotify' : 'Reconnect Spotify',
-  reconnectLfm: isES ? 'Reconectar Last.fm' : 'Reconnect Last.fm',
-  waitingLfm:   isES ? 'Esperando canción de Last.fm...' : 'Waiting for Last.fm song...',
-  tokenExpired: isES ? 'Sesión de Spotify expirada. Reconecta para seguir compartiendo.' : 'Spotify session expired. Reconnect to keep sharing.',
-  activeChats:  isES ? 'CHATS ACTIVOS'    : 'ACTIVE CHATS',
-  delConfirm:   isES ? '¿Eliminar esta conversación?' : 'Delete this conversation?',
-  loading:      isES ? 'CARGANDO...'      : 'LOADING...',
-  chats:        isES ? 'CHATS'            : 'CHATS',
-  noChat:       isES ? 'Sin chat activo.' : 'No active chat.',
-  tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
-  connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
-  connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
-  listenSub:    isES ? 'cerca de ti · en tiempo real · para conversar o escuchar'
-                     : 'near you · in real time · to talk or just listen',
-  lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
-                     : 'Last.fm syncs with Apple Music, YouTube Music and more',
-};
-
-// ── Utils ──
-function esc(s) {
-  if (s == null) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function formatDist(m) {
-  if (m === null || m === undefined) return '';
-  if (m < 500)   return isES ? 'Aquí' : 'Here';
-  if (m < 2000)  return isES ? 'Cerca' : 'Nearby';
-  if (m < 10000) return isES ? 'Tu zona' : 'Your area';
-  if (m < 50000) return isES ? 'Tu ciudad' : 'Your city';
-  return isES ? 'Tu región' : 'Your region';
-}
-
-function isDesktop() { return window.matchMedia('(min-width: 1024px)').matches; }
-
-async function apiFetch(method, path, body) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(SERVER + path, opts);
-  if (!res.ok) throw new Error(res.status);
-  return res.json();
-}
-
-function showToast(msg) {
-  const el = document.getElementById('toast'), txt = document.getElementById('toast-text');
-  if (!el || !txt) return;
-  txt.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-function showLoading(show) {
-  const ex = document.getElementById('loading-overlay');
-  if (show && !ex) {
-    const el = document.createElement('div');
-    el.id = 'loading-overlay'; el.className = 'loading-overlay';
-    el.innerHTML = `<span class="loading-text">${T.loading}</span>`;
-    document.body.appendChild(el);
-  } else if (!show && ex) { ex.remove(); }
-}
-
-// ── Device ID ──
-function getDeviceId() {
-  let did = localStorage.getItem('radar_device_id');
-  if (!did) {
-    did = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem('radar_device_id', did);
-  }
-  return did;
-}
-
-function locIcon(on) {
-  return on
-    ? `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#4ade80"/>
-        <circle cx="8" cy="7" r="2.5" fill="#0c0c0c"/>
-       </svg>`
-    : `<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C4.13 0 1 3.13 1 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#f5f0e8" stroke-width="1.5"/>
-        <circle cx="8" cy="7" r="2.5" stroke="#f5f0e8" stroke-width="1.5"/>
-       </svg>`;
-}
-
-// ── Location toggle ──
-function toggleLocation() {
-  S.shareLocation = !S.shareLocation;
-  localStorage.setItem('radar_loc', S.shareLocation ? '1' : '0');
-  if (!S.shareLocation) {
-    S.coords = null; // stop sending coords immediately
-  } else {
-    getLocation();   // restart GPS
-  }
-  // Patch toggle icons in both layouts
-  document.querySelectorAll('.loc-toggle-btn').forEach(btn => {
-    btn.innerHTML = locIcon(S.shareLocation);
-    btn.title = S.shareLocation
-      ? (isES ? 'Ubicación activa — toca para desactivar' : 'Location on — tap to disable')
-      : (isES ? 'Ubicación desactivada — toca para activar' : 'Location off — tap to enable');
-  });
-}
-
-// ── Location ──
-async function ipFallbackLocation() {
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    if (d.latitude && d.longitude) return { lat: d.latitude, lng: d.longitude };
-  } catch(e) {}
-  return null;
-}
-
-function getLocation() {
-  if (!S.shareLocation) return;
-
-  function applyFix(lat, lng) {
-    const firstFix = !S.coords;
-    S.coords = { lat, lng };
-    if (firstFix && S.userId) {
-      updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
-      refreshAll(S.userId);
-    }
-  }
-
-  if (!navigator.geolocation) {
-    ipFallbackLocation().then(c => { if (c) applyFix(c.lat, c.lng); });
-    return;
-  }
-
-  // Coarse fast fix — no accuracy filter, uses cached WiFi/cell position.
-  navigator.geolocation.getCurrentPosition(
-    p => applyFix(p.coords.latitude, p.coords.longitude),
-    async () => {
-      const c = await ipFallbackLocation();
-      if (c) applyFix(c.lat, c.lng);
-    },
-    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-  );
-
-  // Precise ongoing watch — refines coords as GPS lock improves.
-  navigator.geolocation.watchPosition(
-    p => {
-      if (p.coords.accuracy > 5000) return;
-      applyFix(p.coords.latitude, p.coords.longitude);
-    },
-    () => {},
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
-  );
-}
-
-// ── Polling ──
-function startPolling(uid, token, lfUser) {
-  stopPolling();
-  const lf = lfUser || S.lastfmUsername;
-  songInterval = setInterval(() => updateLocation(uid, token, lf), 5000);
-  updateLocation(uid, token, lf);
-  pollInterval = setInterval(() => refreshAll(uid), 15000);
-  refreshAll(uid);
-}
-function stopPolling() {
-  clearInterval(pollInterval); clearInterval(songInterval);
-  pollInterval = null; songInterval = null;
-}
-
-async function fetchSpotifyCurrentTrack(token) {
-  try {
-    // /me/player includes paused state (covers iOS where OAuth pauses playback briefly)
-    const res = await fetch('https://api.spotify.com/v1/me/player', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.status === 200) {
-      const data = await res.json();
-      if (data?.item) return { song: data.item.name, artist: data.item.artists?.[0]?.name || '' };
-    }
-  } catch(e) {}
-  return null;
-}
-
-async function fetchLastfmNowPlaying(username) {
-  try {
-    const res = await fetch(`${SERVER}/lastfm/now-playing?username=${encodeURIComponent(username)}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data?.song) return null;
-    if (data.playing) return { song: data.song, artist: data.artist };
-    // Fallback: use the most recent scrobble if it was within 10 minutes.
-    // Requires other devices' scrobblers to be disconnected from this Last.fm account.
-    const recentEnough = data.scrobbledAt && (Date.now() - data.scrobbledAt) < 10 * 60 * 1000;
-    return recentEnough ? { song: data.song, artist: data.artist } : null;
-  } catch(e) {}
-  return null;
-}
-
-async function updateLocation(uid, token, lf) {
-  if (!uid || (!token && !lf)) return;
-
-  // Buscar canción independiente del GPS (igual que Spotify)
-  if (token) {
-    const track = await fetchSpotifyCurrentTrack(token);
-    if (track) {
-      S.mySong = track.song; S.myArtist = track.artist;
-      S._nullSongCount = 0;
-      patchNowPlaying();
-    } else {
-      S._nullSongCount = (S._nullSongCount || 0) + 1;
-      patchBottomBar();
-    }
-  } else if (lf) {
-    const track = await fetchLastfmNowPlaying(lf);
-    if (track) {
-      S.mySong = track.song; S.myArtist = track.artist;
-      S._nullSongCount = 0;
-      patchNowPlaying();
-    } else {
-      S._nullSongCount = (S._nullSongCount || 0) + 1;
-      patchBottomBar();
-    }
-  }
-
-  const c = S.coords;
-  try {
-    const res = await apiFetch('POST', '/update-location', {
-      userId: uid,
-      ...(c ? { lat: c.lat, lng: c.lng } : {}),
-      token: token || null, lastfmUsername: lf || null,
-      song: S.mySong || null, artist: S.myArtist || null,
-      deviceId: getDeviceId(),
-    });
-    if (res.song) {
-      S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying();
-    } else if (!S.mySong) {
-      S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar();
-    }
-  } catch(e) {
-    if (!S.mySong) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
-  }
-}
-
-async function refreshAll(uid) {
-  if (!uid) return;
-  const c = S.coords;
-  try {
-    const uidEnc = encodeURIComponent(uid);
-    const nearbyUrl = c
-      ? `${SERVER}/nearby?lat=${c.lat}&lng=${c.lng}&userId=${uidEnc}`
-      : `${SERVER}/nearby?userId=${uidEnc}`;
-    const [feedRes, notifRes, chatsRes] = await Promise.all([
-      fetch(nearbyUrl).then(r => r.json()),
-      fetch(`${SERVER}/notifications?userId=${uidEnc}`).then(r => r.json()),
-      fetch(`${SERVER}/my-chats?userId=${uidEnc}`).then(r => r.json()),
-    ]);
-    // Double-filter: backend already excludes own userId, but guard against encoding mismatches
-    S.feed          = (feedRes.nearby || []).filter(u => u.userId !== uid);
-    S.feedLoaded    = true;
-    S.notifications = notifRes.notifications || notifRes.taps || [];
-    // Filter out expired chats client-side (server may still return them briefly)
-    S.chats         = (chatsRes.chats || []).filter(c => !c.expiresAt || new Date(c.expiresAt) > Date.now());
-    feedMap.clear(); S.feed.forEach(i => feedMap.set(i.userId, i));
-    chatMap.clear(); S.chats.forEach(c => chatMap.set(c.otherUserId, c));
-
-    if (isDesktop()) { patchDesktopFeed(); patchDesktopSide(); patchTopbarInbox(); }
-    else {
-      if (S.screen === 'feed')  { patchFeedList(); patchInboxDot(); }
-      if (S.screen === 'inbox') renderInbox();
-    }
-  } catch(e) {}
-}
-
-// ── Backend warm-up ──
-let _backendWarm = null;
-function warmBackend() {
-  _backendWarm = fetch(SERVER + '/health', { mode: 'no-cors', signal: AbortSignal.timeout(30000) })
-    .catch(() => {})
-    .finally(() => { _backendWarm = null; });
-}
-
-// ── Auth ──
-function loginWithSpotify() {
-  const redirect = window.location.origin + window.location.pathname;
-  window.location.href = `${SERVER}/login?redirect=${encodeURIComponent(redirect)}`;
-}
-function loginWithLastfm() {
-  const redirect = window.location.origin + window.location.pathname;
-  window.location.href = `${SERVER}/lastfm/login?redirect=${encodeURIComponent(redirect)}`;
-}
-
-async function handleCallback() {
-  const params = new URLSearchParams(window.location.search);
-  window.history.replaceState({}, '', window.location.pathname);
-
-  // New flow: backend exchanges code server-side, passes token directly in URL
-  const accessToken = params.get('access_token');
-  const userId      = params.get('user_id');
-  const authError   = params.get('auth_error');
-  const lfToken     = params.get('lastfm_token');
-  // Legacy: backend passed raw code (kept as fallback for old redirects)
-  const code        = params.get('code');
-
-  if (accessToken && userId) {
-    S.spotifyToken = accessToken; S.userId = userId; saveAuth();
-    afterLogin();
-    return;
-  }
-
-  if (authError) {
-    setScreen('listen');
-    const isDevMode = authError === 'access_denied';
-    const msg = isDevMode
-      ? (isES ? 'Tu cuenta Spotify no está autorizada en esta app. Contacta al desarrollador.' : 'Your Spotify account is not authorized for this app. Contact the developer.')
-      : (isES ? `Error al conectar con Spotify (${authError}). Intenta de nuevo.` : `Spotify connection error (${authError}). Try again.`);
-    showToast(msg);
-    return;
-  }
-
-  if (code) {
-    // Fallback for cached redirects that still carry a raw code
-    showLoading(true);
-    try {
-      const res = await apiFetch('POST', '/exchange-token', { code });
-      if (!res.access_token || !res.userId) throw new Error('invalid');
-      S.spotifyToken = res.access_token; S.userId = res.userId; saveAuth();
-      showLoading(false); afterLogin();
-    } catch(e) {
-      showLoading(false); setScreen('listen');
-      showToast(isES ? 'Error al conectar con Spotify. Intenta de nuevo.' : 'Spotify connection failed. Please try again.');
-    }
-    return;
-  }
-
-  if (lfToken) {
-    showLoading(true);
-    try {
-      const res = await apiFetch('POST', '/lastfm/session', { token: lfToken });
-      S.lastfmUsername = res.username; S.userId = res.username; saveAuth();
-      showLoading(false); afterLogin();
-    } catch(e) {
-      showLoading(false);
-      // Token already consumed (stale URL from SW cache or browser history).
-      // If loadAuth() already restored a valid session, just continue.
-      if (S.userId) { afterLogin(); return; }
-      setScreen('listen');
-      showToast(isES ? 'Error al conectar con Last.fm. Intenta de nuevo.' : 'Last.fm connection failed. Please try again.');
-    }
-    return;
-  }
-}
-
-function afterLogin() {
-  S.feedLoaded = false;
-  getLocation();
-  setScreen('feed');
-  startPolling(S.userId, S.spotifyToken, S.lastfmUsername);
-}
-
-// ── Tap / Chat ──
-const tapsInFlight = new Set();
-
-async function sendTap(userId) {
-  if (tapsInFlight.has(userId)) return;
-  const item = feedMap.get(userId);
-  if (!item) return;
-  tapsInFlight.add(userId);
-  try {
-    const res = await apiFetch('POST', '/tap', {
-      fromUserId: S.userId,
-      toUserId: item.userId,
-      song: item.song,
-      artist: item.artist,
-      fromSong: S.mySong || null,
-      fromArtist: S.myArtist || null,
-    });
-    if (res.alreadyChat && res.chatId) { openChat(res.chatId, 'feed', res.expiresAt || null); }
-    else { showToast(`${T.signalSent} · ${item.song}`); }
-  } catch(e) {}
-  finally { tapsInFlight.delete(userId); }
-}
-
-async function respondTap(tapId, accept) {
-  S.notifications = S.notifications.filter(n => n.tapId !== tapId);
-  try {
-    const res = await apiFetch('POST', '/respond-tap', { tapId, accept, userId: S.userId });
-    if (accept && res.chatId) { openChat(res.chatId, 'inbox', res.expiresAt); }
-    else { if (isDesktop()) patchDesktopSide(); else renderInbox(); }
-  } catch(e) { if (isDesktop()) patchDesktopSide(); else renderInbox(); }
-}
-
-function openChat(chatId, origin, expiresAt) {
-  S.activeChatId = chatId; S.chatOrigin = origin; S.messages = [];
-  const mins = expiresAt ? Math.max(0, Math.round((new Date(expiresAt) - Date.now()) / 60000)) : 60;
-  startCountdown(mins); loadMessages(chatId); startChatPolling(chatId);
-  if (isDesktop()) { S.sideTab = 'chat'; patchDesktopSide(); }
-  else { setScreen('chat'); }
-}
-
-async function loadMessages(chatId) {
-  try {
-    const res = await apiFetch('GET', `/messages?chatId=${chatId}&t=${Date.now()}`);
-    S.messages = res.messages || [];
-    patchMessages();
-  } catch(e) {}
-}
-
-function startChatPolling(chatId) {
-  clearInterval(chatPollInt);
-  chatPollInt = setInterval(() => loadMessages(chatId), 5000);
-}
-function stopChatPolling() { clearInterval(chatPollInt); chatPollInt = null; }
-
-function startCountdown(minutes = 60) {
-  clearInterval(countdownInt);
-  let secs = minutes * 60;
-  // Actualizar de inmediato para que el chat se renderice con el tiempo correcto
-  const m0 = Math.floor(secs/60), s0 = String(secs%60).padStart(2,'0');
-  S.chatCountdown = secs > 0 ? `${m0}:${s0}` : '0:00';
-  countdownInt = setInterval(() => {
-    secs--;
-    if (secs <= 0) { clearInterval(countdownInt); S.chatCountdown = '0:00'; }
-    else { const m = Math.floor(secs/60), s = String(secs%60).padStart(2,'0'); S.chatCountdown = `${m}:${s}`; }
-    const el = document.getElementById('chat-timer');
-    if (el) el.textContent = `${T.anonChat} · ${S.chatCountdown}`;
-  }, 1000);
-}
-
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = ''; input.focus();
-  S.messages.push({ id: Date.now().toString(), text, userId: S.userId });
-  patchMessages();
-  if (S.activeChatId) {
-    try { await apiFetch('POST', '/message', { chatId: S.activeChatId, userId: S.userId, text }); } catch(e) {}
-  }
-}
-
-async function deleteChat(chatId) {
-  if (!confirm(T.delConfirm)) return;
-  try { await apiFetch('DELETE', `/chat/${chatId}`, { userId: S.userId }); } catch(e) {}
-  S.chats = S.chats.filter(c => c.chatId !== chatId);
-  chatMap.clear(); S.chats.forEach(c => chatMap.set(c.otherUserId, c));
-  if (S.activeChatId === chatId) { S.activeChatId = null; S.sideTab = 'inbox'; }
-  if (isDesktop()) patchDesktopSide(); else renderInbox();
-}
-
-function exitChat() {
-  stopChatPolling(); clearInterval(countdownInt);
-  if (isDesktop()) { S.sideTab = 'inbox'; patchDesktopSide(); }
-  else { setScreen(S.chatOrigin || 'inbox'); refreshAll(S.userId); }
-}
-
-// ── Screen ──
-function setScreen(screen) {
-  S.screen = screen; render();
-}
-
-function render() {
-  const app = document.getElementById('app');
-  if (!app) return;
-  if (S.screen !== 'feed') stopRippleLoop();
-  if (isDesktop() && S.screen !== 'listen') { renderDesktop(app); return; }
-  switch (S.screen) {
-    case 'listen': renderListen(app); break;
-    case 'feed':   renderFeed(app);   break;
-    case 'inbox':  renderInbox(app);  break;
-    case 'chat':   renderChat(app);   break;
-  }
-  if (!isDesktop()) attachSwipe(app);
-}
-
-// ══════════════════════════════════════════
-// DESKTOP RENDER
-// ══════════════════════════════════════════
-function renderDesktop(container) {
-  container.innerHTML = `
-    ${buildDesktopTopbar()}
-    <div class="desktop-feed" id="desktop-feed">
-      <div class="desktop-feed-header">
-        <div class="desktop-feed-titles">
-          <div class="desktop-big">${T.youListen}</div>
-          <div class="desktop-big-gray">${T.theyListen}</div>
+  <!-- ② ABOUT + TERMINAL (feed) -->
+  <section class="about" aria-label="Qué es RAdAR">
+    <div class="phone-wrap reveal">
+      <div class="phone" aria-hidden="true">
+        <div class="term-bar">
+          <span>RAdAR · FEED</span>
+          <span>● LIVE</span>
         </div>
-        <div class="radar-wrap" style="width:90px;height:90px;">
-          <button class="radar-circle-btn" style="width:74px;height:74px;" id="radar-btn">
-            <span class="radar-label" style="font-size:15px;">RA<span class="radar-d">d</span>AR</span>
-          </button>
+        <div class="phone-screen">
+          <div class="p-hdr">[ SEÑAL ACTIVA ]</div>
+
+          <div class="p-card active">
+            <div class="p-card-info">
+              <div class="p-song">Suffers — Oye</div>
+              <div class="p-artist">Valentina · Santiago</div>
+              <div class="p-dist">AQUÍ</div>
+            </div>
+            <div class="p-eq"><span></span><span></span><span></span></div>
+          </div>
+
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Alex Turner — Submarine</div>
+              <div class="p-artist">Martín · Providencia</div>
+              <div class="p-dist">CERCA</div>
+            </div>
+          </div>
+
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Nathy Peluso — BZRP #36</div>
+              <div class="p-artist">Camila · Las Condes</div>
+              <div class="p-dist">TU ZONA</div>
+            </div>
+          </div>
+
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Radiohead — Creep</div>
+              <div class="p-artist">Diego · Ñuñoa</div>
+              <div class="p-dist">TU ZONA</div>
+            </div>
+          </div>
+
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Mon Laferte — Amárrame</div>
+              <div class="p-artist">Sofía · Vitacura</div>
+              <div class="p-dist">TU CIUDAD</div>
+            </div>
+          </div>
+
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Tame Impala — Let It Happen</div>
+              <div class="p-artist">Andrés · Región Metro</div>
+              <div class="p-dist">TU REGIÓN</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="scroll-area" id="feed-list" style="margin-top:0;">
-        ${buildFeedItems()}
       </div>
     </div>
-    <div class="desktop-side" id="desktop-side">
-      ${buildDesktopSide()}
-    </div>`;
 
-  document.getElementById('radar-btn').onclick = doRadar;
-  const tbRadar = document.getElementById('topbar-radar');
-  if (tbRadar) tbRadar.onclick = doRadar;
-  const tbInbox = document.getElementById('topbar-inbox');
-  if (tbInbox) tbInbox.onclick = () => { S.sideTab = 'inbox'; patchDesktopSide(); };
-  const tbLoc = document.getElementById('loc-toggle-desktop');
-  if (tbLoc) tbLoc.onclick = toggleLocation;
-
-  attachFeedEvents();
-  attachSideEvents();
-  setTimeout(() => {
-    const btn = document.getElementById('radar-btn') || document.getElementById('topbar-radar');
-    if (btn) triggerRipple(btn);
-  }, 100);
-  startRippleLoop();
-}
-
-function buildDesktopTopbar() {
-  const notifCount  = S.notifications.length;
-  const hasActivity = notifCount > 0 || S.chats.length > 0;
-  // [6] Ecualizador en el topbar cuando hay canción sonando
-  const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-  const npHtml = S.mySong
-    ? `<span class="topbar-np-label">${T.nowPlaying}</span>
-       ${eqHtml}
-       <span class="topbar-np-song">${esc(S.mySong)}</span>
-       <span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
-    : `<span class="topbar-np-nothing">${T.nothing}</span>`;
-
-  return `
-    <div class="desktop-topbar" id="desktop-topbar">
-      <div class="topbar-logo" id="topbar-radar" style="cursor:pointer;">
-        <span class="topbar-logo-text">RA</span><span class="topbar-logo-d topbar-logo-text">d</span><span class="topbar-logo-text">AR</span>
+    <div class="reveal reveal-d">
+      <div class="sect-id">[ 01 — ACERCA ]</div>
+      <div class="about-text">
+        <p>conoce RAdAR, una <strong>webapp</strong> para los que quieren saber qué escucha la gente cerca. <strong>sin algoritmos. sin recomendaciones. <em>solo lo que están escuchando ahora mismo, cerca de ti.</em></strong> la abres desde el navegador — sin descargar nada.</p>
       </div>
-      <div class="topbar-divider"></div>
-      <div class="topbar-now-playing" id="topbar-np">${npHtml}</div>
-      <button class="loc-toggle-btn" id="loc-toggle-desktop" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
-      <button class="topbar-inbox-btn" id="topbar-inbox">
-        ${hasActivity ? '<div class="topbar-inbox-ring"></div>' : ''}
-        <div class="topbar-inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
-      </button>
-    </div>`;
-}
-
-function buildDesktopSide() {
-  const notifCount = S.notifications.length;
-  const chatCount  = S.chats.length;
-
-  const inboxLabel = notifCount + chatCount > 0
-    ? `${T.messages} <span style="color:#e8ff47;font-size:10px;">${notifCount + chatCount}</span>`
-    : T.messages;
-
-  return `
-    <div class="side-tabs">
-      <button class="side-tab ${S.sideTab === 'inbox' ? 'active' : ''}" id="tab-inbox">${inboxLabel}</button>
-      <button class="side-tab ${S.sideTab === 'chat'  ? 'active' : ''}" id="tab-chat">${T.chats}${S.activeChatId ? ' <span style="color:#e8ff47;font-size:10px;">●</span>' : ''}</button>
     </div>
-    <div class="side-tab-content" id="side-content">
-      ${S.sideTab === 'inbox' ? buildInboxContent() : buildChatContent()}
-    </div>`;
-}
+  </section>
 
-function buildInboxContent() {
-  const empty = !S.notifications.length && !S.chats.length
-    ? `<span class="empty">${T.noMessages}</span>` : '';
-  return `
-    ${S.notifications.length ? `<div class="section-label" style="margin-bottom:12px;">${T.sigRec}</div>` : ''}
-    ${buildNotificationCards()}
-    ${S.chats.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:12px;">${T.activeChats}</div>` : ''}
-    ${buildActiveChatCards()}
-    ${empty}`;
-}
+  <!-- ③ STATEMENT -->
+  <section class="statement reveal" aria-label="En tiempo real">
+    <div class="sect-id">[ 02 — SEÑAL ]</div>
+    <h2>EN TIEMPO<br>REAL.</h2>
+  </section>
 
-function buildChatContent() {
-  if (!S.activeChatId) return `<span class="empty">${T.noChat}</span>`;
-  return `
-    <div style="display:flex;flex-direction:column;height:100%;gap:0;">
-      <div class="chat-anon" id="chat-timer" style="text-align:left;padding:0 0 4px;margin-bottom:2px;">${T.anonChat} · ${S.chatCountdown}</div>
-      <div class="chat-warning" style="text-align:left;padding:0 0 8px;border-bottom:1px solid #1a1a1a;margin-bottom:8px;">${T.safetyWarn}</div>
-      <div class="messages-area" id="messages-area" style="flex:1;padding:8px 0;">
-        ${buildMessages()}
+  <!-- ④ HOW TO HEADER -->
+  <div class="howto-hdr">
+    <span class="pre">// INSTRUCCIONES DE USO</span>
+    <h2 class="reveal">CÓMO<br>USAR<br><em>RAdAR</em></h2>
+  </div>
+
+  <!-- ⑤ PASO 1 — conectar -->
+  <section class="step step-a" aria-label="Paso 1: conectar tu cuenta">
+    <div class="reveal">
+      <div class="sect-id">[ PASO 01 ]</div>
+      <div class="step-num" aria-hidden="true">1</div>
+      <div class="step-body">
+        <h3>CONECTA<br>TU CUENTA</h3>
+        <p>conecta tu <strong>Spotify</strong> o tu <strong>Last.fm</strong>. si usas Apple Music o YouTube Music, Last.fm scrobblea todo automáticamente. un click y listo — sin crear cuenta, sin descargar nada.</p>
       </div>
-      <div class="input-row" style="padding:10px 0 0;border-top:1px solid #1e1e1e;gap:8px;">
-        <input id="chat-input" class="chat-input" placeholder="${T.typeHere}" autocomplete="off">
-        <button class="send-btn" id="send-btn">→</button>
-      </div>
-    </div>`;
-}
-
-function buildMessages() {
-  return S.messages.map(m => `
-    <div class="bubble ${m.userId === S.userId ? 'bubble-me' : 'bubble-them'}">
-      <span class="bubble-text">${esc(m.text)}</span>
-    </div>`).join('');
-}
-
-function attachSideEvents() {
-  const tabInbox = document.getElementById('tab-inbox');
-  const tabChat  = document.getElementById('tab-chat');
-  if (tabInbox) tabInbox.onclick = () => { S.sideTab = 'inbox'; patchDesktopSide(); };
-  if (tabChat)  tabChat.onclick  = () => { S.sideTab = 'chat';  patchDesktopSide(); };
-
-  const content = document.getElementById('side-content');
-  if (!content) return;
-
-  content.addEventListener('click', e => {
-    const conn  = e.target.closest('[data-action="connect"]');
-    const ign   = e.target.closest('[data-action="ignore"]');
-    const close = e.target.closest('[data-action="close-chat"]');
-    const card  = e.target.closest('.card.has-chat');
-    if (conn)  { respondTap(conn.dataset.tap, true);  return; }
-    if (ign)   { respondTap(ign.dataset.tap,  false); return; }
-    if (close) { e.stopPropagation(); deleteChat(close.dataset.chatId); return; }
-    if (card && card.dataset.chatId) openChat(card.dataset.chatId, 'inbox', card.dataset.chatExpires || null);
-  });
-
-  const sendBtn = document.getElementById('send-btn');
-  if (sendBtn) sendBtn.onclick = sendMessage;
-  const chatInput = document.getElementById('chat-input');
-  if (chatInput) chatInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-
-  scrollToBottom();
-}
-
-// Patch functions (update without full re-render)
-function patchDesktopFeed() {
-  const list = document.getElementById('feed-list');
-  if (!list) return;
-  list.innerHTML = buildFeedItems();
-  attachFeedEvents();
-}
-
-function patchDesktopSide() {
-  const side = document.getElementById('desktop-side');
-  if (!side) return;
-  side.innerHTML = buildDesktopSide();
-  attachSideEvents();
-}
-
-function patchTopbarInbox() {
-  const btn = document.getElementById('topbar-inbox');
-  if (!btn) return;
-  const notifCount  = S.notifications.length;
-  const hasActivity = notifCount > 0 || S.chats.length > 0;
-  btn.innerHTML = `${hasActivity ? '<div class="topbar-inbox-ring"></div>' : ''}<div class="topbar-inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>`;
-}
-
-function patchNowPlaying() {
-  const el = document.getElementById('topbar-np');
-  if (el) {
-    const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-    const spotifyExpired = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
-    const notLoggedIn = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
-    const needsReconnect = spotifyExpired || notLoggedIn;
-    const waitingLfm = !S.mySong && S.lastfmUsername;
-    if (S.mySong) {
-      el.innerHTML = `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`;
-      el.style.cursor = 'pointer';
-      el.onclick = () => { window.location.href = 'https://open.spotify.com/'; };
-    } else if (needsReconnect) {
-      el.innerHTML = `<span class="topbar-np-nothing" style="cursor:pointer;text-decoration:underline;">${T.reconnect}</span>`;
-      el.style.cursor = 'pointer';
-      el.onclick = loginWithSpotify;
-    } else if (waitingLfm) {
-      el.innerHTML = `<span class="topbar-np-nothing">${T.waitingLfm}</span>`;
-      el.style.cursor = 'default';
-      el.onclick = null;
-    } else {
-      el.innerHTML = `<span class="topbar-np-nothing">${T.nothing}</span>`;
-      el.style.cursor = 'default';
-      el.onclick = null;
-    }
-  }
-  patchBottomBar(); // siempre actualiza — desktop Y mobile
-}
-
-// ══════════════════════════════════════════
-// MOBILE RENDER
-// ══════════════════════════════════════════
-
-// ── Listen Screen — entrada sin login ──
-function renderListen(container) {
-  container = container || document.getElementById('app');
-  container.innerHTML = `
-    <div class="listen-screen">
-      <div class="listen-content">
-        <div class="listen-logo-center">RA<em>d</em>AR</div>
-        <div class="listen-tagline">${T.tagline}</div>
-        <div class="listen-sub">${T.listenSub}</div>
-        <div class="listen-connect-btns">
-          <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
-          <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
-        </div>
-        <button id="help-btn" class="help-btn" style="color:#e8ff47;margin-top:20px;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
-      </div>
-    </div>`;
-  document.getElementById('listen-spotify').onclick = loginWithSpotify;
-  document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
-  document.getElementById('help-btn').onclick       = showHelp;
-  triggerLoginDots(1);
-}
-
-
-function renderFeed(container) {
-  container = container || document.getElementById('app');
-  const hasActivity = S.notifications.length > 0 || S.chats.length > 0;
-  const notifCount  = S.notifications.length;
-  container.innerHTML = `
-    <div class="screen">
-      <div class="header">
-        <div class="header-titles">
-          <div class="big-title">${T.youListen}</div>
-          <div class="big-title-gray">${T.theyListen}</div>
-        </div>
-        <div class="radar-wrap">
-          <button class="radar-circle-btn" id="radar-btn"><span class="radar-label">RA<span class="radar-d">d</span>AR</span></button>
-        </div>
-      </div>
-      <div class="scroll-area" id="feed-list">${buildFeedItems()}</div>
-      <div class="bottom-bar">
-        <button class="bottom-song" id="bottom-song-btn">${buildBottomSong()}</button>
-        <button class="loc-toggle-btn" id="loc-toggle-mobile" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
-        <button class="inbox-btn" id="inbox-btn">
-          ${hasActivity ? '<div class="inbox-ring"></div>' : ''}
-          <div class="inbox-dot ${hasActivity ? 'has-activity' : ''}">${notifCount > 0 ? notifCount : '◉'}</div>
-        </button>
-      </div>
-    </div>`;
-  document.getElementById('radar-btn').onclick        = doRadar;
-  document.getElementById('inbox-btn').onclick        = () => setScreen('inbox');
-  document.getElementById('loc-toggle-mobile').onclick = toggleLocation;
-  document.getElementById('bottom-song-btn').onclick  = () => {
-    if (S.mySong) {
-      window.location.href = 'https://open.spotify.com/';
-    } else if (!S.lastfmUsername && (!S.spotifyToken || (S._nullSongCount || 0) >= 3)) {
-      const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-      window.location.href = loginUrl;
-    }
-  };
-  attachFeedEvents();
-  setTimeout(() => {
-    const btn = document.getElementById('radar-btn');
-    if (btn) triggerRipple(btn);
-  }, 100);
-  startRippleLoop();
-}
-
-function renderInbox(container) {
-  container = container || document.getElementById('app');
-  container.innerHTML = `
-    <div class="screen">
-      <button class="back-btn" id="inbox-back">${T.back}</button>
-      <div class="section-title">${T.messages}</div>
-      ${S.notifications.length ? `<div class="section-label">${T.sigRec}</div>` : ''}
-      ${buildNotificationCards()}
-      ${S.chats.length ? `<div class="section-label" style="margin-top:12px;">${T.activeChats}</div>` : ''}
-      <div class="scroll-area" id="chat-list" style="margin-top:0;">
-        ${buildActiveChatCards()}
-        ${!S.notifications.length && !S.chats.length ? `<span class="empty">${T.noMessages}</span>` : ''}
-      </div>
-    </div>`;
-  document.getElementById('inbox-back').onclick = () => setScreen('feed');
-  container.addEventListener('click', e => {
-    const conn  = e.target.closest('[data-action="connect"]');
-    const ign   = e.target.closest('[data-action="ignore"]');
-    const close = e.target.closest('[data-action="close-chat"]');
-    const card  = e.target.closest('.card.has-chat');
-    if (conn)  { respondTap(conn.dataset.tap, true);  return; }
-    if (ign)   { respondTap(ign.dataset.tap,  false); return; }
-    if (close) { e.stopPropagation(); deleteChat(close.dataset.chatId); return; }
-    if (card && card.dataset.chatId) openChat(card.dataset.chatId, 'inbox', card.dataset.chatExpires || null);
-  });
-}
-
-function renderChat(container) {
-  container = container || document.getElementById('app');
-  container.innerHTML = `
-    <div class="chat-screen">
-      <div class="chat-header">
-        <button class="back-btn" id="chat-back">${T.back}</button>
-        <div class="chat-anon" id="chat-timer">${T.anonChat} · ${S.chatCountdown}</div>
-      <div class="chat-warning">${T.safetyWarn}</div>
-      </div>
-      <div class="messages-area" id="messages-area">${buildMessages()}</div>
-      <div class="input-row">
-        <input id="chat-input" class="chat-input" placeholder="${T.typeHere}" autocomplete="off">
-        <button class="send-btn" id="send-btn">→</button>
-      </div>
-    </div>`;
-  document.getElementById('chat-back').onclick = exitChat;
-  document.getElementById('send-btn').onclick  = sendMessage;
-  document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-  scrollToBottom();
-}
-
-// ── Shared card builders ──
-function buildNotificationCards() {
-  return S.notifications.map(item => `
-    <div class="card" data-tap-id="${esc(item.tapId)}">
-      <div class="card-info">
-        <div class="signal-label">${T.wasListening}</div>
-        <div class="song-name">${esc(item.fromSong || item.song)}</div>
-        <div class="artist-name">${esc(item.fromArtist || item.artist)}</div>
-      </div>
-      <button class="btn-connect" data-action="connect" data-tap="${esc(item.tapId)}">${T.connect}</button>
-      <button class="btn-ignore"  data-action="ignore"  data-tap="${esc(item.tapId)}">${T.ignore}</button>
-    </div>`).join('');
-}
-
-function buildActiveChatCards() {
-  return S.chats.map(item => `
-    <div class="card has-chat" data-chat-id="${esc(item.chatId)}" data-chat-expires="${esc(item.expiresAt||'')}">
-      <div class="card-info">
-        <div class="signal-label">${T.activeChat}</div>
-        <div class="song-name">${esc(item.song)}</div>
-        <div class="artist-name">${esc(item.artist)}</div>
-        <div class="distance">${T.expiresIn} ${esc(String(item.minutesLeft))} ${T.min}</div>
-      </div>
-      <button class="btn-close-chat" data-action="close-chat" data-chat-id="${esc(item.chatId)}">✕</button>
-    </div>`).join('');
-}
-
-// Shared build/patch helpers
-function buildFeedItems() {
-  if (!S.feedLoaded) return `<span class="empty" style="color:#444;">${isES ? 'Buscando cerca de ti...' : 'Looking nearby...'}</span>`;
-  if (!S.feed.length) return `<span class="empty">${T.nobody}</span>`;
-  return S.feed.map(item => {
-    const existingChat = chatMap.get(item.userId);
-    const hasChat = !!existingChat;
-    const q = encodeURIComponent(`${item.song} ${item.artist}`);
-    return `
-      <div class="card${hasChat ? ' has-chat' : ''}" data-userid="${esc(item.userId)}" data-haschat="${hasChat}">
-        <div class="card-info">
-          <div class="song-name">${esc(item.song)}</div>
-          <div class="artist-name">${esc(item.artist)}</div>
-          <div class="distance">${item.distance !== null ? formatDist(item.distance) : '·'}</div>
-        </div>
-        <div class="card-btns">
-          <button class="btn-listen" data-action="listen" data-query="${esc(q)}">♫</button>
-          ${hasChat ? `<div class="chat-active-dot"></div>` : `<button class="btn-chat" data-action="chat" data-userid="${esc(item.userId)}">CHAT</button>`}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// [6] Ecualizador en el bottom bar cuando hay canción sonando
-function buildBottomSong() {
-  if (S.mySong) return `
-    <div class="bottom-label">${T.nowPlaying}</div>
-    <div class="bottom-song-row">
-      <div class="bottom-song-title">${esc(S.mySong)}</div>
-      <span class="eq eq-dark"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>
     </div>
-    <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
-  // Not logged in at all
-  if (!S.spotifyToken && !S.lastfmUsername) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
-  }
-  // Spotify token expired
-  if (S.spotifyToken && (S._nullSongCount || 0) >= 3) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
-  }
-  // Last.fm connected but no nowplaying yet
-  if (S.lastfmUsername) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.waitingLfm}</div><div class="bottom-artist">Last.fm</div>`;
-  }
-  return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
-}
+    <div class="step-phone phone-wrap reveal reveal-d">
+      <div class="phone" aria-hidden="true">
+        <div class="term-bar">
+          <span>RAdAR · LOGIN</span>
+          <span>UNIT D-01</span>
+        </div>
+        <div class="phone-screen">
+          <div class="p-login">
+            <div class="p-logo-circle"><img src="logo.png" alt="RAdAR"></div>
+            <p class="p-tagline">la música que te gusta, <em>o no.</em></p>
+            <div style="width:100%;">
+              <div class="p-btn-spotify">[ SPOTIFY ]</div>
+              <div style="height:4px;"></div>
+              <div class="p-btn-lastfm">[ LAST.FM ]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function showHelp() {
-  let overlay = document.getElementById('help-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'help-overlay';
-    overlay.id = 'help-overlay';
-    overlay.innerHTML = `
-      <div class="help-sheet">
-        <div class="help-sheet-title">${isES ? 'CÓMO FUNCIONA' : 'HOW IT WORKS'}</div>
-        <div class="help-step"><div class="help-step-num">01</div><div class="help-step-text">${isES ? 'Conecta <strong>Spotify</strong> o <strong>Last.fm</strong> y activa tu ubicación.' : 'Connect <strong>Spotify</strong> or <strong>Last.fm</strong> and allow location.'}</div></div>
-        <div class="help-step"><div class="help-step-num">02</div><div class="help-step-text">${isES ? 'RAdAR muestra las personas cerca tuyo que están escuchando música ahora mismo.' : 'RAdAR shows people near you listening to music right now.'}</div></div>
-        <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
-        <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tenéis unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
-        <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
-        <div class="help-step" style="margin-top:8px;padding-top:16px;border-top:1px solid #222;"><div class="help-step-num" style="color:#888;">·</div><div class="help-step-text" style="color:#555;">${isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más.' : 'Last.fm syncs with Apple Music, YouTube Music and more.'}</div></div>
-        <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', e => { if (e.target === overlay) hideHelp(); });
-    document.getElementById('help-close').onclick = hideHelp;
-  }
-  requestAnimationFrame(() => overlay.classList.add('show'));
-}
-function hideHelp() {
-  const overlay = document.getElementById('help-overlay');
-  if (overlay) overlay.classList.remove('show');
-}
+  <!-- ⑥ PASO 2 — ubicación -->
+  <section class="step step-b" aria-label="Paso 2: activar ubicación">
+    <div class="reveal">
+      <div class="sect-id">[ PASO 02 ]</div>
+      <div class="step-num" aria-hidden="true">2</div>
+      <div class="step-body">
+        <h3>ACTIVA<br>(O NO)<br>TU UBICACIÓN</h3>
+        <p>con GPS ves quién escucha cerca — <strong>aquí, cerca, tu zona, tu ciudad, tu región.</strong> sin GPS igual ves todos los usuarios activos en el mundo. tú decides.</p>
+      </div>
+    </div>
+    <div class="step-phone phone-wrap reveal reveal-d">
+      <div class="phone" aria-hidden="true">
+        <div class="term-bar">
+          <span>RAdAR · GPS</span>
+          <span>● ACTIVE</span>
+        </div>
+        <div class="phone-screen">
+          <div class="p-hdr">[ MODO DE SEÑAL ]</div>
+          <div class="p-card active">
+            <div class="p-card-info">
+              <div class="p-song">Tame Impala — Let It Happen</div>
+              <div class="p-artist">cerca de ti</div>
+              <div class="p-dist">AQUÍ</div>
+            </div>
+            <div class="p-eq"><span></span><span></span><span></span></div>
+          </div>
+          <div class="p-card">
+            <div class="p-card-info">
+              <div class="p-song">Billie Eilish — Happier Than Ever</div>
+              <div class="p-artist">tu barrio</div>
+              <div class="p-dist">CERCA</div>
+            </div>
+          </div>
+          <div style="margin-top:8px; padding:6px 8px; border: 1px solid rgba(232,255,71,0.2); background:rgba(232,255,71,0.05);">
+            <div style="font-family:var(--mono);color:var(--accent);font-size:0.44rem;font-weight:700;letter-spacing:0.1em;">[ GPS: ACTIVO ]</div>
+            <div style="font-family:var(--mono);color:var(--muted);font-size:0.4rem;margin-top:2px;letter-spacing:0.06em;">VES QUIÉN ESTÁ CERCA DE TI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function attachFeedEvents() {
-  const list = document.getElementById('feed-list');
-  if (!list) return;
-  if (feedClickHandler) list.removeEventListener('click', feedClickHandler);
-  feedClickHandler = e => {
-    const listenBtn = e.target.closest('[data-action="listen"]');
-    const chatBtn   = e.target.closest('[data-action="chat"]');
-    const card      = e.target.closest('.card.has-chat');
-    if (listenBtn) { e.stopPropagation(); window.location.href = `https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`; }
-    else if (chatBtn) { e.stopPropagation(); sendTap(chatBtn.dataset.userid); }
-    else if (card) { const ec = chatMap.get(card.dataset.userid); if (ec) openChat(ec.chatId, 'feed', ec.expiresAt); }
-  };
-  list.addEventListener('click', feedClickHandler);
-}
+  <!-- ⑦ PASO 3 — escuchar -->
+  <section class="step step-a" aria-label="Paso 3: escuchar y conectar">
+    <div class="reveal">
+      <div class="sect-id">[ PASO 03 ]</div>
+      <div class="step-num" aria-hidden="true">3</div>
+      <div class="step-body">
+        <h3>ESCUCHA<br>Y CONECTA</h3>
+        <p>ve el feed en tiempo real. toca una fila para abrir la canción en Spotify. o inicia un chat anónimo con alguien que está escuchando lo mismo que tú — <strong>sin compartir tus datos.</strong></p>
+      </div>
+    </div>
+    <div class="step-phone phone-wrap reveal reveal-d">
+      <div class="phone" aria-hidden="true">
+        <div class="term-bar">
+          <span>RAdAR · CHAT</span>
+          <span>ANON · 60MIN</span>
+        </div>
+        <div class="phone-screen">
+          <div class="p-chat">
+            <div style="font-family:var(--mono);font-size:0.47rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px;">Radiohead — Creep</div>
+            <div class="p-chat-meta">[ CANAL ANÓNIMO · REV 1.0 ]</div>
+            <div class="p-messages">
+              <div class="p-bubble p-bubble-them">esa canción siempre 🥲</div>
+              <div class="p-bubble p-bubble-me">lo sé, la tengo en loop</div>
+              <div class="p-bubble p-bubble-them">the bends &gt; ok computer</div>
+              <div class="p-bubble p-bubble-me">debate válido</div>
+            </div>
+            <div class="p-chat-input">_ ESCRIBE ALGO...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function patchFeedList() {
-  const list = document.getElementById('feed-list');
-  if (!list) return;
-  list.innerHTML = buildFeedItems();
-  attachFeedEvents();
-}
+  <!-- ⑧ SERVICES -->
+  <section class="services reveal" aria-label="Compatibilidad">
+    <div class="sect-id">[ 04 — COMPATIBILIDAD ]</div>
+    <h3>FUNCIONA CON<br>LO QUE YA USAS, <em>HOY.</em></h3>
+    <div class="svc-table" role="list">
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">SPOTIFY</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">LAST.FM</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">APPLE MUSIC (VÍA LAST.FM)</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">YOUTUBE MUSIC (VÍA LAST.FM)</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">IPHONE Y ANDROID</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">INSTALABLE COMO WEBAPP (PWA)</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+      <div class="svc-row" role="listitem">
+        <span class="svc-label">SIN CREAR CUENTA EN RADAR</span>
+        <span class="svc-val">[ ✓ ]</span>
+      </div>
+    </div>
+  </section>
 
-function patchBottomBar() {
-  const btn = document.getElementById('bottom-song-btn');
-  if (!btn) return;
-  btn.innerHTML = buildBottomSong();
-}
+  <!-- ⑨ FREE PUNCHLINE -->
+  <section class="free" aria-label="Y es gratis">
+    <h2 class="reveal">Y ES,<br><em>GRATIS.</em></h2>
+    <p class="free-note reveal reveal-d">
+      WEBAPP GRATUITA &nbsp;·&nbsp; FUNCIONA EN EL NAVEGADOR &nbsp;·&nbsp; SIN SUSCRIPCIÓN<br>
+      SIN ANUNCIOS &nbsp;·&nbsp; SIN VENDER TUS DATOS
+    </p>
+  </section>
 
-function patchInboxDot() {
-  const btn = document.getElementById('inbox-btn');
-  if (!btn) return;
-  const hasActivity = S.notifications.length > 0 || S.chats.length > 0;
-  btn.innerHTML = `${hasActivity ? '<div class="inbox-ring"></div>' : ''}<div class="inbox-dot ${hasActivity ? 'has-activity' : ''}">${S.notifications.length > 0 ? S.notifications.length : '◉'}</div>`;
-}
+  <!-- ⑩ CTA FINAL -->
+  <section class="cta-section" aria-label="Instalar RAdAR">
+    <h2>INSTALA<br>RADAR<br>AHORA.</h2>
+    <a href="./app.html" class="cta-btn" aria-label="Abrir la webapp RAdAR">
+      ABRIR RADAR
+      <span aria-hidden="true">&nbsp;///</span>
+    </a>
+  </section>
 
-function patchMessages() {
-  const area = document.getElementById('messages-area');
-  if (!area) return;
-  area.innerHTML = buildMessages();
-  scrollToBottom();
-}
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo"><img src="logo.png" alt="RAdAR"></span>
+    <ul class="footer-links">
+      <li><a href="./app.html">WEBAPP</a></li>
+      <li><a href="https://github.com/yopordos/radar-pwa" target="_blank" rel="noopener noreferrer">GITHUB</a></li>
+      <li><a href="mailto:jt.gonzalezmarin@gmail.com">CONTACTO</a></li>
+    </ul>
+    <p class="footer-build">© 2026 RADAR &nbsp;·&nbsp; RADAR MUSICAL EN TIEMPO REAL &nbsp;·&nbsp; WEBAPP GRATUITA &nbsp;·&nbsp; REV 1.0</p>
+  </footer>
 
-function scrollToBottom() {
-  const area = document.getElementById('messages-area');
-  if (area) requestAnimationFrame(() => { area.scrollTop = area.scrollHeight; });
-}
+  <script>
+    const io = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
+      { threshold: 0.08 }
+    );
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  </script>
 
-// ── Puntos de conexión + pulso login (todo en #radar-ripple, z-index:0) ──
-function triggerLoginDots(ringCount) {
-  const overlay = document.getElementById('radar-ripple');
-  if (!overlay) return;
-  overlay.innerHTML = '';
-  const n = ringCount || 3;
-
-  // Anillos de pulso: medir el centro tras un frame de render
-  const borders = ['rgba(232,255,71,0.35)', 'rgba(232,255,71,0.2)', 'rgba(232,255,71,0.12)'];
-  const allDelays = [0, 1.6, 3.2];
-  requestAnimationFrame(() => {
-    const center = document.querySelector('.listen-logo-center');
-    let cx = window.innerWidth / 2, cy = window.innerHeight * 0.34;
-    if (center) {
-      const r = center.getBoundingClientRect();
-      if (r.width > 0) { cx = r.left + r.width/2; cy = r.top + r.height/2; }
-    }
-    allDelays.slice(0, n).forEach((d, i) => {
-      const ring = document.createElement('div');
-      ring.className = 'onb-pulse-overlay-ring';
-      ring.style.cssText = `left:${cx}px;top:${cy}px;animation-delay:${d}s;border-color:${borders[i]};`;
-      overlay.appendChild(ring);
-    });
-  });
-
-  // Puntos dispersos: algunos conectan, la mayoría no
-  // Posiciones en % para que funcionen sin depender de window.innerWidth/Height
-  const W = window.innerWidth  || document.documentElement.clientWidth  || 375;
-  const H = window.innerHeight || document.documentElement.clientHeight || 812;
-
-  // Solos — aparecen y desaparecen sin conectar con nadie
-  const solos = [
-    { l: '8%',  t:  '9%', delay: 0.0 },
-    { l: '72%', t:  '7%', delay: 3.2 },
-    { l: '91%', t: '38%', delay: 1.1 },
-    { l: '4%',  t: '55%', delay: 4.0 },
-    { l: '55%', t: '75%', delay: 2.3 },
-    { l: '40%', t: '20%', delay: 0.6 },
-  ];
-  solos.forEach(({ l, t, delay }) => {
-    const d = document.createElement('div');
-    d.className = 'login-dot';
-    d.style.cssText = `left:${l};top:${t};animation-delay:${delay}s;`;
-    overlay.appendChild(d);
-  });
-
-  // Pares — dos puntos que se encuentran y conectan
-  const pairs = [
-    { al: '18%', at: '6%',  bl: '28%', bt: '13%', delay: 1.8 },
-    { al: '78%', at: '28%', bl: '88%', bt: '20%', delay: 3.5 },
-    { al: '12%', at: '48%', bl: '22%', bt: '56%', delay: 0.8 },
-    { al: '62%', at: '65%', bl: '74%', bt: '73%', delay: 2.6 },
-  ];
-  pairs.forEach(({ al, at, bl, bt, delay }) => {
-    const ax = parseFloat(al)/100*W, ay = parseFloat(at)/100*H;
-    const bx = parseFloat(bl)/100*W, by = parseFloat(bt)/100*H;
-    const dist  = Math.sqrt((bx-ax)**2 + (by-ay)**2);
-    const angle = Math.atan2(by-ay, bx-ax) * 180 / Math.PI;
-
-    const dA = document.createElement('div');
-    dA.className = 'login-dot';
-    dA.style.cssText = `left:${al};top:${at};animation-delay:${delay}s;`;
-    overlay.appendChild(dA);
-
-    const dB = document.createElement('div');
-    dB.className = 'login-dot';
-    dB.style.cssText = `left:${bl};top:${bt};animation-delay:${delay+0.2}s;`;
-    overlay.appendChild(dB);
-
-    const line = document.createElement('div');
-    line.className = 'login-connect-line';
-    line.style.cssText = `left:${al};top:${at};width:${dist}px;transform:rotate(${angle}deg);animation-delay:${delay+0.5}s;`;
-    overlay.appendChild(line);
-  });
-}
-
-// ── Ripple de ondas expansivo (una sola pasada, cubre todo el viewport) ──
-function triggerRipple(fromEl) {
-  const overlay = document.getElementById('radar-ripple');
-  if (!overlay) return;
-  let cx, cy;
-  if (fromEl) {
-    const r = fromEl.getBoundingClientRect();
-    cx = r.left + r.width  / 2;
-    cy = r.top  + r.height / 2;
-  } else {
-    cx = window.innerWidth  / 2;
-    cy = window.innerHeight / 2;
-  }
-  const size = 50;
-  overlay.innerHTML = '';
-  for (let i = 0; i < 3; i++) {
-    const ring = document.createElement('div');
-    ring.className = 'ripple-ring';
-    ring.style.cssText = `width:${size}px;height:${size}px;left:${cx - size/2}px;top:${cy - size/2}px;animation-delay:${i * 0.4}s;`;
-    overlay.appendChild(ring);
-  }
-}
-
-// ── Onda cada 10s en las pantallas interiores ──
-let rippleInterval = null;
-function startRippleLoop() {
-  stopRippleLoop();
-  rippleInterval = setInterval(() => {
-    const btn = document.getElementById('radar-btn') || document.getElementById('topbar-radar');
-    if (btn) triggerRipple(btn);
-  }, 10000);
-}
-function stopRippleLoop() {
-  clearInterval(rippleInterval);
-  rippleInterval = null;
-}
-
-async function doRadar() {
-  const btn = document.getElementById('radar-btn') || document.getElementById('topbar-radar');
-  if (btn) {
-    btn.style.opacity = '0.5';
-    setTimeout(() => { if (btn) btn.style.opacity = ''; }, 300);
-    triggerRipple(btn);
-  }
-  await refreshAll(S.userId);
-}
-
-// ── Swipe (mobile) ──
-let swipeSX = 0, swipeSY = 0, swipeController = null;
-function attachSwipe(el) {
-  if (swipeController) swipeController.abort();
-  swipeController = new AbortController();
-  const { signal } = swipeController;
-  el.addEventListener('touchstart', e => { swipeSX = e.touches[0].clientX; swipeSY = e.touches[0].clientY; }, { passive: true, signal });
-  el.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - swipeSX;
-    const dy = e.changedTouches[0].clientY - swipeSY;
-    if (Math.abs(dx) < 50 || Math.abs(dy) > 80) return;
-    if (S.screen === 'feed'  && dx < 0) { setScreen('inbox'); return; }
-    if (S.screen === 'inbox' && dx > 0) { setScreen('feed');  return; }
-    if (S.screen === 'chat'  && dx > 0) { exitChat(); return; }
-  }, { passive: true, signal });
-}
-
-// ── Resize ──
-let resizeTimer = null;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { if (S.userId) render(); }, 150);
-});
-
-// ── Visual Viewport (keyboard awareness on iOS/iPadOS) ──
-function setupVisualViewport() {
-  const vv = window.visualViewport;
-  if (!vv) return;
-
-  const update = () => {
-    const app = document.getElementById('app');
-    if (!app) return;
-    // Desktop: CSS grid handles layout — clear any stale inline styles
-    if (isDesktop()) {
-      app.style.cssText = '';
-      return;
-    }
-    // Mobile/tablet: offset for virtual keyboard
-    app.style.height   = vv.height + 'px';
-    app.style.top      = vv.offsetTop  + 'px';
-    app.style.left     = vv.offsetLeft + 'px';
-    app.style.position = 'fixed';
-    app.style.width    = vv.width + 'px';
-    // maxWidth comes from CSS (480px mobile, 680px tablet) — don't override inline
-    app.style.maxWidth = '';
-    if (S.screen === 'chat' || S.sideTab === 'chat') scrollToBottom();
-  };
-
-  vv.addEventListener('resize', update);
-  vv.addEventListener('scroll', update);
-  // Apply immediately so initial height is correct (not just on keyboard events)
-  requestAnimationFrame(update);
-}
-
-// ── Service Worker ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
-}
-
-// ── Init ──
-async function init() {
-  warmBackend();
-  setupVisualViewport();
-  loadAuth();
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('code') || params.get('access_token') || params.get('auth_error') || params.get('lastfm_token')) {
-    await handleCallback(); return;
-  }
-  if (S.userId) { getLocation(); setScreen('feed'); startPolling(S.userId, S.spotifyToken, S.lastfmUsername); }
-  else { setScreen('listen'); }
-}
-
-init();
-</script>
 </body>
 </html>
