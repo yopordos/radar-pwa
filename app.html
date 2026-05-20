@@ -1117,11 +1117,11 @@ function warmBackend() {
 
 // ── Auth ──
 function loginWithSpotify() {
-  const redirect = window.location.origin + '/app.html';
+  const redirect = window.location.origin + '/app';
   window.location.href = `${SERVER}/login?redirect=${encodeURIComponent(redirect)}`;
 }
 function loginWithLastfm() {
-  const redirect = window.location.origin + '/app.html';
+  const redirect = window.location.origin + '/app';
   window.location.href = `${SERVER}/lastfm/login?redirect=${encodeURIComponent(redirect)}`;
 }
 

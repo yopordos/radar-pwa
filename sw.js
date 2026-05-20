@@ -1,5 +1,5 @@
-const CACHE = 'radar-v49';
-const ASSETS = ['./app.html', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
+const CACHE = 'radar-v50';
+const ASSETS = ['./app', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -21,18 +21,19 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith(self.location.origin)) return;
 
-  // Navigation requests: serve the correct shell, stripping any auth callback params
-  // (?access_token=, ?lastfm_token=, etc.) to prevent stale token re-exchange on refresh.
   if (e.request.mode === 'navigate') {
     const url = new URL(e.request.url);
     const isApp = url.pathname === '/app.html' || url.pathname === '/app' || url.pathname.endsWith('/app.html');
-    const shell = isApp ? './app.html' : './';
+
+    // Landing page and other non-app routes go straight to network — no SW interception
+    if (!isApp) return;
+
+    // App shell: serve from cache using canonical URL (./app, no redirect)
     e.respondWith(
       caches.open(CACHE).then(c =>
-        c.match(shell)
-          .then(cached => cached || c.match('./app.html'))
-          .then(cached => cached || fetch('./app.html'))
-          .catch(() => fetch('./app.html'))
+        c.match('./app')
+          .then(cached => cached || fetch('./app'))
+          .catch(() => fetch('./app'))
       )
     );
     return;

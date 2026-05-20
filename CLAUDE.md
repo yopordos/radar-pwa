@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-**RAdAR** (`radarpin.me`) — a Spanish-language social music PWA. Users connect Spotify or Last.fm to broadcast what they're listening to, see what others nearby are playing, and chat anonymously. No build system, no bundler, no npm. Pure HTML/CSS/JS deployed to Netlify as static files.
+**RAdAR** (`radarpin.me`) — a Spanish-language social music PWA. Users connect Spotify or Last.fm to broadcast what they're listening to, see what others nearby are playing, and chat anonymously. No build system, no bundler, no npm. Pure HTML/CSS/JS deployed to Cloudflare Pages as static files.
 
 ## Deployment
 
 ```bash
-# No build step — deploy as-is. Netlify reads publish = "." from netlify.toml.
+# No build step — deploy as-is.
 # Preview locally with any static file server:
 npx serve .
 # or
 python3 -m http.server 8080
 ```
 
-Deploy by pushing to `main` — Netlify auto-deploys.
+Deploy by pushing to `main` — Cloudflare Pages auto-deploys from GitHub.
 
 ## File Map
 
@@ -25,7 +25,7 @@ Deploy by pushing to `main` — Netlify auto-deploys.
 | `index.html` | Marketing/landing page — CRT grain aesthetic, dark |
 | `app.html` | The PWA itself — all app logic lives here |
 | `admin.html` | Password-protected admin dashboard, `noindex` |
-| `sw.js` | Service worker — cache name `radar-v47` |
+| `sw.js` | Service worker — cache name `radar-v50` |
 | `manifest.json` | PWA manifest (`start_url: ./app.html`) |
 | `netlify.toml` | Cache headers (HTML: no-cache, assets: immutable, SW: no-cache) |
 
@@ -68,7 +68,12 @@ Fonts: **Poppins** (UI, weight 400/700/900) + **IBM Plex Mono** (landing page on
 
 ## Service Worker
 
-Cache name is `radar-v47`. Navigation requests always serve `./` from cache (prevents auth callback URLs like `?access_token=` from being cached). Bump the cache version in `sw.js` after deploying changes that must bust the cache.
+Cache name is `radar-v50`. Two-page architecture:
+- `/app.html` or `/app` → serves cached `./app` (canonical URL — Cloudflare Pages redirects `/app.html` → `/app`)
+- All other paths (landing page, etc.) → NOT intercepted by SW, browser fetches from network directly
+- `./app` is pre-cached (not `./app.html`) to avoid caching a redirect response (`redirected: true` causes WebKit/Safari to throw "Response served by service worker has redirections")
+
+Auth callback URLs (`?access_token=`, `?lastfm_token=`, etc.) land in the address bar; `handleCallback()` reads them from `window.location.search`. Bump the cache version in `sw.js` after deploying changes that must bust the cache.
 
 ## Auth Flow
 
@@ -76,11 +81,13 @@ Cache name is `radar-v47`. Navigation requests always serve `./` from cache (pre
 2. **Last.fm**: OAuth redirect via `SERVER/lastfm/login` → `?lastfm_token=` param on return → exchanged for session via `POST /lastfm/session`
 3. **Spotify token TTL**: 3500s (`SPOTIFY_TOKEN_TTL`). If token is older or missing timestamp, it's cleared and user is prompted to reconnect.
 4. No email/password — userId is either the Spotify user ID or the Last.fm username.
+5. OAuth redirect URI sent to backend is always `window.location.origin + '/app'` (canonical, avoids Cloudflare redirect loop).
 
 ## Key Constraints
 
 - **No build tooling** — don't introduce npm, webpack, or any bundler. Keep it a single HTML file per page.
 - **Spanish UI copy** — all user-facing text is in Spanish (Chile locale, `es_CL`). Keep it that way.
-- **SW cache version** — if you add or rename a cached asset, bump `radar-v47` in `sw.js` to force cache invalidation.
+- **SW cache version** — if you add or rename a cached asset, bump `radar-v50` in `sw.js` to force cache invalidation.
 - **Hard-coded design tokens** — tokens are duplicated across `index.html` and `app.html`. When changing colors/fonts, update both files.
 - **Backend is separate** — this repo is frontend-only. The Render.com backend is not here.
+- **Cloudflare Pages pretty URLs** — `/app.html` redirects to `/app`. Always use `/app` as the canonical URL in SW and OAuth redirects.
