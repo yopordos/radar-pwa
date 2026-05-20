@@ -1,9 +1,11 @@
-const CACHE = 'radar-v48';
-const ASSETS = ['./', './app.html', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
+const CACHE = 'radar-v49';
+const ASSETS = ['./app.html', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => Promise.allSettled(ASSETS.map(a => c.add(a))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -23,9 +25,15 @@ self.addEventListener('fetch', e => {
   // (?access_token=, ?lastfm_token=, etc.) to prevent stale token re-exchange on refresh.
   if (e.request.mode === 'navigate') {
     const url = new URL(e.request.url);
-    const shell = url.pathname.endsWith('app.html') ? './app.html' : './';
+    const isApp = url.pathname === '/app.html' || url.pathname === '/app' || url.pathname.endsWith('/app.html');
+    const shell = isApp ? './app.html' : './';
     e.respondWith(
-      caches.match(shell).then(cached => cached || fetch(shell))
+      caches.open(CACHE).then(c =>
+        c.match(shell)
+          .then(cached => cached || c.match('./app.html'))
+          .then(cached => cached || fetch('./app.html'))
+          .catch(() => fetch('./app.html'))
+      )
     );
     return;
   }
