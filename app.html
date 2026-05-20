@@ -1107,7 +1107,10 @@ async function refreshAll(uid) {
     // Double-filter: backend already excludes own userId, but guard against encoding mismatches
     S.feed          = (feedRes.nearby || []).filter(u => u.userId !== uid);
     S.feedLoaded    = true;
-    S.notifications = notifRes.notifications || notifRes.taps || [];
+    const freshNotifs = notifRes.notifications || notifRes.taps || [];
+    const prevIds = new Set(S.notifications.map(n => n.tapId));
+    if (freshNotifs.some(n => !prevIds.has(n.tapId))) playRadarPing();
+    S.notifications = freshNotifs;
     // Filter out expired chats client-side (server may still return them briefly)
     S.chats         = (chatsRes.chats || []).filter(c => !c.expiresAt || new Date(c.expiresAt) > Date.now());
     feedMap.clear(); S.feed.forEach(i => feedMap.set(i.userId, i));
@@ -1118,6 +1121,34 @@ async function refreshAll(uid) {
       if (S.screen === 'feed')  { patchFeedList(); patchInboxDot(); }
       if (S.screen === 'inbox') renderInbox();
     }
+  } catch(e) {}
+}
+
+// ── Radar ping (Web Audio, sin archivos externos) ──
+function playRadarPing() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+
+    function ping(freq, startAt, vol) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + startAt);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.55, now + startAt + 0.38);
+      gain.gain.setValueAtTime(0, now + startAt);
+      gain.gain.linearRampToValueAtTime(vol, now + startAt + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + startAt + 0.38);
+      osc.start(now + startAt);
+      osc.stop(now + startAt + 0.4);
+    }
+
+    ping(1040, 0,    0.35);
+    ping(820,  0.18, 0.15);
+
+    setTimeout(() => ctx.close(), 800);
   } catch(e) {}
 }
 

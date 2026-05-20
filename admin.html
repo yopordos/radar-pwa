@@ -87,6 +87,25 @@
 
   .empty { color: #2a2a2a; font-size: 13px; font-style: italic; padding: 16px 0; }
   .loading { color: #333; font-size: 12px; letter-spacing: 1px; padding: 16px 0; }
+
+  .users-section { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1a1a1a; }
+  .user-list { list-style: none; }
+  .user-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid #141414;
+  }
+  .user-item:last-child { border-bottom: none; }
+  .user-song { flex: 1; min-width: 0; }
+  .user-song-name { color: #f5f0e8; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-song-meta { color: #555; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-dist { color: #333; font-size: 10px; font-weight: 700; letter-spacing: 1px; flex-shrink: 0; min-width: 60px; text-align: right; }
+  .delete-btn {
+    background: none; border: 1px solid #2a0a0a; color: #ff4757;
+    font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 5px 10px; border-radius: 6px; cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .delete-btn:hover { background: #1a0505; border-color: #ff4757; }
 </style>
 </head>
 <body>
@@ -113,6 +132,11 @@
     <div class="stat-card"><div class="stat-num" id="s-active">—</div><div class="stat-label">ACTIVOS AHORA</div></div>
     <div class="stat-card"><div class="stat-num" id="s-taps">—</div><div class="stat-label">SEÑALES ENVIADAS</div></div>
     <div class="stat-card"><div class="stat-num" id="s-chats">—</div><div class="stat-label">CHATS CREADOS</div></div>
+  </div>
+
+  <div class="users-section">
+    <div class="section-title">📻 USUARIOS ACTIVOS</div>
+    <ul class="user-list" id="list-users"><li class="loading">cargando...</li></ul>
   </div>
 
   <div class="sections">
@@ -150,6 +174,47 @@ function renderList(id, items) {
       </div>
       <span class="song-count">${item.count}</span>
     </li>`).join('');
+}
+
+async function loadUsers() {
+  const el = document.getElementById('list-users');
+  try {
+    const res = await fetch(`${SERVER}/admin/users?key=${encodeURIComponent(adminKey)}`);
+    if (res.status === 401) { logout(); return; }
+    const users = await res.json();
+    if (!users || users.length === 0) {
+      el.innerHTML = '<li class="empty">sin usuarios activos</li>';
+      return;
+    }
+    el.innerHTML = users.map(u => `
+      <li class="user-item">
+        <div class="user-song">
+          <div class="user-song-name">${u.song || '—'}</div>
+          <div class="user-song-meta">${u.artist || '—'} · <span style="color:#e8ff47;font-size:9px;letter-spacing:1px">${u.userId || u.deviceId || ''}</span></div>
+        </div>
+        <span class="user-dist">${u.dist || '—'}</span>
+        <button class="delete-btn" onclick="deleteUser('${u.deviceId}')">✕ BORRAR</button>
+      </li>`).join('');
+  } catch (e) {
+    el.innerHTML = '<li class="empty">error al cargar</li>';
+  }
+}
+
+async function deleteUser(deviceId) {
+  if (!confirm('¿Eliminar esta entrada del feed?')) return;
+  try {
+    const res = await fetch(`${SERVER}/admin/users/${encodeURIComponent(deviceId)}?key=${encodeURIComponent(adminKey)}`, {
+      method: 'DELETE'
+    });
+    if (res.status === 401) { logout(); return; }
+    if (res.ok) {
+      await Promise.all([loadUsers(), loadStats()]);
+    } else {
+      alert('Error al borrar — revisa que el backend tenga el endpoint DELETE /admin/users/:deviceId');
+    }
+  } catch (e) {
+    alert('Error de conexión');
+  }
 }
 
 async function loadStats() {
@@ -199,16 +264,17 @@ document.getElementById('auth-btn').onclick = async () => {
   renderList('list-tapped',  data.topTapped);
   renderList('list-chatted', data.topChatted);
   document.getElementById('ts').textContent = new Date(data.ts).toLocaleTimeString('es-CL');
+  loadUsers();
 
   // Auto-refresh cada 60s
-  setInterval(loadStats, 60000);
+  setInterval(() => { loadStats(); loadUsers(); }, 60000);
 };
 
 document.getElementById('key-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('auth-btn').click();
 });
 
-document.getElementById('refresh-btn').onclick = loadStats;
+document.getElementById('refresh-btn').onclick = () => { loadStats(); loadUsers(); };
 </script>
 </body>
 </html>
