@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RAdAR — la música que te gusta, o no.</title>
+  <script>
+    // Si el callback OAuth llega a index.html por error, redirigir a app.html
+    (function() {
+      var p = window.location.search;
+      if (p && (p.indexOf('access_token=') !== -1 || p.indexOf('auth_error=') !== -1 || p.indexOf('lastfm_token=') !== -1 || p.indexOf('code=') !== -1)) {
+        window.location.replace('./app.html' + p);
+      }
+    })();
+  </script>
   <meta name="description" content="Ve qué está escuchando la gente cerca de ti en tiempo real. Conecta Spotify o Last.fm. Webapp gratuita. Sin cuenta.">
   <meta name="keywords" content="app música social, radar musical, descubrir música, Spotify social, música cerca, qué escuchan cerca">
   <meta name="author" content="RAdAR">

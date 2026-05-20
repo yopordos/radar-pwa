@@ -1117,11 +1117,11 @@ function warmBackend() {
 
 // ── Auth ──
 function loginWithSpotify() {
-  const redirect = window.location.origin + window.location.pathname;
+  const redirect = window.location.origin + '/app.html';
   window.location.href = `${SERVER}/login?redirect=${encodeURIComponent(redirect)}`;
 }
 function loginWithLastfm() {
-  const redirect = window.location.origin + window.location.pathname;
+  const redirect = window.location.origin + '/app.html';
   window.location.href = `${SERVER}/lastfm/login?redirect=${encodeURIComponent(redirect)}`;
 }
 
@@ -1616,8 +1616,7 @@ function renderFeed(container) {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
     } else if (!S.lastfmUsername && (!S.spotifyToken || (S._nullSongCount || 0) >= 3)) {
-      const loginUrl = `${SERVER}/login?redirect=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-      window.location.href = loginUrl;
+      loginWithSpotify();
     }
   };
   attachFeedEvents();
