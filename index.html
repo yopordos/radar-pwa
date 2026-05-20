@@ -17,7 +17,6 @@
   <meta name="author" content="RAdAR">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://radarpin.me/">
-
   <meta property="og:type"         content="website">
   <meta property="og:url"          content="https://radarpin.me/">
   <meta property="og:site_name"    content="RAdAR">
@@ -28,17 +27,14 @@
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt"    content="RAdAR — la música que te gusta, o no. Cerca de ti, en tiempo real.">
-
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="RAdAR — la música que te gusta, o no.">
   <meta name="twitter:description" content="Ve qué está escuchando la gente cerca de ti en tiempo real.">
   <meta name="twitter:image"       content="https://radarpin.me/og-image.png">
-
   <meta name="theme-color" content="#0c0c0c">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icon.png">
-
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -53,11 +49,11 @@
     "featureList": ["Radar musical en tiempo real","Spotify y Last.fm","GPS opcional","Sin cuenta propia","PWA instalable"]
   }
   </script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 
   <style>
+    /* ── tokens + easing ── */
     :root {
       --ink:      #0c0c0c;
       --surface:  #111113;
@@ -68,36 +64,45 @@
       --muted:    #44444a;
       --sans:     'Poppins', sans-serif;
       --mono:     var(--sans);
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--ink); color: var(--text); overflow-x: hidden; }
 
-    body {
-      font-family: var(--sans);
-      background: var(--ink);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
+    /* CRT scanlines */
     body::after {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
-      );
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
     }
-
+    /* grain */
     body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 9998;
-      opacity: 0.035;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.035;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 300px 300px;
     }
 
-    /* ─── nav ─── */
+    /* ── keyframes ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes rexpand {
+      0%   { transform: translate(-50%,-50%) scale(0.05); opacity: 0.8; }
+      12%  { opacity: 0.5; }
+      100% { transform: translate(-50%,-50%) scale(60);   opacity: 0; }
+    }
+    @keyframes pdpulse {
+      0%,100% { opacity: 0.35; transform: scale(1); }
+      50%     { opacity: 1;    transform: scale(1.6); }
+    }
+    @keyframes eqdance {
+      0%,100% { height: 2px; }
+      50%     { height: 9px; }
+    }
+
+    /* ── nav ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       padding: 1.25rem 2rem;
@@ -106,330 +111,238 @@
       background: rgba(12,12,12,0.92);
       backdrop-filter: blur(8px);
     }
-
-    .nav-logo {
-      display: flex; align-items: center; text-decoration: none; line-height: 0;
-    }
+    .nav-logo { display: flex; align-items: center; text-decoration: none; line-height: 0; }
     .nav-logo img { height: 30px; width: 30px; display: block; }
-
     .nav-meta {
       font-family: var(--mono); font-size: 0.6rem;
-      color: var(--muted); letter-spacing: 0.12em;
-      text-transform: uppercase; display: none;
+      color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; display: none;
     }
     @media (min-width: 640px) { .nav-meta { display: block; } }
-
     .nav-cta {
       background: var(--accent); color: var(--ink);
-      padding: 0.5rem 1.25rem;
-      text-decoration: none; font-family: var(--mono);
-      font-size: 0.6875rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      cursor: pointer; transition: opacity 0.15s;
-      border: none;
+      padding: 0.5rem 1.25rem; text-decoration: none;
+      font-family: var(--mono); font-size: 0.6875rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; border: none;
+      transition: transform 160ms var(--ease-out), opacity 150ms ease;
     }
-    .nav-cta:hover { opacity: 0.82; }
+    .nav-cta:active { transform: scale(0.97); }
+    @media (hover: hover) and (pointer: fine) { .nav-cta:hover { opacity: 0.82; } }
     .nav-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-    /* ─── hero ─── */
+    /* ── hero ── */
     .hero {
-      min-height: 100svh;
-      background: radial-gradient(ellipse at 50% 35%, #141416 0%, #0c0c0c 65%);
-      display: flex; flex-direction: column;
-      justify-content: flex-end;
-      padding: 2rem 2rem 0;
       position: relative; overflow: hidden;
+      background: radial-gradient(ellipse at 50% 35%, #141416 0%, #0c0c0c 70%);
     }
-
-    .hero-ripple {
-      position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    }
+    .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
     .rring {
       position: absolute; border-radius: 50%;
       border: 1px solid rgba(232,255,71,0.22);
-      top: 38%; left: 50%;
+      top: 40%; left: 50%;
       transform: translate(-50%,-50%) scale(0.05);
       animation: rexpand 7s cubic-bezier(0.15,0,0.55,1) infinite;
     }
-    .rring:nth-child(2) { animation-delay: 2s; border-color: rgba(232,255,71,0.12); }
-    .rring:nth-child(3) { animation-delay: 4s; border-color: rgba(232,255,71,0.06); }
-    @keyframes rexpand {
-      0%   { transform: translate(-50%,-50%) scale(0.05); opacity: 0.8; }
-      12%  { opacity: 0.5; }
-      100% { transform: translate(-50%,-50%) scale(60);   opacity: 0; }
+    .rring:nth-child(2) { animation-delay: 2.3s; border-color: rgba(232,255,71,0.12); }
+    .rring:nth-child(3) { animation-delay: 4.6s; border-color: rgba(232,255,71,0.06); }
+
+    /* hero inner: column on mobile, row on desktop */
+    .hero-inner {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: 3rem;
+      padding: 7rem 2rem 4rem;
+    }
+    @media (min-width: 900px) {
+      .hero-inner {
+        flex-direction: row; align-items: center;
+        justify-content: center; min-height: 100svh;
+        gap: 6rem; padding: 6rem 5rem;
+      }
+      .hero-copy { flex: 1; max-width: 480px; }
+      .hero-phone { flex: 0 0 auto; width: auto; }
     }
 
-    .hero-content { position: relative; z-index: 1; }
-
+    /* hero copy — staggered entrance */
     .hero-tag {
-      font-family: var(--mono); font-size: 0.6rem;
-      font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted);
-      position: absolute; top: 5.5rem; left: 2rem;
+      display: block; font-family: var(--mono); font-size: 0.6rem;
+      font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.5rem;
+      animation: fadeUp 500ms var(--ease-out) both 80ms;
     }
-
     .hero-title {
-      font-size: clamp(5.5rem, 30vw, 26rem);
-      font-weight: 900; line-height: 0.88;
-      letter-spacing: -0.04em; color: var(--text);
-      margin-bottom: 1.5rem;
+      font-size: clamp(5rem, 22vw, 8rem);
+      font-weight: 900; line-height: 0.88; letter-spacing: -0.04em;
+      color: var(--text); margin-bottom: 1.5rem;
+      animation: fadeUp 600ms var(--ease-out) both 160ms;
+    }
+    @media (min-width: 900px) {
+      .hero-title { font-size: clamp(4rem, 6vw, 7.5rem); }
     }
     .hero-tagline {
-      font-size: clamp(1.375rem, 4vw, 3rem);
-      font-weight: 900; line-height: 1.1; max-width: 22ch;
-      letter-spacing: -0.02em;
+      font-size: clamp(1.25rem, 3.5vw, 2rem);
+      font-weight: 900; line-height: 1.15; letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      animation: fadeUp 550ms var(--ease-out) both 240ms;
     }
     .hero-tagline em { color: var(--accent); font-style: normal; }
-
     .hero-meta {
-      margin-top: 1rem;
-      font-family: var(--mono); font-size: clamp(0.575rem, 1.2vw, 0.75rem);
-      color: var(--muted); letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-family: var(--mono); font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+      color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeUp 500ms var(--ease-out) both 310ms;
     }
-
     .hero-cta {
       display: inline-block;
-      margin-top: 2rem;
       background: var(--accent); color: var(--ink);
-      font-family: var(--mono); font-size: clamp(0.7rem, 1.5vw, 0.875rem);
+      font-family: var(--mono); font-size: clamp(0.7rem, 1.5vw, 0.8rem);
       font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.9rem 2.25rem;
-      text-decoration: none; transition: opacity 0.15s;
+      padding: 0.9rem 2.25rem; text-decoration: none;
+      transition: transform 160ms var(--ease-out), opacity 150ms ease;
+      animation: fadeUp 500ms var(--ease-out) both 380ms;
     }
-    .hero-cta:hover { opacity: 0.82; }
+    .hero-cta:active { transform: scale(0.97); }
+    @media (hover: hover) and (pointer: fine) { .hero-cta:hover { opacity: 0.82; } }
     .hero-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-    .hero-rule {
-      margin-top: 3rem;
-      height: 1px; background: var(--border);
-      position: relative;
-    }
-    .hero-rule::before {
-      content: attr(data-label);
-      font-family: var(--mono); font-size: 0.55rem;
-      color: var(--muted); letter-spacing: 0.1em;
-      text-transform: uppercase;
-      position: absolute; right: 0; top: -0.85rem;
+    /* hero phone */
+    .hero-phone {
+      width: 100%; display: flex; justify-content: center;
+      animation: fadeUp 700ms var(--ease-out) both 300ms;
     }
 
-    /* ─── preview ─── */
-    .preview {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 2rem;
-      display: grid; gap: 4rem; align-items: center;
-    }
-    @media (min-width: 768px) {
-      .preview {
-        grid-template-columns: 1fr 1fr;
-        padding: 7rem 5rem; gap: 5rem;
-      }
-    }
-
-    .preview-text .sect-id {
-      font-family: var(--mono); font-size: 0.6rem;
-      color: var(--muted); letter-spacing: 0.15em;
-      text-transform: uppercase; margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.75rem;
-    }
-    .preview-text .sect-id::after {
-      content: '';
-      flex: 1; height: 1px; background: var(--border);
-      max-width: 120px;
-    }
-
-    .preview-text p {
-      font-size: clamp(1.25rem, 3vw, 2rem);
-      font-weight: 900; line-height: 1.2; max-width: 20ch;
-      letter-spacing: -0.02em; color: var(--text);
-      margin-bottom: 0.75rem;
-    }
-    .preview-text p em { color: var(--accent); font-style: normal; }
-
-    .preview-text .sub {
-      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
-      font-weight: 400; color: var(--muted); line-height: 1.6;
-      max-width: 32ch; margin-bottom: 2rem;
-      letter-spacing: 0;
-    }
-
-    .preview-cta {
-      display: inline-block;
-      background: var(--ink); color: var(--accent);
-      border: 1px solid var(--border);
-      font-family: var(--mono); font-size: 0.75rem;
-      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.75rem 1.75rem;
-      text-decoration: none; transition: border-color 0.15s, color 0.15s;
-    }
-    .preview-cta:hover { border-color: var(--accent); }
-    .preview-cta:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
-
-    /* ─── phone mockup ─── */
-    .phone-wrap { display: flex; justify-content: center; }
-
+    /* ── phone mockup ── */
     .phone {
-      width: min(235px, 60vw);
-      aspect-ratio: 9/19.5;
-      background: var(--ink);
-      border: 1.5px solid var(--accent);
+      width: min(250px, 65vw); aspect-ratio: 9/19.5;
+      background: var(--ink); border: 1.5px solid var(--accent);
       display: flex; flex-direction: column;
-      box-shadow: 0 0 32px rgba(232,255,71,0.1), 0 0 80px rgba(232,255,71,0.04);
+      box-shadow: 0 0 40px rgba(232,255,71,0.12), 0 0 100px rgba(232,255,71,0.05);
     }
-
     .term-bar {
-      background: var(--accent);
-      color: var(--ink);
-      font-family: var(--mono); font-size: 0.48rem;
-      font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 4px 8px;
-      display: flex; justify-content: space-between; align-items: center;
+      background: var(--accent); color: var(--ink);
+      font-family: var(--mono); font-size: 0.48rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;
       flex-shrink: 0;
     }
-
     .phone-screen {
       flex: 1; display: flex; flex-direction: column;
       padding: 8px 10px; overflow: hidden;
     }
-
     .p-hdr {
       color: var(--accent); font-family: var(--mono);
       font-size: 0.48rem; font-weight: 700;
       letter-spacing: 0.15em; text-transform: uppercase;
       margin-bottom: 6px; flex-shrink: 0;
+      animation: fadeUp 400ms var(--ease-out) both 450ms;
     }
-
     .p-card {
-      background: var(--card);
-      padding: 7px 8px; margin-bottom: 4px;
+      background: var(--card); padding: 7px 8px; margin-bottom: 4px;
       display: flex; align-items: center; gap: 6px;
-      border: 1px solid transparent;
-      border-left: 2px solid transparent;
+      border: 1px solid transparent; border-left: 2px solid transparent;
       flex-shrink: 0;
+      animation: fadeUp 350ms var(--ease-out) both;
     }
-    .p-card.active {
-      border-color: rgba(232,255,71,0.3);
-      border-left-color: var(--accent);
-    }
+    .p-card.active { border-color: rgba(232,255,71,0.3); border-left-color: var(--accent); }
+
+    /* stagger: nth-child accounts for .p-hdr as first child */
+    .phone-screen .p-card:nth-child(2) { animation-delay: 520ms; }
+    .phone-screen .p-card:nth-child(3) { animation-delay: 570ms; }
+    .phone-screen .p-card:nth-child(4) { animation-delay: 620ms; }
+    .phone-screen .p-card:nth-child(5) { animation-delay: 670ms; }
+    .phone-screen .p-card:nth-child(6) { animation-delay: 720ms; }
+    .phone-screen .p-card:nth-child(7) { animation-delay: 770ms; }
 
     .p-card-info { flex: 1; min-width: 0; }
     .p-song   { color: var(--text); font-size: 0.575rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .p-artist { color: #555; font-size: 0.5rem; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
     .p-dist {
-      color: var(--accent); font-family: var(--mono);
-      font-size: 0.45rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0;
-      display: flex; align-items: center; gap: 3px;
+      color: var(--accent); font-family: var(--mono); font-size: 0.45rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      flex-shrink: 0; display: flex; align-items: center; gap: 3px;
     }
     .p-dist::before {
-      content: '';
-      display: inline-block; width: 3px; height: 3px;
-      background: var(--accent);
+      content: ''; display: inline-block; width: 3px; height: 3px; background: var(--accent);
       animation: pdpulse 2s ease-in-out infinite;
     }
-    @keyframes pdpulse {
-      0%,100% { opacity: 0.35; transform: scale(1); }
-      50%      { opacity: 1;   transform: scale(1.6); }
-    }
-
-    .p-eq {
-      display: inline-flex; align-items: flex-end; gap: 1.5px;
-      height: 9px; flex-shrink: 0;
-    }
+    .p-eq { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 9px; flex-shrink: 0; }
     .p-eq span {
       width: 2px; background: var(--accent); opacity: 0.7;
-      transform-origin: bottom;
-      animation: eqdance 0.75s ease-in-out infinite;
+      transform-origin: bottom; animation: eqdance 0.75s ease-in-out infinite;
     }
     .p-eq span:nth-child(2) { animation-delay: 0.2s; }
     .p-eq span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes eqdance { 0%,100% { height: 2px; } 50% { height: 9px; } }
 
-    /* ─── cta final ─── */
+    /* ── cta final ── */
     .cta-section {
-      background: var(--accent);
-      padding: 6rem 2rem;
+      background: var(--accent); padding: 6rem 2rem;
       display: flex; flex-direction: column;
       align-items: flex-start; gap: 2.5rem;
     }
     @media (min-width: 768px) {
-      .cta-section { padding: 7rem 5rem; flex-direction: row; align-items: flex-end; justify-content: space-between; }
+      .cta-section {
+        padding: 7rem 5rem; flex-direction: row;
+        align-items: flex-end; justify-content: space-between;
+      }
     }
-
     .cta-section h2 {
-      font-size: clamp(3rem, 12vw, 10rem);
-      font-weight: 900; line-height: 0.88;
-      letter-spacing: -0.04em; color: var(--ink);
-      text-transform: uppercase;
+      font-size: clamp(3rem, 12vw, 9rem); font-weight: 900;
+      line-height: 0.88; letter-spacing: -0.04em;
+      color: var(--ink); text-transform: uppercase;
     }
-
     .cta-block { display: flex; flex-direction: column; gap: 1.25rem; align-items: flex-start; flex-shrink: 0; }
-
     .cta-services {
       font-family: var(--mono); font-size: 0.6rem;
       color: rgba(12,12,12,0.5); letter-spacing: 0.1em;
       text-transform: uppercase; line-height: 1.9;
     }
-
     .cta-btn {
       display: inline-flex; align-items: center; gap: 0.75rem;
       background: var(--ink); color: var(--accent);
       font-family: var(--mono); font-weight: 700;
       font-size: clamp(0.7rem, 1.5vw, 0.875rem);
-      padding: 1.125rem 2.5rem;
-      text-decoration: none; letter-spacing: 0.1em;
-      text-transform: uppercase; white-space: nowrap;
-      cursor: pointer; transition: opacity 0.15s;
-      border: 2px solid var(--ink);
+      padding: 1.125rem 2.5rem; text-decoration: none;
+      letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+      transition: transform 160ms var(--ease-out), opacity 150ms ease;
     }
-    .cta-btn:hover { opacity: 0.85; }
+    .cta-btn:active { transform: scale(0.97); }
+    @media (hover: hover) and (pointer: fine) { .cta-btn:hover { opacity: 0.85; } }
     .cta-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-    /* ─── footer ─── */
+    /* ── footer ── */
     footer {
-      background: var(--ink);
-      padding: 2rem;
+      background: var(--ink); padding: 2rem;
       display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 1rem;
-      border-top: 1px solid var(--border);
+      flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--border);
     }
-
     .footer-logo { display: flex; align-items: center; opacity: 0.3; line-height: 0; }
     .footer-logo img { height: 26px; width: 26px; display: block; }
-
     .footer-links { list-style: none; display: flex; gap: 1.75rem; }
     .footer-links a {
-      font-family: var(--mono); font-size: 0.6rem;
-      color: var(--muted); text-decoration: none;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      transition: color 0.15s;
+      font-family: var(--mono); font-size: 0.6rem; color: var(--muted);
+      text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 150ms ease;
     }
-    .footer-links a:hover { color: var(--accent); }
+    @media (hover: hover) and (pointer: fine) { .footer-links a:hover { color: var(--accent); } }
     .footer-links a:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
-
     .footer-build {
-      font-family: var(--mono); font-size: 0.55rem;
-      color: #28282c; letter-spacing: 0.08em;
-      text-transform: uppercase; width: 100%;
-      border-top: 1px solid var(--border); padding-top: 1rem;
-      margin-top: 0.5rem;
+      font-family: var(--mono); font-size: 0.55rem; color: #28282c;
+      letter-spacing: 0.08em; text-transform: uppercase; width: 100%;
+      border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;
     }
 
-    /* ─── reveal ─── */
+    /* ── scroll reveal (CTA section) ── */
     @media (prefers-reduced-motion: no-preference) {
-      .reveal {
-        opacity: 0; transform: translateY(20px);
-        transition: opacity 0.55s ease, transform 0.55s ease;
-      }
+      .reveal { opacity: 0; transform: translateY(16px); transition: opacity 550ms var(--ease-out), transform 550ms var(--ease-out); }
       .reveal.in { opacity: 1; transform: none; }
       .reveal-d { transition-delay: 0.1s; }
     }
 
+    /* ── reduced motion ── */
     @media (prefers-reduced-motion: reduce) {
+      .hero-tag, .hero-title, .hero-tagline, .hero-meta,
+      .hero-cta, .hero-phone, .p-hdr, .p-card { animation: none; }
       .rring, .p-dist::before, .p-eq span { animation: none !important; }
+      .reveal { opacity: 1; transform: none; transition: none; }
     }
   </style>
 </head>
@@ -442,101 +355,84 @@
     <a href="./app" class="nav-cta">ABRIR RADAR ///</a>
   </nav>
 
-  <!-- ① HERO -->
+  <!-- HERO -->
   <section class="hero" aria-label="Inicio">
-    <div class="hero-ripple" aria-hidden="true">
+    <div class="hero-bg" aria-hidden="true">
       <div class="rring" style="width:130vmax;height:130vmax;"></div>
       <div class="rring" style="width:130vmax;height:130vmax;"></div>
       <div class="rring" style="width:130vmax;height:130vmax;"></div>
     </div>
 
-    <span class="hero-tag" aria-hidden="true">&lt; WEBAPP · RADAR MUSICAL · V1.0 &gt;</span>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="hero-tag">&lt; WEBAPP · RADAR MUSICAL · V1.0 &gt;</span>
+        <h1 class="hero-title">R<i>A</i>d<i>A</i>R</h1>
+        <p class="hero-tagline">la música que te gusta, <em>o no.</em></p>
+        <p class="hero-meta">SPOTIFY &nbsp;·&nbsp; LAST.FM &nbsp;·&nbsp; GRATIS &nbsp;·&nbsp; SIN CUENTA</p>
+        <a href="./app" class="hero-cta" aria-label="Abrir RAdAR">ABRIR RADAR ///</a>
+      </div>
 
-    <div class="hero-content">
-      <h1 class="hero-title">R<i>A</i>d<i>A</i>R</h1>
-      <p class="hero-tagline">la música que te gusta, <em>o no.</em></p>
-      <p class="hero-meta">SPOTIFY &nbsp;·&nbsp; LAST.FM &nbsp;·&nbsp; GRATIS &nbsp;·&nbsp; SIN CUENTA</p>
-      <a href="./app" class="hero-cta" aria-label="Abrir RAdAR">ABRIR RADAR ///</a>
-    </div>
-
-    <div class="hero-rule" data-label="SCROLL ///"></div>
-  </section>
-
-  <!-- ② PREVIEW -->
-  <section class="preview" aria-label="Qué es RAdAR">
-    <div class="phone-wrap reveal">
-      <div class="phone" aria-hidden="true">
-        <div class="term-bar">
-          <span>RAdAR · FEED</span>
-          <span>● LIVE</span>
-        </div>
-        <div class="phone-screen">
-          <div class="p-hdr">[ SEÑAL ACTIVA ]</div>
-
-          <div class="p-card active">
-            <div class="p-card-info">
-              <div class="p-song">Suffers — Oye</div>
-              <div class="p-artist">Valentina · Santiago</div>
-              <div class="p-dist">AQUÍ</div>
-            </div>
-            <div class="p-eq"><span></span><span></span><span></span></div>
+      <div class="hero-phone" aria-hidden="true">
+        <div class="phone">
+          <div class="term-bar">
+            <span>RAdAR · FEED</span>
+            <span>● LIVE</span>
           </div>
-
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Alex Turner — Submarine</div>
-              <div class="p-artist">Martín · Providencia</div>
-              <div class="p-dist">CERCA</div>
+          <div class="phone-screen">
+            <div class="p-hdr">[ SEÑAL ACTIVA ]</div>
+            <div class="p-card active">
+              <div class="p-card-info">
+                <div class="p-song">Suffers — Oye</div>
+                <div class="p-artist">Valentina · Santiago</div>
+                <div class="p-dist">AQUÍ</div>
+              </div>
+              <div class="p-eq"><span></span><span></span><span></span></div>
             </div>
-          </div>
-
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Nathy Peluso — BZRP #36</div>
-              <div class="p-artist">Camila · Las Condes</div>
-              <div class="p-dist">TU ZONA</div>
+            <div class="p-card">
+              <div class="p-card-info">
+                <div class="p-song">Alex Turner — Submarine</div>
+                <div class="p-artist">Martín · Providencia</div>
+                <div class="p-dist">CERCA</div>
+              </div>
             </div>
-          </div>
-
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Radiohead — Creep</div>
-              <div class="p-artist">Diego · Ñuñoa</div>
-              <div class="p-dist">TU ZONA</div>
+            <div class="p-card">
+              <div class="p-card-info">
+                <div class="p-song">Nathy Peluso — BZRP #36</div>
+                <div class="p-artist">Camila · Las Condes</div>
+                <div class="p-dist">TU ZONA</div>
+              </div>
             </div>
-          </div>
-
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Mon Laferte — Amárrame</div>
-              <div class="p-artist">Sofía · Vitacura</div>
-              <div class="p-dist">TU CIUDAD</div>
+            <div class="p-card">
+              <div class="p-card-info">
+                <div class="p-song">Radiohead — Creep</div>
+                <div class="p-artist">Diego · Ñuñoa</div>
+                <div class="p-dist">TU ZONA</div>
+              </div>
             </div>
-          </div>
-
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Tame Impala — Let It Happen</div>
-              <div class="p-artist">Andrés · Región Metro</div>
-              <div class="p-dist">TU REGIÓN</div>
+            <div class="p-card">
+              <div class="p-card-info">
+                <div class="p-song">Mon Laferte — Amárrame</div>
+                <div class="p-artist">Sofía · Vitacura</div>
+                <div class="p-dist">TU CIUDAD</div>
+              </div>
+            </div>
+            <div class="p-card">
+              <div class="p-card-info">
+                <div class="p-song">Tame Impala — Let It Happen</div>
+                <div class="p-artist">Andrés · Región Metro</div>
+                <div class="p-dist">TU REGIÓN</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="preview-text reveal reveal-d">
-      <div class="sect-id">[ 01 — SEÑAL ]</div>
-      <p>ve qué escucha la gente<br>cerca de ti, <em>ahora mismo.</em></p>
-      <p class="sub">conecta spotify o last.fm — un click, sin crear cuenta en radar. chat anónimo incluido.</p>
-      <a href="./app" class="preview-cta" aria-label="Abrir la webapp RAdAR">ABRIR RADAR ///</a>
-    </div>
   </section>
 
-  <!-- ③ CTA FINAL -->
+  <!-- CTA FINAL -->
   <section class="cta-section" aria-label="Abrir RAdAR">
-    <h2>GRATIS.<br>SIN CUENTA.</h2>
-    <div class="cta-block">
+    <h2 class="reveal">GRATIS.<br>SIN CUENTA.</h2>
+    <div class="cta-block reveal reveal-d">
       <p class="cta-services">
         SPOTIFY &nbsp;·&nbsp; LAST.FM<br>
         APPLE MUSIC &nbsp;·&nbsp; YOUTUBE MUSIC<br>
