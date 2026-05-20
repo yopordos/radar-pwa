@@ -344,6 +344,13 @@
       .rring, .p-dist::before, .p-eq span { animation: none !important; }
       .reveal { opacity: 1; transform: none; transition: none; }
     }
+
+    /* ── circle-reveal page transition ── */
+    @view-transition { navigation: auto; }
+    .transition-cover {
+      position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+      background: var(--ink); will-change: clip-path;
+    }
   </style>
 </head>
 <body>
@@ -457,11 +464,50 @@
   </footer>
 
   <script>
+    // scroll reveal
     const io = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
       { threshold: 0.08 }
     );
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // circle-reveal transition on all app links
+    let transitioning = false;
+    document.querySelectorAll('a[href="./app"]').forEach(link => {
+      link.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (transitioning) { e.preventDefault(); return; }
+        e.preventDefault();
+        transitioning = true;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          window.location.href = './app'; return;
+        }
+
+        const rect = link.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const maxR = Math.hypot(
+          Math.max(cx, window.innerWidth - cx),
+          Math.max(cy, window.innerHeight - cy)
+        );
+
+        const cover = document.createElement('div');
+        cover.className = 'transition-cover';
+        document.body.appendChild(cover);
+
+        const doNav = () => { window.location.href = './app'; };
+        const t = setTimeout(doNav, 750);
+
+        cover.animate(
+          [
+            { clipPath: `circle(0px at ${cx}px ${cy}px)` },
+            { clipPath: `circle(${maxR * 1.05}px at ${cx}px ${cy}px)` }
+          ],
+          { duration: 560, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+        ).finished.then(() => { clearTimeout(t); doNav(); });
+      });
+    });
   </script>
 
 </body>
