@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RAdAR — la música que te gusta, o no.</title>
   <script>
-    // Si el callback OAuth llega a index.html por error, redirigir a app.html
     (function() {
       var p = window.location.search;
       if (p && (p.indexOf('access_token=') !== -1 || p.indexOf('auth_error=') !== -1 || p.indexOf('lastfm_token=') !== -1 || p.indexOf('code=') !== -1)) {
@@ -45,7 +44,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "RAdAR",
-    "url": "https://radarpin.me/app.html",
+    "url": "https://radarpin.me/app",
     "description": "Ve qué está escuchando la gente cerca de ti en tiempo real. Conecta Spotify o Last.fm.",
     "applicationCategory": "MusicApplication",
     "operatingSystem": "Web, iOS, Android",
@@ -59,19 +58,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 
   <style>
-    /* ─── tokens ─── */
     :root {
-      --ink:     #0c0c0c;
-      --surface: #111113;
-      --card:    #161618;
-      --border:  #1e1e20;
-      --border-hi: #2c2c2e;
-      --accent:  #e8ff47;
-      --text:    #e4e4dc;
-      --muted:   #44444a;
-      --subtle:  #28282c;
-      --sans:    'Poppins', sans-serif;
-      --mono:    var(--sans);
+      --ink:      #0c0c0c;
+      --surface:  #111113;
+      --card:     #161618;
+      --border:   #1e1e20;
+      --accent:   #e8ff47;
+      --text:     #e4e4dc;
+      --muted:    #44444a;
+      --sans:     'Poppins', sans-serif;
+      --mono:     var(--sans);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,7 +80,6 @@
       overflow-x: hidden;
     }
 
-    /* CRT scanlines overlay */
     body::after {
       content: '';
       position: fixed; inset: 0; pointer-events: none; z-index: 9999;
@@ -94,7 +89,6 @@
       );
     }
 
-    /* Grain noise — low opacity SVG fractal */
     body::before {
       content: '';
       position: fixed; inset: 0; pointer-events: none; z-index: 9998;
@@ -137,19 +131,6 @@
     .nav-cta:hover { opacity: 0.82; }
     .nav-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-    /* ─── section marker ─── */
-    .sect-id {
-      font-family: var(--mono); font-size: 0.6rem;
-      color: var(--muted); letter-spacing: 0.15em;
-      text-transform: uppercase; margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.75rem;
-    }
-    .sect-id::after {
-      content: '';
-      flex: 1; height: 1px; background: var(--border);
-      max-width: 120px;
-    }
-
     /* ─── hero ─── */
     .hero {
       min-height: 100svh;
@@ -160,7 +141,6 @@
       position: relative; overflow: hidden;
     }
 
-    /* radar ripple rings */
     .hero-ripple {
       position: absolute; inset: 0; pointer-events: none; z-index: 0;
     }
@@ -205,9 +185,20 @@
       margin-top: 1rem;
       font-family: var(--mono); font-size: clamp(0.575rem, 1.2vw, 0.75rem);
       color: var(--muted); letter-spacing: 0.1em;
-      text-transform: uppercase; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
+      text-transform: uppercase;
     }
+
+    .hero-cta {
+      display: inline-block;
+      margin-top: 2rem;
+      background: var(--accent); color: var(--ink);
+      font-family: var(--mono); font-size: clamp(0.7rem, 1.5vw, 0.875rem);
+      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.9rem 2.25rem;
+      text-decoration: none; transition: opacity 0.15s;
+    }
+    .hero-cta:hover { opacity: 0.82; }
+    .hero-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .hero-rule {
       margin-top: 3rem;
@@ -222,36 +213,60 @@
       position: absolute; right: 0; top: -0.85rem;
     }
 
-    /* ─── grid divider trick — 1px borders via gap ─── */
-    .grid-div {
-      display: grid; gap: 1px;
-      background: var(--border);
-    }
-    .grid-div > * { background: var(--ink); }
-    .grid-div-surface > * { background: var(--surface); }
-
-    /* ─── about ─── */
-    .about {
+    /* ─── preview ─── */
+    .preview {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 5rem 2rem;
       display: grid; gap: 4rem; align-items: center;
     }
     @media (min-width: 768px) {
-      .about {
+      .preview {
         grid-template-columns: 1fr 1fr;
         padding: 7rem 5rem; gap: 5rem;
       }
     }
 
-    .about-text p {
-      font-size: clamp(1rem, 2.25vw, 1.375rem);
-      line-height: 1.6; max-width: 38ch; color: var(--text);
+    .preview-text .sect-id {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--muted); letter-spacing: 0.15em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
     }
-    .about-text strong { font-weight: 900; }
-    .about-text em { color: var(--accent); font-style: normal; font-weight: 700; }
+    .preview-text .sect-id::after {
+      content: '';
+      flex: 1; height: 1px; background: var(--border);
+      max-width: 120px;
+    }
 
-    /* ─── terminal (phone mockup) ─── */
+    .preview-text p {
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      font-weight: 900; line-height: 1.2; max-width: 20ch;
+      letter-spacing: -0.02em; color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .preview-text p em { color: var(--accent); font-style: normal; }
+
+    .preview-text .sub {
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+      font-weight: 400; color: var(--muted); line-height: 1.6;
+      max-width: 32ch; margin-bottom: 2rem;
+      letter-spacing: 0;
+    }
+
+    .preview-cta {
+      display: inline-block;
+      background: var(--ink); color: var(--accent);
+      border: 1px solid var(--border);
+      font-family: var(--mono); font-size: 0.75rem;
+      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.75rem 1.75rem;
+      text-decoration: none; transition: border-color 0.15s, color 0.15s;
+    }
+    .preview-cta:hover { border-color: var(--accent); }
+    .preview-cta:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+    /* ─── phone mockup ─── */
     .phone-wrap { display: flex; justify-content: center; }
 
     .phone {
@@ -286,7 +301,6 @@
       margin-bottom: 6px; flex-shrink: 0;
     }
 
-    /* card matching app exactly — no border-radius */
     .p-card {
       background: var(--card);
       padding: 7px 8px; margin-bottom: 4px;
@@ -301,7 +315,7 @@
     }
 
     .p-card-info { flex: 1; min-width: 0; }
-    .p-song  { color: var(--text); font-size: 0.575rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-song   { color: var(--text); font-size: 0.575rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .p-artist { color: #555; font-size: 0.5rem; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .p-dist {
@@ -334,192 +348,30 @@
     .p-eq span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes eqdance { 0%,100% { height: 2px; } 50% { height: 9px; } }
 
-    /* login screen */
-    .p-login {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      height: 100%; gap: 0;
-    }
-    .p-logo-circle {
-      width: 52px; height: 52px; overflow: hidden;
-      margin-bottom: 10px; flex-shrink: 0;
-      box-shadow: 0 0 16px rgba(232,255,71,0.25);
-    }
-    .p-logo-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .p-tagline {
-      font-size: 0.52rem; font-weight: 900; color: var(--text);
-      text-align: center; line-height: 1.3; margin-bottom: 12px; padding: 0 4px;
-    }
-    .p-tagline em { color: var(--accent); font-style: normal; }
-    .p-btn-spotify {
-      background: #1DB954; color: #fff; font-family: var(--mono);
-      font-size: 0.48rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 5px 8px; width: 100%; text-align: center; margin-bottom: 4px;
-    }
-    .p-btn-lastfm {
-      background: #d51007; color: #fff; font-family: var(--mono);
-      font-size: 0.48rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 5px 8px; width: 100%; text-align: center;
-    }
-
-    /* chat screen */
-    .p-chat { display: flex; flex-direction: column; height: 100%; gap: 4px; }
-    .p-chat-meta { color: var(--muted); font-family: var(--mono); font-size: 0.43rem; text-align: center; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 0 4px; flex-shrink: 0; }
-    .p-messages { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
-    .p-bubble { font-size: 0.52rem; line-height: 1.4; color: var(--text); padding: 5px 7px; max-width: 82%; }
-    .p-bubble-me {
-      background: rgba(232,255,71,0.12); border: 1px solid rgba(232,255,71,0.2);
-      align-self: flex-end;
-    }
-    .p-bubble-them { background: var(--card); align-self: flex-start; }
-    .p-chat-input {
-      background: var(--card); padding: 5px 7px; flex-shrink: 0;
-      color: #333; font-family: var(--mono); font-size: 0.45rem;
-      letter-spacing: 0.05em;
-    }
-
-    /* ─── statement ─── */
-    .statement {
-      background: var(--accent);
-      padding: 5rem 2rem;
-      border-bottom: 1px solid #c8df27;
-    }
-    .statement .sect-id { color: rgba(0,0,0,0.35); }
-    .statement .sect-id::after { background: rgba(0,0,0,0.15); }
-    .statement h2 {
-      font-size: clamp(4rem, 20vw, 17rem);
-      font-weight: 900; line-height: 0.88;
-      letter-spacing: -0.04em; color: var(--ink);
-      text-transform: uppercase;
-    }
-
-    /* ─── how-to header ─── */
-    .howto-hdr {
-      background: var(--ink);
-      padding: 5rem 2rem 2rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .howto-hdr .pre {
-      font-family: var(--mono); font-size: 0.65rem;
-      color: var(--muted); letter-spacing: 0.15em;
-      text-transform: uppercase; margin-bottom: 1.5rem;
-      display: block;
-    }
-    .howto-hdr h2 {
-      font-size: clamp(3.5rem, 15vw, 13rem);
-      font-weight: 900; line-height: 0.88;
-      letter-spacing: -0.04em; color: var(--text);
-      text-transform: uppercase;
-    }
-    .howto-hdr h2 em { color: var(--accent); font-style: normal; }
-
-    /* ─── steps ─── */
-    .step {
-      padding: 5rem 2rem;
-      display: grid; gap: 2.5rem; align-items: center;
-      border-bottom: 1px solid var(--border);
-    }
-    .step-a { background: var(--ink); }
-    .step-b { background: var(--surface); }
-
-    @media (min-width: 768px) {
-      .step { grid-template-columns: 1fr 1fr; padding: 6.5rem 5rem; gap: 5rem; }
-      .step-b .step-phone { order: -1; }
-    }
-
-    .step-num {
-      font-size: clamp(6rem, 25vw, 20rem);
-      font-weight: 900; line-height: 0.8;
-      letter-spacing: -0.06em; color: var(--accent);
-      font-style: normal;
-    }
-
-    .step-body h3 {
-      font-size: clamp(2rem, 5.5vw, 4rem);
-      font-weight: 900; line-height: 0.92;
-      letter-spacing: -0.03em; color: var(--text);
-      text-transform: uppercase; margin-bottom: 1.25rem;
-    }
-    .step-body p {
-      font-size: clamp(0.875rem, 1.75vw, 1.125rem);
-      line-height: 1.65; max-width: 36ch; color: var(--muted);
-    }
-    .step-body p strong { color: var(--text); font-weight: 700; }
-
-    /* ─── services ─── */
-    .services {
-      background: var(--surface);
-      padding: 5rem 2rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .services h3 {
-      font-size: clamp(1.75rem, 5vw, 3.5rem);
-      font-weight: 900; letter-spacing: -0.03em;
-      line-height: 1; margin-bottom: 3rem;
-      color: var(--text); text-transform: uppercase;
-    }
-    .services h3 em { color: var(--accent); font-style: normal; }
-
-    .svc-table {
-      width: 100%; max-width: 600px;
-      border-top: 1px solid var(--border);
-    }
-    .svc-row {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding: 0.75rem 0;
-    }
-    .svc-label {
-      font-family: var(--mono); font-size: clamp(0.65rem, 1.5vw, 0.8125rem);
-      letter-spacing: 0.06em; text-transform: uppercase;
-      color: rgba(228,228,220,0.6);
-    }
-    .svc-val {
-      font-family: var(--mono); font-size: 0.75rem;
-      font-weight: 700; color: var(--accent);
-      letter-spacing: 0.05em;
-    }
-
-    /* ─── free punchline ─── */
-    .free {
-      background: var(--ink);
-      padding: 5rem 2rem 6.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .free h2 {
-      font-size: clamp(4.5rem, 22vw, 19rem);
-      font-weight: 900; line-height: 0.85;
-      letter-spacing: -0.04em; color: var(--text);
-      text-transform: uppercase;
-    }
-    .free h2 em { color: var(--accent); font-style: normal; }
-
-    .free-note {
-      margin-top: 2rem;
-      font-family: var(--mono);
-      font-size: clamp(0.6rem, 1.2vw, 0.75rem);
-      color: var(--muted); letter-spacing: 0.1em;
-      text-transform: uppercase; line-height: 1.8;
-    }
-
-    /* ─── cta ─── */
+    /* ─── cta final ─── */
     .cta-section {
       background: var(--accent);
       padding: 6rem 2rem;
       display: flex; flex-direction: column;
-      align-items: flex-start; gap: 3rem;
+      align-items: flex-start; gap: 2.5rem;
     }
     @media (min-width: 768px) {
       .cta-section { padding: 7rem 5rem; flex-direction: row; align-items: flex-end; justify-content: space-between; }
     }
 
     .cta-section h2 {
-      font-size: clamp(2.5rem, 9vw, 7.5rem);
-      font-weight: 900; line-height: 0.9;
+      font-size: clamp(3rem, 12vw, 10rem);
+      font-weight: 900; line-height: 0.88;
       letter-spacing: -0.04em; color: var(--ink);
       text-transform: uppercase;
+    }
+
+    .cta-block { display: flex; flex-direction: column; gap: 1.25rem; align-items: flex-start; flex-shrink: 0; }
+
+    .cta-services {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: rgba(12,12,12,0.5); letter-spacing: 0.1em;
+      text-transform: uppercase; line-height: 1.9;
     }
 
     .cta-btn {
@@ -531,7 +383,6 @@
       text-decoration: none; letter-spacing: 0.1em;
       text-transform: uppercase; white-space: nowrap;
       cursor: pointer; transition: opacity 0.15s;
-      flex-shrink: 0;
       border: 2px solid var(--ink);
     }
     .cta-btn:hover { opacity: 0.85; }
@@ -561,7 +412,7 @@
 
     .footer-build {
       font-family: var(--mono); font-size: 0.55rem;
-      color: var(--subtle); letter-spacing: 0.08em;
+      color: #28282c; letter-spacing: 0.08em;
       text-transform: uppercase; width: 100%;
       border-top: 1px solid var(--border); padding-top: 1rem;
       margin-top: 0.5rem;
@@ -577,7 +428,6 @@
       .reveal-d { transition-delay: 0.1s; }
     }
 
-    /* reduced motion — disable all animations */
     @media (prefers-reduced-motion: reduce) {
       .rring, .p-dist::before, .p-eq span { animation: none !important; }
     }
@@ -589,7 +439,7 @@
   <nav aria-label="Navegación principal">
     <a href="/" class="nav-logo" aria-label="RAdAR — inicio"><img src="logo.png" alt="RAdAR"></a>
     <span class="nav-meta">[ WEBAPP · RADAR MUSICAL ]</span>
-    <a href="./app.html" class="nav-cta">ABRIR RADAR ///</a>
+    <a href="./app" class="nav-cta">ABRIR RADAR ///</a>
   </nav>
 
   <!-- ① HERO -->
@@ -605,14 +455,15 @@
     <div class="hero-content">
       <h1 class="hero-title">R<i>A</i>d<i>A</i>R</h1>
       <p class="hero-tagline">la música que te gusta, <em>o no.</em></p>
-      <p class="hero-meta">WEBAPP &nbsp;·&nbsp; CERCA DE TI &nbsp;·&nbsp; EN TIEMPO REAL &nbsp;·&nbsp; GRATIS</p>
+      <p class="hero-meta">SPOTIFY &nbsp;·&nbsp; LAST.FM &nbsp;·&nbsp; GRATIS &nbsp;·&nbsp; SIN CUENTA</p>
+      <a href="./app" class="hero-cta" aria-label="Abrir RAdAR">ABRIR RADAR ///</a>
     </div>
 
     <div class="hero-rule" data-label="SCROLL ///"></div>
   </section>
 
-  <!-- ② ABOUT + TERMINAL (feed) -->
-  <section class="about" aria-label="Qué es RAdAR">
+  <!-- ② PREVIEW -->
+  <section class="preview" aria-label="Qué es RAdAR">
     <div class="phone-wrap reveal">
       <div class="phone" aria-hidden="true">
         <div class="term-bar">
@@ -674,195 +525,39 @@
       </div>
     </div>
 
-    <div class="reveal reveal-d">
-      <div class="sect-id">[ 01 — ACERCA ]</div>
-      <div class="about-text">
-        <p>conoce RAdAR, una <strong>webapp</strong> para los que quieren saber qué escucha la gente cerca. <strong>sin algoritmos. sin recomendaciones. <em>solo lo que están escuchando ahora mismo, cerca de ti.</em></strong> la abres desde el navegador — sin descargar nada.</p>
-      </div>
+    <div class="preview-text reveal reveal-d">
+      <div class="sect-id">[ 01 — SEÑAL ]</div>
+      <p>ve qué escucha la gente<br>cerca de ti, <em>ahora mismo.</em></p>
+      <p class="sub">conecta spotify o last.fm — un click, sin crear cuenta en radar. chat anónimo incluido.</p>
+      <a href="./app" class="preview-cta" aria-label="Abrir la webapp RAdAR">ABRIR RADAR ///</a>
     </div>
   </section>
 
-  <!-- ③ STATEMENT -->
-  <section class="statement reveal" aria-label="En tiempo real">
-    <div class="sect-id">[ 02 — SEÑAL ]</div>
-    <h2>EN TIEMPO<br>REAL.</h2>
-  </section>
-
-  <!-- ④ HOW TO HEADER -->
-  <div class="howto-hdr">
-    <span class="pre">// INSTRUCCIONES DE USO</span>
-    <h2 class="reveal">CÓMO<br>USAR<br><em>RAdAR</em></h2>
-  </div>
-
-  <!-- ⑤ PASO 1 — conectar -->
-  <section class="step step-a" aria-label="Paso 1: conectar tu cuenta">
-    <div class="reveal">
-      <div class="sect-id">[ PASO 01 ]</div>
-      <div class="step-num" aria-hidden="true">1</div>
-      <div class="step-body">
-        <h3>CONECTA<br>TU CUENTA</h3>
-        <p>conecta tu <strong>Spotify</strong> o tu <strong>Last.fm</strong>. si usas Apple Music o YouTube Music, Last.fm scrobblea todo automáticamente. un click y listo — sin crear cuenta, sin descargar nada.</p>
-      </div>
+  <!-- ③ CTA FINAL -->
+  <section class="cta-section" aria-label="Abrir RAdAR">
+    <h2>GRATIS.<br>SIN CUENTA.</h2>
+    <div class="cta-block">
+      <p class="cta-services">
+        SPOTIFY &nbsp;·&nbsp; LAST.FM<br>
+        APPLE MUSIC &nbsp;·&nbsp; YOUTUBE MUSIC<br>
+        IPHONE &nbsp;·&nbsp; ANDROID &nbsp;·&nbsp; DESKTOP<br>
+        PWA INSTALABLE
+      </p>
+      <a href="./app" class="cta-btn" aria-label="Abrir la webapp RAdAR">
+        ABRIR RADAR <span aria-hidden="true">&nbsp;///</span>
+      </a>
     </div>
-    <div class="step-phone phone-wrap reveal reveal-d">
-      <div class="phone" aria-hidden="true">
-        <div class="term-bar">
-          <span>RAdAR · LOGIN</span>
-          <span>UNIT D-01</span>
-        </div>
-        <div class="phone-screen">
-          <div class="p-login">
-            <div class="p-logo-circle"><img src="logo.png" alt="RAdAR"></div>
-            <p class="p-tagline">la música que te gusta, <em>o no.</em></p>
-            <div style="width:100%;">
-              <div class="p-btn-spotify">[ SPOTIFY ]</div>
-              <div style="height:4px;"></div>
-              <div class="p-btn-lastfm">[ LAST.FM ]</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑥ PASO 2 — ubicación -->
-  <section class="step step-b" aria-label="Paso 2: activar ubicación">
-    <div class="reveal">
-      <div class="sect-id">[ PASO 02 ]</div>
-      <div class="step-num" aria-hidden="true">2</div>
-      <div class="step-body">
-        <h3>ACTIVA<br>(O NO)<br>TU UBICACIÓN</h3>
-        <p>con GPS ves quién escucha cerca — <strong>aquí, cerca, tu zona, tu ciudad, tu región.</strong> sin GPS igual ves todos los usuarios activos en el mundo. tú decides.</p>
-      </div>
-    </div>
-    <div class="step-phone phone-wrap reveal reveal-d">
-      <div class="phone" aria-hidden="true">
-        <div class="term-bar">
-          <span>RAdAR · GPS</span>
-          <span>● ACTIVE</span>
-        </div>
-        <div class="phone-screen">
-          <div class="p-hdr">[ MODO DE SEÑAL ]</div>
-          <div class="p-card active">
-            <div class="p-card-info">
-              <div class="p-song">Tame Impala — Let It Happen</div>
-              <div class="p-artist">cerca de ti</div>
-              <div class="p-dist">AQUÍ</div>
-            </div>
-            <div class="p-eq"><span></span><span></span><span></span></div>
-          </div>
-          <div class="p-card">
-            <div class="p-card-info">
-              <div class="p-song">Billie Eilish — Happier Than Ever</div>
-              <div class="p-artist">tu barrio</div>
-              <div class="p-dist">CERCA</div>
-            </div>
-          </div>
-          <div style="margin-top:8px; padding:6px 8px; border: 1px solid rgba(232,255,71,0.2); background:rgba(232,255,71,0.05);">
-            <div style="font-family:var(--mono);color:var(--accent);font-size:0.44rem;font-weight:700;letter-spacing:0.1em;">[ GPS: ACTIVO ]</div>
-            <div style="font-family:var(--mono);color:var(--muted);font-size:0.4rem;margin-top:2px;letter-spacing:0.06em;">VES QUIÉN ESTÁ CERCA DE TI</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑦ PASO 3 — escuchar -->
-  <section class="step step-a" aria-label="Paso 3: escuchar y conectar">
-    <div class="reveal">
-      <div class="sect-id">[ PASO 03 ]</div>
-      <div class="step-num" aria-hidden="true">3</div>
-      <div class="step-body">
-        <h3>ESCUCHA<br>Y CONECTA</h3>
-        <p>ve el feed en tiempo real. toca una fila para abrir la canción en Spotify. o inicia un chat anónimo con alguien que está escuchando lo mismo que tú — <strong>sin compartir tus datos.</strong></p>
-      </div>
-    </div>
-    <div class="step-phone phone-wrap reveal reveal-d">
-      <div class="phone" aria-hidden="true">
-        <div class="term-bar">
-          <span>RAdAR · CHAT</span>
-          <span>ANON · 60MIN</span>
-        </div>
-        <div class="phone-screen">
-          <div class="p-chat">
-            <div style="font-family:var(--mono);font-size:0.47rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px;">Radiohead — Creep</div>
-            <div class="p-chat-meta">[ CANAL ANÓNIMO · REV 1.0 ]</div>
-            <div class="p-messages">
-              <div class="p-bubble p-bubble-them">esa canción siempre 🥲</div>
-              <div class="p-bubble p-bubble-me">lo sé, la tengo en loop</div>
-              <div class="p-bubble p-bubble-them">the bends &gt; ok computer</div>
-              <div class="p-bubble p-bubble-me">debate válido</div>
-            </div>
-            <div class="p-chat-input">_ ESCRIBE ALGO...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑧ SERVICES -->
-  <section class="services reveal" aria-label="Compatibilidad">
-    <div class="sect-id">[ 04 — COMPATIBILIDAD ]</div>
-    <h3>FUNCIONA CON<br>LO QUE YA USAS, <em>HOY.</em></h3>
-    <div class="svc-table" role="list">
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">SPOTIFY</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">LAST.FM</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">APPLE MUSIC (VÍA LAST.FM)</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">YOUTUBE MUSIC (VÍA LAST.FM)</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">IPHONE Y ANDROID</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">INSTALABLE COMO WEBAPP (PWA)</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-      <div class="svc-row" role="listitem">
-        <span class="svc-label">SIN CREAR CUENTA EN RADAR</span>
-        <span class="svc-val">[ ✓ ]</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑨ FREE PUNCHLINE -->
-  <section class="free" aria-label="Y es gratis">
-    <h2 class="reveal">Y ES,<br><em>GRATIS.</em></h2>
-    <p class="free-note reveal reveal-d">
-      WEBAPP GRATUITA &nbsp;·&nbsp; FUNCIONA EN EL NAVEGADOR &nbsp;·&nbsp; SIN SUSCRIPCIÓN<br>
-      SIN ANUNCIOS &nbsp;·&nbsp; SIN VENDER TUS DATOS
-    </p>
-  </section>
-
-  <!-- ⑩ CTA FINAL -->
-  <section class="cta-section" aria-label="Instalar RAdAR">
-    <h2>INSTALA<br>RADAR<br>AHORA.</h2>
-    <a href="./app.html" class="cta-btn" aria-label="Abrir la webapp RAdAR">
-      ABRIR RADAR
-      <span aria-hidden="true">&nbsp;///</span>
-    </a>
   </section>
 
   <!-- FOOTER -->
   <footer>
     <span class="footer-logo"><img src="logo.png" alt="RAdAR"></span>
     <ul class="footer-links">
-      <li><a href="./app.html">WEBAPP</a></li>
+      <li><a href="./app">WEBAPP</a></li>
       <li><a href="https://github.com/yopordos/radar-pwa" target="_blank" rel="noopener noreferrer">GITHUB</a></li>
       <li><a href="mailto:jt.gonzalezmarin@gmail.com">CONTACTO</a></li>
     </ul>
-    <p class="footer-build">© 2026 RADAR &nbsp;·&nbsp; RADAR MUSICAL EN TIEMPO REAL &nbsp;·&nbsp; WEBAPP GRATUITA &nbsp;·&nbsp; REV 1.0</p>
+    <p class="footer-build">© 2026 RADAR &nbsp;·&nbsp; RADAR MUSICAL EN TIEMPO REAL &nbsp;·&nbsp; WEBAPP GRATUITA</p>
   </footer>
 
   <script>
