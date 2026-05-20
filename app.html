@@ -1145,15 +1145,20 @@ async function handleCallback() {
       // user_id missing from redirect — fetch it directly from Spotify
       showLoading(true);
       try {
-        const me = await fetch('https://api.spotify.com/v1/me', {
+        const res = await fetch('https://api.spotify.com/v1/me', {
           headers: { 'Authorization': `Bearer ${accessToken}` }
-        }).then(r => r.json());
-        if (!me.id) throw new Error('no id');
+        });
+        if (!res.ok) throw new Error(`spotify_me_${res.status}`);
+        const me = await res.json();
+        if (!me.id) throw new Error('no_id');
         S.spotifyToken = accessToken; S.userId = me.id; saveAuth();
         showLoading(false); afterLogin();
       } catch(e) {
         showLoading(false); setScreen('listen');
-        showToast(isES ? 'Error al conectar con Spotify. Intenta de nuevo.' : 'Spotify connection failed. Please try again.');
+        const isTokenErr = e.message && e.message.startsWith('spotify_me_');
+        showToast(isTokenErr
+          ? (isES ? 'Token de Spotify inválido. Intenta conectar de nuevo.' : 'Invalid Spotify token. Please try again.')
+          : (isES ? 'Error al conectar con Spotify. Intenta de nuevo.' : 'Spotify connection failed. Please try again.'));
       }
     }
     return;
