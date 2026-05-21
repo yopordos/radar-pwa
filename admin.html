@@ -89,23 +89,24 @@
   .loading { color: #333; font-size: 12px; letter-spacing: 1px; padding: 16px 0; }
 
   .users-section { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1a1a1a; }
-  .user-list { list-style: none; }
+  .user-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
   .user-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0; border-bottom: 1px solid #141414;
+    display: flex; align-items: stretch;
+    background: #141414; border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden;
+    transition: border-color 0.15s;
   }
-  .user-item:last-child { border-bottom: none; }
-  .user-song { flex: 1; min-width: 0; }
+  .user-item:hover { border-color: #2a2a2a; }
+  .user-item-content { flex: 1; min-width: 0; padding: 11px 14px; }
   .user-song-name { color: #f5f0e8; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-song-meta { color: #555; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-dist { color: #333; font-size: 10px; font-weight: 700; letter-spacing: 1px; flex-shrink: 0; min-width: 60px; text-align: right; }
+  .user-song-meta { color: #555; font-size: 11px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-ago { color: #333; font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-top: 5px; }
   .delete-btn {
-    background: none; border: 1px solid #2a0a0a; color: #ff4757;
-    font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    padding: 5px 10px; border-radius: 6px; cursor: pointer; flex-shrink: 0;
-    transition: background 0.15s, border-color 0.15s;
+    background: none; border: none; border-left: 1px solid #1e1e1e;
+    color: #ff4757; width: 48px; flex-shrink: 0; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.15s;
   }
-  .delete-btn:hover { background: #1a0505; border-color: #ff4757; }
+  .delete-btn:hover { background: #1a0505; }
 </style>
 </head>
 <body>
@@ -186,15 +187,20 @@ async function loadUsers() {
       el.innerHTML = '<li class="empty">sin usuarios activos</li>';
       return;
     }
-    el.innerHTML = users.map(u => `
-      <li class="user-item">
-        <div class="user-song">
-          <div class="user-song-name">${u.song || '—'}</div>
-          <div class="user-song-meta">${u.artist || '—'} · <span style="color:#e8ff47;font-size:9px;letter-spacing:1px">${u.userId || u.deviceId || ''}</span></div>
+    users.sort((a, b) => (b.updatedMs || 0) - (a.updatedMs || 0));
+    el.innerHTML = users.map(u => {
+      const ago = u.updatedMs ? Math.round((Date.now() - u.updatedMs) / 60000) : null;
+      const agoStr = ago === null ? '' : ago < 1 ? 'ahora mismo' : `hace ${ago}m`;
+      const uid = (u.userId || '').slice(0, 20) || (u.deviceId || '').slice(0, 12);
+      return `<li class="user-item">
+        <div class="user-item-content">
+          <div class="user-song-name">${u.song || '<span style="color:#333;font-style:italic">sin canción</span>'}</div>
+          <div class="user-song-meta">${u.artist || '—'} · <span style="color:#333;font-size:10px">${uid}</span></div>
+          ${agoStr ? `<div class="user-ago">${agoStr}</div>` : ''}
         </div>
-        <span class="user-dist">${u.dist || '—'}</span>
-        <button class="delete-btn" onclick="deleteUser('${u.deviceId}')">✕ BORRAR</button>
-      </li>`).join('');
+        <button class="delete-btn" title="Eliminar" onclick="deleteUser('${u.deviceId}')">✕</button>
+      </li>`;
+    }).join('');
   } catch (e) {
     el.innerHTML = '<li class="empty">error al cargar</li>';
   }
