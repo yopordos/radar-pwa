@@ -177,7 +177,20 @@
       overflow: hidden; cursor: pointer;
       transition: opacity 0.15s;
     }
+    .detect-btn {
+      background: none; border: 1px solid rgba(245,240,232,0.15); border-radius: 14px;
+      padding: 0 10px; height: 68px; min-width: 52px;
+      font-family: inherit; font-size: 8px; font-weight: 700; letter-spacing: 1px;
+      color: var(--text, #f5f0e8); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      transition: opacity 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    .detect-btn:active { opacity: 0.7; }
+    .detect-btn.detecting { opacity: 0.4; pointer-events: none; }
+    .detect-btn-icon { font-size: 20px; line-height: 1; }
     .bottom-song:active { opacity: 0.85; }
+    @keyframes reconnect-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+    .bottom-song.reconnect { animation: reconnect-pulse 2s ease-in-out infinite; }
     .bottom-label       { color: rgba(0,0,0,0.45); font-size: 8px; font-weight: 700; letter-spacing: 2px; margin-bottom: 1px; }
     .bottom-song-row    { display: flex; align-items: center; gap: 6px; overflow: hidden; }
     .bottom-song-title  { color: #0c0c0c; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
@@ -307,6 +320,13 @@
       .topbar-np-nothing {
         color: #333; font-size: 13px; font-style: italic;
       }
+      .topbar-reconnect-btn {
+        background: #e8ff47; color: #0c0c0c; border: none;
+        font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 900;
+        letter-spacing: 1px; padding: 7px 14px; border-radius: 8px;
+        cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+      }
+      .topbar-reconnect-btn:hover { opacity: 0.85; }
 
       .topbar-radar-btn {
         width: 44px; height: 44px; border-radius: 50%;
@@ -553,12 +573,15 @@
       top: calc(env(safe-area-inset-top) + 16px);
       bottom: auto;
       left: 50%; transform: translateX(-50%);
-      white-space: nowrap; background: #1e1e1e; border: 1px solid #e8ff47;
-      padding: 10px 20px; border-radius: 10px; z-index: 200;
+      max-width: min(340px, calc(100vw - 32px));
+      width: max-content;
+      text-align: center;
+      background: #1e1e1e; border: 1px solid #e8ff47;
+      padding: 10px 18px; border-radius: 10px; z-index: 200;
       opacity: 0; transition: opacity 0.2s; pointer-events: none;
     }
     .toast.show { opacity: 1; }
-    .toast-text { color: #e8ff47; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+    .toast-text { color: #e8ff47; font-size: 12px; font-weight: 700; letter-spacing: 1px; line-height: 1.4; }
 
     /* Loading */
     .loading-overlay {
@@ -707,7 +730,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       .eq-bar, .inbox-ring, .topbar-inbox-ring, .ripple-ring,
-      .onb-pulse-overlay-ring, .login-dot, .login-connect-line {
+      .onb-pulse-overlay-ring, .login-dot, .login-connect-line,
+      .bottom-song.reconnect {
         animation: none;
       }
       body::before, body::after { display: none; }
@@ -858,7 +882,7 @@ const T = {
   reconnect:    isES ? 'Reconectar Spotify' : 'Reconnect Spotify',
   reconnectLfm: isES ? 'Reconectar Last.fm' : 'Reconnect Last.fm',
   waitingLfm:   isES ? 'Esperando canción de Last.fm...' : 'Waiting for Last.fm song...',
-  tokenExpired: isES ? 'Sesión de Spotify expirada. Reconecta para seguir compartiendo.' : 'Spotify session expired. Reconnect to keep sharing.',
+  tokenExpired: isES ? 'sesión de Spotify expirada' : 'Spotify session expired',
   activeChats:  isES ? 'CHATS ACTIVOS'    : 'ACTIVE CHATS',
   delConfirm:   isES ? '¿Eliminar esta conversación?' : 'Delete this conversation?',
   loading:      isES ? 'CARGANDO...'      : 'LOADING...',
@@ -1001,6 +1025,60 @@ function getLocation() {
     () => {},
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
   );
+}
+
+// ── ACRCloud mic detection ──
+function blobToBase64(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function detectWithMic() {
+  if (!S.userId) { showToast(isES ? 'CONECTA SPOTIFY O LAST.FM PRIMERO' : 'CONNECT SPOTIFY OR LAST.FM FIRST'); return; }
+  const btn = document.getElementById('detect-btn');
+  if (btn) btn.classList.add('detecting');
+  showToast(isES ? 'ESCUCHANDO 8 SEG...' : 'LISTENING 8 SEC...');
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e) {
+    showToast(isES ? 'MICRÓFONO NO DISPONIBLE' : 'MIC NOT AVAILABLE');
+    if (btn) btn.classList.remove('detecting');
+    return;
+  }
+
+  const recorder = new MediaRecorder(stream);
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    showToast(isES ? 'IDENTIFICANDO...' : 'IDENTIFYING...');
+    try {
+      const blob = new Blob(chunks, { type: recorder.mimeType });
+      const base64 = await blobToBase64(blob);
+      const res = await apiFetch('POST', '/recognize', { audio: base64 });
+      if (res.song) {
+        S.mySong = res.song;
+        S.myArtist = res.artist || null;
+        S._nullSongCount = 0;
+        patchNowPlaying();
+        showToast(`♫ ${res.song}`);
+        updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
+      } else {
+        showToast(isES ? 'NO SE RECONOCIÓ LA CANCIÓN' : 'SONG NOT RECOGNIZED');
+      }
+    } catch(e) {
+      showToast(isES ? 'ERROR AL DETECTAR' : 'DETECT ERROR');
+    }
+    if (btn) btn.classList.remove('detecting');
+  };
+
+  recorder.start();
+  setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 8000);
 }
 
 // ── Polling ──
@@ -1586,9 +1664,9 @@ function patchNowPlaying() {
       el.style.cursor = 'pointer';
       el.onclick = () => { window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/'; };
     } else if (needsReconnect) {
-      el.innerHTML = `<span class="topbar-np-nothing" style="cursor:pointer;text-decoration:underline;">${T.reconnect}</span>`;
-      el.style.cursor = 'pointer';
-      el.onclick = loginWithSpotify;
+      el.innerHTML = `<button class="topbar-reconnect-btn" onclick="loginWithSpotify()">↺ ${T.reconnect}</button>`;
+      el.style.cursor = 'default';
+      el.onclick = null;
     } else if (waitingLfm) {
       el.innerHTML = `<span class="topbar-np-nothing">${T.waitingLfm}</span>`;
       el.style.cursor = 'default';
@@ -1647,6 +1725,10 @@ function renderFeed(container) {
       <div class="scroll-area" id="feed-list">${buildFeedItems()}</div>
       <div class="bottom-bar">
         <button class="bottom-song" id="bottom-song-btn">${buildBottomSong()}</button>
+        <button class="detect-btn" id="detect-btn" aria-label="${isES ? 'Detectar canción' : 'Detect song'}">
+          <span class="detect-btn-icon">⊙</span>
+          <span>${isES ? 'DETECTAR' : 'DETECT'}</span>
+        </button>
         <button class="loc-toggle-btn" id="loc-toggle-mobile" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
         <button class="inbox-btn" id="inbox-btn">
           ${hasActivity ? '<div class="inbox-ring"></div>' : ''}
@@ -1657,6 +1739,7 @@ function renderFeed(container) {
   document.getElementById('radar-btn').onclick        = doRadar;
   document.getElementById('inbox-btn').onclick        = () => setScreen('inbox');
   document.getElementById('loc-toggle-mobile').onclick = toggleLocation;
+  document.getElementById('detect-btn').onclick       = detectWithMic;
   document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
@@ -1782,17 +1865,17 @@ function buildBottomSong() {
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
   // Not logged in at all
   if (!S.spotifyToken && !S.lastfmUsername) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
+    return `<div class="bottom-label">${isES ? 'SIN SESIÓN' : 'NOT CONNECTED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
   }
   // Spotify token expired
   if (S.spotifyToken && (S._nullSongCount || 0) >= 3) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.reconnect}</div><div class="bottom-artist">${isES ? 'Toca para reconectar' : 'Tap to reconnect'}</div>`;
+    return `<div class="bottom-label">${isES ? 'SESIÓN EXPIRADA' : 'SESSION EXPIRED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
   }
   // Last.fm connected but no nowplaying yet
   if (S.lastfmUsername) {
-    return `<div class="bottom-song-title" style="font-size:12px;">${T.waitingLfm}</div><div class="bottom-artist">Last.fm</div>`;
+    return `<div class="bottom-label">LAST.FM</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">${T.waitingLfm}</div></div>`;
   }
-  return `<div class="bottom-song-title">${T.nothing}</div><div class="bottom-artist">${T.putMusic}</div>`;
+  return `<div class="bottom-label">${isES ? 'SPOTIFY' : 'SPOTIFY'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">${T.nothing}</div></div><div class="bottom-artist">${T.putMusic}</div>`;
 }
 
 function showHelp() {
@@ -1848,6 +1931,9 @@ function patchFeedList() {
 function patchBottomBar() {
   const btn = document.getElementById('bottom-song-btn');
   if (!btn) return;
+  const expired = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+  const noSession = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+  btn.classList.toggle('reconnect', expired || noSession);
   btn.innerHTML = buildBottomSong();
 }
 
