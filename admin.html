@@ -107,6 +107,15 @@
     cursor: pointer; transition: background 0.15s;
   }
   .delete-btn:hover { background: #1a0505; }
+  .restore-btn {
+    background: none; border: none; border-left: 1px solid #1e1e1e;
+    color: #2ed573; width: 48px; flex-shrink: 0; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .restore-btn:hover { background: #051a09; }
+  .user-item.banned { opacity: 0.45; }
+  .banned-tag { color: #ff4757; font-size: 9px; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -187,18 +196,23 @@ async function loadUsers() {
       el.innerHTML = '<li class="empty">sin usuarios activos</li>';
       return;
     }
-    users.sort((a, b) => (b.updatedMs || 0) - (a.updatedMs || 0));
+    users.sort((a, b) => (a.banned ? 1 : 0) - (b.banned ? 1 : 0) || (b.updatedMs || 0) - (a.updatedMs || 0));
     el.innerHTML = users.map(u => {
       const ago = u.updatedMs ? Math.round((Date.now() - u.updatedMs) / 60000) : null;
       const agoStr = ago === null ? '' : ago < 1 ? 'ahora mismo' : `hace ${ago}m`;
       const uid = (u.userId || '').slice(0, 20) || (u.deviceId || '').slice(0, 12);
-      return `<li class="user-item">
+      const isBanned = !!u.banned;
+      return `<li class="user-item${isBanned ? ' banned' : ''}">
         <div class="user-item-content">
+          ${isBanned ? '<div class="banned-tag">BANEADO</div>' : ''}
           <div class="user-song-name">${u.song || '<span style="color:#333;font-style:italic">sin canción</span>'}</div>
           <div class="user-song-meta">${u.artist || '—'} · <span style="color:#333;font-size:10px">${uid}</span></div>
           ${agoStr ? `<div class="user-ago">${agoStr}</div>` : ''}
         </div>
-        <button class="delete-btn" title="Eliminar" onclick="deleteUser('${u.deviceId}')">✕</button>
+        ${isBanned
+          ? `<button class="restore-btn" title="Restaurar" onclick="unbanUser('${u.deviceId}')">↺</button>`
+          : `<button class="delete-btn" title="Banear" onclick="deleteUser('${u.deviceId}')">✕</button>`
+        }
       </li>`;
     }).join('');
   } catch (e) {
@@ -206,8 +220,19 @@ async function loadUsers() {
   }
 }
 
+async function unbanUser(deviceId) {
+  try {
+    const res = await fetch(`${SERVER}/admin/users/${encodeURIComponent(deviceId)}/unban?key=${encodeURIComponent(adminKey)}`, {
+      method: 'POST'
+    });
+    if (res.status === 401) { logout(); return; }
+    if (res.ok) { loadUsers(); loadStats(); }
+    else { alert('Error al restaurar'); }
+  } catch (e) { alert('Error de conexión'); }
+}
+
 async function deleteUser(deviceId) {
-  if (!confirm('¿Eliminar esta entrada del feed?')) return;
+  if (!confirm('¿Banear esta entrada? El dispositivo no volverá a aparecer en el feed.')) return;
   try {
     const res = await fetch(`${SERVER}/admin/users/${encodeURIComponent(deviceId)}?key=${encodeURIComponent(adminKey)}`, {
       method: 'DELETE'
