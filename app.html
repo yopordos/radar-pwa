@@ -777,6 +777,19 @@
       margin-bottom: 36px;
     }
     .listen-connect-btns { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
+    .listen-or { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 340px; margin: 8px 0; }
+    .listen-or-line { flex: 1; height: 1px; background: rgba(245,240,232,0.12); }
+    .listen-or-text { color: rgba(245,240,232,0.35); font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+    .btn-detect-login {
+      width: 100%; max-width: 340px;
+      background: none; border: 1px solid rgba(245,240,232,0.2); border-radius: 14px;
+      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px;
+      color: rgba(245,240,232,0.6); padding: 16px; cursor: pointer;
+      transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-detect-login:active { opacity: 0.7; }
+    .btn-detect-login.detecting { opacity: 0.4; pointer-events: none; }
 
     @media (min-width: 1024px) {
       .listen-screen { grid-column: 1 / -1 !important; grid-row: 1 / -1 !important; }
@@ -904,11 +917,28 @@ function esc(s) {
 }
 function formatDist(m) {
   if (m === null || m === undefined) return '';
-  if (m < 500)   return isES ? 'Aquí' : 'Here';
-  if (m < 2000)  return isES ? 'Cerca' : 'Nearby';
-  if (m < 10000) return isES ? 'Tu zona' : 'Your area';
-  if (m < 50000) return isES ? 'Tu ciudad' : 'Your city';
-  return isES ? 'Tu región' : 'Your region';
+  if (m < 500)    return isES ? 'Aquí' : 'Here';
+  if (m < 2000)   return isES ? 'Cerca' : 'Nearby';
+  if (m < 10000)  return isES ? 'Tu zona' : 'Your area';
+  if (m < 50000)  return isES ? 'Tu ciudad' : 'Your city';
+  if (m < 300000) return isES ? 'Tu región' : 'Your region';
+  // Far away — show km
+  if (m < 1000000) return `${Math.round(m / 1000)} km`;
+  return `${(m / 1000000).toFixed(1).replace('.0', '')} mil km`;
+}
+
+// Línea de ubicación para una tarjeta del feed
+// Con GPS propio: "🇯🇵 Tokio · 9,200 km" | Sin GPS: "🇯🇵 Tokio" | Sin datos: "🌍"
+function formatLocation(item) {
+  const flag = item.flag || null;
+  const city = item.city || null;
+  const place = flag ? (city ? `${flag} ${city}` : flag) : null;
+
+  if (S.coords && item.distance !== null) {
+    const distStr = formatDist(item.distance);
+    return place ? `${place} · ${distStr}` : distStr;
+  }
+  return place || '🌍';
 }
 
 function isDesktop() { return window.matchMedia('(min-width: 1024px)').matches; }
@@ -1037,8 +1067,8 @@ function blobToBase64(blob) {
 }
 
 async function detectWithMic() {
-  if (!S.userId) { showToast(isES ? 'CONECTA SPOTIFY O LAST.FM PRIMERO' : 'CONNECT SPOTIFY OR LAST.FM FIRST'); return; }
-  const btn = document.getElementById('detect-btn');
+  const btn = document.getElementById('detect-btn') || document.getElementById('listen-detect');
+  const isGuest = !S.userId;
   if (btn) btn.classList.add('detecting');
   showToast(isES ? 'ESCUCHANDO 8 SEG...' : 'LISTENING 8 SEC...');
 
@@ -1062,12 +1092,22 @@ async function detectWithMic() {
       const base64 = await blobToBase64(blob);
       const res = await apiFetch('POST', '/recognize', { audio: base64 });
       if (res.song) {
+        if (isGuest) {
+          S.userId = 'guest_' + Math.random().toString(36).slice(2, 10);
+          saveAuth();
+        }
         S.mySong = res.song;
         S.myArtist = res.artist || null;
         S._nullSongCount = 0;
-        patchNowPlaying();
         showToast(`♫ ${res.song}`);
-        updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
+        if (isGuest) {
+          getLocation();
+          setScreen('feed');
+          startPolling(S.userId, null, null);
+        } else {
+          patchNowPlaying();
+          updateLocation(S.userId, S.spotifyToken, S.lastfmUsername);
+        }
       } else {
         showToast(isES ? 'NO SE RECONOCIÓ LA CANCIÓN' : 'SONG NOT RECOGNIZED');
       }
@@ -1526,12 +1566,16 @@ function buildDesktopTopbar() {
   const hasActivity = notifCount > 0 || S.chats.length > 0;
   // [6] Ecualizador en el topbar cuando hay canción sonando
   const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
+  const _tbExpired   = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
+  const _tbNoSession = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+  const _tbWaitLfm   = !S.mySong && S.lastfmUsername;
   const npHtml = S.mySong
-    ? `<span class="topbar-np-label">${T.nowPlaying}</span>
-       ${eqHtml}
-       <span class="topbar-np-song">${esc(S.mySong)}</span>
-       <span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
-    : `<span class="topbar-np-nothing">${T.nothing}</span>`;
+    ? `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
+    : (_tbExpired || _tbNoSession)
+      ? `<button class="topbar-reconnect-btn" onclick="loginWithSpotify()">↺ ${T.reconnect}</button>`
+      : _tbWaitLfm
+        ? `<span class="topbar-np-nothing">${T.waitingLfm}</span>`
+        : `<span class="topbar-np-nothing">${T.nothing}</span>`;
 
   return `
     <div class="desktop-topbar" id="desktop-topbar">
@@ -1697,11 +1741,21 @@ function renderListen(container) {
           <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
           <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
         </div>
+        <div class="listen-or">
+          <div class="listen-or-line"></div>
+          <span class="listen-or-text">${isES ? 'O' : 'OR'}</span>
+          <div class="listen-or-line"></div>
+        </div>
+        <button class="btn-detect-login" id="listen-detect">
+          <span>⊙</span>
+          <span>${isES ? 'Detectar lo que suena' : 'Detect what\'s playing'}</span>
+        </button>
         <button id="help-btn" class="help-btn" style="color:#e8ff47;margin-top:20px;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
   document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
+  document.getElementById('listen-detect').onclick  = detectWithMic;
   document.getElementById('help-btn').onclick       = showHelp;
   triggerLoginDots(1);
 }
@@ -1833,7 +1887,7 @@ function buildActiveChatCards() {
 
 // Shared build/patch helpers
 function buildFeedItems() {
-  if (!S.feedLoaded) return `<span class="empty" style="color:#444;">${isES ? 'Buscando cerca de ti...' : 'Looking nearby...'}</span>`;
+  if (!S.feedLoaded) return `<span class="empty" style="color:#444;">${isES ? 'Buscando en el mundo...' : 'Looking worldwide...'}</span>`;
   if (!S.feed.length) return `<span class="empty">${T.nobody}</span>`;
   return S.feed.map(item => {
     const existingChat = chatMap.get(item.userId);
@@ -1844,7 +1898,7 @@ function buildFeedItems() {
         <div class="card-info">
           <div class="song-name">${esc(item.song)}</div>
           <div class="artist-name">${esc(item.artist)}</div>
-          <div class="distance">${item.distance !== null ? formatDist(item.distance) : '·'}</div>
+          <div class="distance">${formatLocation(item)}</div>
         </div>
         <div class="card-btns">
           <button class="btn-listen" data-action="listen" data-query="${esc(q)}">♫</button>
