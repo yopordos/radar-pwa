@@ -25,7 +25,7 @@ Deploy by pushing to `main` — Cloudflare Pages auto-deploys from GitHub.
 | `index.html` | Marketing/landing page — CRT grain aesthetic, dark |
 | `app.html` | The PWA itself — all app logic lives here |
 | `admin.html` | Password-protected admin dashboard, `noindex` |
-| `sw.js` | Service worker — cache name `radar-v50` |
+| `sw.js` | Service worker — cache name `radar-v51` |
 | `manifest.json` | PWA manifest (`start_url: ./app.html`) |
 | `netlify.toml` | Cache headers (HTML: no-cache, assets: immutable, SW: no-cache) |
 
