@@ -6,6 +6,9 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://radar-mvp.onrender.com https://api.spotify.com https://fonts.googleapis.com; img-src 'self' data:; frame-src 'none'; object-src 'none'
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Cross-Origin-Embedder-Policy: unsafe-none
+  Cross-Origin-Resource-Policy: cross-origin
 
 # HTML: sin caché (Google siempre ve la versión actual)
 /*.html
