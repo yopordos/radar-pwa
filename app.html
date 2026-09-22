@@ -1839,20 +1839,10 @@ function renderListen(container) {
         <div class="listen-connect-btns">
           <button class="btn-login btn-lastfm" id="listen-lastfm">${T.connectLfm}</button>
         </div>
-        <div class="listen-or">
-          <div class="listen-or-line"></div>
-          <span class="listen-or-text">${isES ? 'O' : 'OR'}</span>
-          <div class="listen-or-line"></div>
-        </div>
-        <button class="btn-detect-login" id="listen-detect">
-          <span>⊙</span>
-          <span>${isES ? 'Detectar lo que suena' : 'Detect what\'s playing'}</span>
-        </button>
         <button id="help-btn" class="help-btn" style="color:#e8ff47;margin-top:20px;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
-  document.getElementById('listen-detect').onclick  = detectWithMic;
   document.getElementById('help-btn').onclick       = showHelp;
   triggerLoginDots(1);
 }
@@ -1876,10 +1866,6 @@ function renderFeed(container) {
       <div class="scroll-area" id="feed-list">${buildFeedItems()}</div>
       <div class="bottom-bar">
         <button class="bottom-song" id="bottom-song-btn">${buildBottomSong()}</button>
-        <button class="detect-btn" id="detect-btn" aria-label="${isES ? 'Detectar canción' : 'Detect song'}">
-          <span class="detect-btn-icon">⊙</span>
-          <span>${isES ? 'DETECTAR' : 'DETECT'}</span>
-        </button>
         <button class="loc-toggle-btn" id="loc-toggle-mobile" title="${S.shareLocation ? (isES ? 'Ubicación activa' : 'Location on') : (isES ? 'Sin ubicación' : 'Location off')}">${locIcon(S.shareLocation)}</button>
         <button class="inbox-btn" id="inbox-btn">
           ${hasActivity ? '<div class="inbox-ring"></div>' : ''}
@@ -1890,7 +1876,6 @@ function renderFeed(container) {
   document.getElementById('radar-btn').onclick        = doRadar;
   document.getElementById('inbox-btn').onclick        = () => setScreen('inbox');
   document.getElementById('loc-toggle-mobile').onclick = toggleLocation;
-  document.getElementById('detect-btn').onclick       = detectWithMic;
   document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
