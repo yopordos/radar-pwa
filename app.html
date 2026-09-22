@@ -874,7 +874,9 @@ function lfmNoSource() {
   return !S.mySong && S.lastfmUsername && (S._nullSongCount || 0) >= LFM_NO_SOURCE_CYCLES;
 }
 function openLfmApps() {
-  window.open('https://www.last.fm/settings/applications', '_blank', 'noopener');
+  // RAdAR no figura en esa página: ahí se conectan las fuentes que le mandan
+  // música a Last.fm. Abrimos la ayuda para que se entienda qué hay que buscar.
+  showHelp('connect');
 }
 
 // Hay sesión de Spotify mientras exista token o spotifyKey: el token vencido se
@@ -1844,7 +1846,7 @@ function patchNowPlaying() {
     if (S.mySong) {
       el.innerHTML = `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`;
       el.style.cursor = 'pointer';
-      el.onclick = () => { window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/'; };
+      el.onclick = () => { window.open(S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/', '_blank', 'noopener'); };
     } else if (needsReconnect) {
       el.innerHTML = `<button class="topbar-reconnect-btn" onclick="${hasSpotify() ? 'loginWithSpotify()' : 'loginWithLastfm()'}">↺ ${hasSpotify() ? T.reconnect : T.reconnectLfm}</button>`;
       el.style.cursor = 'default';
@@ -1886,7 +1888,7 @@ function renderListen(container) {
       </div>
     </div>`;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
-  document.getElementById('help-btn').onclick       = showHelp;
+  document.getElementById('help-btn').onclick       = () => showHelp();
   triggerLoginDots(1);
 }
 
@@ -1921,7 +1923,7 @@ function renderFeed(container) {
   document.getElementById('loc-toggle-mobile').onclick = toggleLocation;
   document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
-      window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
+      window.open(S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/', '_blank', 'noopener');
     } else if (lfmNoSource()) {
       openLfmApps();
     } else if (!S.lastfmUsername && (!hasSpotify() || (S._nullSongCount || 0) >= 3)) {
@@ -2024,7 +2026,7 @@ function buildFeedItems() {
   return S.feed.map(item => {
     const existingChat = chatMap.get(item.userId);
     const hasChat = !!existingChat;
-    const q = encodeURIComponent(`${item.song} ${item.artist}`);
+    const q = `${item.song} ${item.artist}`;   // se codifica al abrir la URL, no acá
     return `
       <div class="card${hasChat ? ' has-chat' : ''}" data-userid="${esc(item.userId)}" data-haschat="${hasChat}">
         <div class="card-info">
@@ -2119,7 +2121,7 @@ function doLogout() {
   }
 }
 
-function showHelp() {
+function showHelp(focus) {
   let overlay = document.getElementById('help-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -2135,7 +2137,7 @@ function showHelp() {
         <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
         <div class="help-sheet-sub">${isES ? 'CONECTAR TU MÚSICA' : 'CONNECT YOUR MUSIC'}</div>
         <div class="help-step"><div class="help-step-num">A</div><div class="help-step-text">${isES ? 'Crea tu cuenta en <a href="https://www.last.fm/join" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm</a>. Es gratis.' : 'Create your <a href="https://www.last.fm/join" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm</a> account. It is free.'}</div></div>
-        <div class="help-step"><div class="help-step-num">B</div><div class="help-step-text">${isES ? 'En <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, conecta <strong>Spotify</strong>. Sirve igual Apple Music, YouTube Music o la app de Last.fm en tu teléfono.' : 'Under <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, connect <strong>Spotify</strong>. Apple Music, YouTube Music or the Last.fm phone app work just as well.'}</div></div>
+        <div class="help-step"><div class="help-step-num">B</div><div class="help-step-text">${isES ? 'En <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, busca <strong>Spotify Scrobbling</strong> y dale Connect. RAdAR no aparece en esa lista: ahí se conectan las fuentes que le mandan música a Last.fm. Sirve igual Apple Music, YouTube Music o la app de Last.fm en tu teléfono.' : 'Under <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, find <strong>Spotify Scrobbling</strong> and hit Connect. RAdAR is not on that list: it holds the sources that feed music to Last.fm. Apple Music, YouTube Music or the Last.fm phone app work just as well.'}</div></div>
         <div class="help-step"><div class="help-step-num">C</div><div class="help-step-text">${isES ? 'Vuelve acá y entra con Last.fm. Listo.' : 'Come back here and sign in with Last.fm. Done.'}</div></div>
         <p class="help-note">${isES ? 'Esto se hace una sola vez, y ocurre en Last.fm, no acá: nadie puede conectar tu Spotify por ti. Si ya usabas Last.fm, ya está hecho.' : 'You only do this once, and it happens on Last.fm, not here: nobody can connect your Spotify for you. If you already used Last.fm, it is already done.'}</p>
         <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
@@ -2144,7 +2146,13 @@ function showHelp() {
     overlay.addEventListener('click', e => { if (e.target === overlay) hideHelp(); });
     document.getElementById('help-close').onclick = hideHelp;
   }
-  requestAnimationFrame(() => overlay.classList.add('show'));
+  requestAnimationFrame(() => {
+    overlay.classList.add('show');
+    const sheet = overlay.querySelector('.help-sheet');
+    const target = overlay.querySelector('.help-sheet-sub');
+    if (focus === 'connect' && sheet && target) sheet.scrollTop = target.offsetTop - 12;
+    else if (sheet) sheet.scrollTop = 0;
+  });
 }
 function hideHelp() {
   const overlay = document.getElementById('help-overlay');
@@ -2159,7 +2167,7 @@ function attachFeedEvents() {
     const listenBtn = e.target.closest('[data-action="listen"]');
     const chatBtn   = e.target.closest('[data-action="chat"]');
     const card      = e.target.closest('.card.has-chat');
-    if (listenBtn) { e.stopPropagation(); window.location.href = `https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`; }
+    if (listenBtn) { e.stopPropagation(); window.open(`https://open.spotify.com/search/${encodeURIComponent(listenBtn.dataset.query)}`, '_blank', 'noopener'); }
     else if (chatBtn) { e.stopPropagation(); sendTap(chatBtn.dataset.userid); }
     else if (card) { const ec = chatMap.get(card.dataset.userid); if (ec) openChat(ec.chatId, 'feed', ec.expiresAt); }
   };
