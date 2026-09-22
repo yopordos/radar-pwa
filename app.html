@@ -514,8 +514,17 @@
     /* Login buttons */
     .btn-login  { font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 1px; padding: 18px; border-radius: 14px; width: 100%; transition: opacity 0.15s, transform 0.1s; }
     .btn-login:active { opacity: 0.85; transform: scale(0.98); }
-    .btn-spotify { background: #1DB954; color: #fff; margin-bottom: 12px; }
+    .btn-spotify { background: #1DB954; color: #fff; }
     .btn-lastfm  { background: #d51007; color: #fff; }
+    .listen-note { width: 100%; max-width: 340px; margin: 2px 0 0; font-size: 11.5px; line-height: 1.6; text-align: center; color: rgba(245,240,232,0.6); }
+    .listen-howto { width: 100%; max-width: 340px; }
+    .listen-howto > summary { list-style: none; cursor: pointer; font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent); padding: 8px 0; text-align: center; }
+    .listen-howto > summary::-webkit-details-marker { display: none; }
+    .listen-howto > summary::before { content: '+ '; }
+    .listen-howto[open] > summary::before { content: '\2212\00a0'; }
+    .listen-howto > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+    .listen-howto ol { margin: 2px 0 0; padding: 12px 14px 12px 32px; font-size: 11.5px; line-height: 1.8; color: rgba(245,240,232,0.6); text-align: left; border: 1px solid rgba(245,240,232,0.12); border-radius: 12px; }
+    .listen-howto a { color: var(--accent); }
     .login-buttons { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
     @media (min-width: 1024px) {
@@ -914,6 +923,15 @@ const T = {
   tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
   connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
   connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
+  spotLimit:    isES ? 'necesitamos 250.000 usuarios para que spotify nos deje tener usuarios.<br>entremedio: last.fm.'
+                     : 'we need 250,000 users before spotify lets us have users.<br>in between: last.fm.',
+  spotViaLfm:   isES ? 'conectar spotify vía last.fm' : 'connect spotify through last.fm',
+  spotStep1:    isES ? 'crea una cuenta en <a href="https://www.last.fm/join" target="_blank" rel="noopener">last.fm</a> (gratis)'
+                     : 'create a <a href="https://www.last.fm/join" target="_blank" rel="noopener">last.fm</a> account (free)',
+  spotStep2:    isES ? 'abre <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener">settings → applications</a> y conecta spotify'
+                     : 'open <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener">settings → applications</a> and connect spotify',
+  spotStep3:    isES ? 'funciona con spotify free y premium' : 'works with spotify free and premium',
+  spotStep4:    isES ? 'vuelve acá y entra con last.fm' : 'come back here and sign in with last.fm',
   listenSub:    isES ? 'cerca de ti · en tiempo real · para conversar o escuchar'
                      : 'near you · in real time · to talk or just listen',
   lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
@@ -1820,9 +1838,19 @@ function renderListen(container) {
         <div class="listen-tagline">${T.tagline}</div>
         <div class="listen-sub">${T.listenSub}</div>
         <div class="listen-connect-btns">
-          <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
           <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
+          <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
         </div>
+        <p class="listen-note">${T.spotLimit}</p>
+        <details class="listen-howto">
+          <summary>${T.spotViaLfm}</summary>
+          <ol>
+            <li>${T.spotStep1}</li>
+            <li>${T.spotStep2}</li>
+            <li>${T.spotStep3}</li>
+            <li>${T.spotStep4}</li>
+          </ol>
+        </details>
         <div class="listen-or">
           <div class="listen-or-line"></div>
           <span class="listen-or-text">${isES ? 'O' : 'OR'}</span>
