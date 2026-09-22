@@ -840,6 +840,17 @@ let feedClickHandler = null;
 // ── Persist ──
 const SPOTIFY_TOKEN_TTL = 3500 * 1000; // 3500s (~58min) — expire slightly early
 
+// Tras 2 minutos sin now-playing, lo más probable es que el Last.fm del usuario
+// no tenga ninguna fuente conectada — o que la de Spotify haya caducado, cosa que
+// pasa a los 6 meses y en silencio. No lo afirmamos: ofrecemos el camino.
+const LFM_NO_SOURCE_CYCLES = 8;   // ciclos de 15s
+function lfmNoSource() {
+  return !S.mySong && S.lastfmUsername && (S._nullSongCount || 0) >= LFM_NO_SOURCE_CYCLES;
+}
+function openLfmApps() {
+  window.open('https://www.last.fm/settings/applications', '_blank', 'noopener');
+}
+
 // Hay sesión de Spotify mientras exista token o spotifyKey: el token vencido se
 // renueva solo, así que la UI no debe tratarlo como desconexión.
 function hasSpotify() { return !!(S.spotifyToken || S.spotifyKey); }
@@ -903,6 +914,7 @@ const T = {
   reconnect:    isES ? 'Reconectar Spotify' : 'Reconnect Spotify',
   reconnectLfm: isES ? 'Reconectar Last.fm' : 'Reconnect Last.fm',
   waitingLfm:   isES ? 'Esperando canción de Last.fm...' : 'Waiting for Last.fm song...',
+  lfmNoSrc:     isES ? '¿no aparece tu música? conecta una fuente' : 'music not showing? connect a source',
   tokenExpired: isES ? 'sesión de Spotify expirada' : 'Spotify session expired',
   spotifyQuota: isES ? 'spotify saturado — reintentando en un rato' : 'spotify rate limited — retrying shortly',
   activeChats:  isES ? 'CHATS ACTIVOS'    : 'ACTIVE CHATS',
@@ -1648,14 +1660,17 @@ function buildDesktopTopbar() {
   const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
   const _tbExpired   = !S.mySong && hasSpotify() && (S._nullSongCount || 0) >= 3;
   const _tbNoSession = !S.mySong && !hasSpotify() && !S.lastfmUsername;
+  const _tbNoSrc     = lfmNoSource();
   const _tbWaitLfm   = !S.mySong && S.lastfmUsername;
   const npHtml = S.mySong
     ? `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
     : (_tbExpired || _tbNoSession)
-      ? `<button class="topbar-reconnect-btn" onclick="loginWithSpotify()">↺ ${T.reconnect}</button>`
-      : _tbWaitLfm
-        ? `<span class="topbar-np-nothing">${T.waitingLfm}</span>`
-        : `<span class="topbar-np-nothing">${T.nothing}</span>`;
+      ? `<button class="topbar-reconnect-btn" onclick="${hasSpotify() ? 'loginWithSpotify()' : 'loginWithLastfm()'}">↺ ${hasSpotify() ? T.reconnect : T.reconnectLfm}</button>`
+      : _tbNoSrc
+        ? `<button class="topbar-reconnect-btn" onclick="openLfmApps()">↗ ${T.lfmNoSrc}</button>`
+        : _tbWaitLfm
+          ? `<span class="topbar-np-nothing">${T.waitingLfm}</span>`
+          : `<span class="topbar-np-nothing">${T.nothing}</span>`;
 
   return `
     <div class="desktop-topbar" id="desktop-topbar">
@@ -1788,7 +1803,11 @@ function patchNowPlaying() {
       el.style.cursor = 'pointer';
       el.onclick = () => { window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/'; };
     } else if (needsReconnect) {
-      el.innerHTML = `<button class="topbar-reconnect-btn" onclick="loginWithSpotify()">↺ ${T.reconnect}</button>`;
+      el.innerHTML = `<button class="topbar-reconnect-btn" onclick="${hasSpotify() ? 'loginWithSpotify()' : 'loginWithLastfm()'}">↺ ${hasSpotify() ? T.reconnect : T.reconnectLfm}</button>`;
+      el.style.cursor = 'default';
+      el.onclick = null;
+    } else if (lfmNoSource()) {
+      el.innerHTML = `<button class="topbar-reconnect-btn" onclick="openLfmApps()">↗ ${T.lfmNoSrc}</button>`;
       el.style.cursor = 'default';
       el.onclick = null;
     } else if (waitingLfm) {
@@ -1875,6 +1894,8 @@ function renderFeed(container) {
   document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
+    } else if (lfmNoSource()) {
+      openLfmApps();
     } else if (!S.lastfmUsername && (!hasSpotify() || (S._nullSongCount || 0) >= 3)) {
       // Quien ya tiene Spotify puede reconectarlo; el resto entra por Last.fm.
       hasSpotify() ? loginWithSpotify() : loginWithLastfm();
@@ -2003,6 +2024,10 @@ function buildBottomSong() {
   // Spotify token expired
   if (hasSpotify() && (S._nullSongCount || 0) >= 3) {
     return `<div class="bottom-label">${isES ? 'SESIÓN EXPIRADA' : 'SESSION EXPIRED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
+  }
+  // Last.fm conectado pero sin fuente que le mande música
+  if (lfmNoSource()) {
+    return `<div class="bottom-label">LAST.FM</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↗ ${T.lfmNoSrc}</div></div>`;
   }
   // Last.fm connected but no nowplaying yet
   if (S.lastfmUsername) {
