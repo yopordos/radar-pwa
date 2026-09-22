@@ -606,8 +606,12 @@
     .help-sheet {
       background: #141414; border-radius: 20px 20px 0 0; padding: 28px 24px 36px;
       width: 100%; max-width: 480px; border-top: 1px solid #222;
+      max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
       transform: translateY(20px); transition: transform 0.25s;
     }
+    .help-sheet-sub { color: #e8ff47; font-size: 12px; font-weight: 900; letter-spacing: 2px; margin: 26px 0 14px; padding-top: 22px; border-top: 1px solid #222; }
+    .help-note { color: #9a9a95; font-size: 12px; line-height: 1.55; margin-top: 14px; }
+    .help-note a { color: #e8ff47; }
     .help-overlay.show .help-sheet { transform: translateY(0); }
     .help-sheet-title { color: #e8ff47; font-size: 13px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; }
     .help-step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
@@ -2129,7 +2133,11 @@ function showHelp() {
         <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
         <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tienen unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
         <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
-        <div class="help-step" style="margin-top:8px;padding-top:16px;border-top:1px solid #222;"><div class="help-step-num" style="color:#888;">·</div><div class="help-step-text" style="color:#999;">${isES ? 'Last.fm sincroniza con Spotify, Apple Music, YouTube Music y más: se conecta una vez en <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm/settings/applications</a>.' : 'Last.fm syncs with Spotify, Apple Music, YouTube Music and more: connect it once at <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm/settings/applications</a>.'}</div></div>
+        <div class="help-sheet-sub">${isES ? 'CONECTAR TU MÚSICA' : 'CONNECT YOUR MUSIC'}</div>
+        <div class="help-step"><div class="help-step-num">A</div><div class="help-step-text">${isES ? 'Crea tu cuenta en <a href="https://www.last.fm/join" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm</a>. Es gratis.' : 'Create your <a href="https://www.last.fm/join" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm</a> account. It is free.'}</div></div>
+        <div class="help-step"><div class="help-step-num">B</div><div class="help-step-text">${isES ? 'En <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, conecta <strong>Spotify</strong>. Sirve igual Apple Music, YouTube Music o la app de Last.fm en tu teléfono.' : 'Under <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">settings → applications</a>, connect <strong>Spotify</strong>. Apple Music, YouTube Music or the Last.fm phone app work just as well.'}</div></div>
+        <div class="help-step"><div class="help-step-num">C</div><div class="help-step-text">${isES ? 'Vuelve acá y entra con Last.fm. Listo.' : 'Come back here and sign in with Last.fm. Done.'}</div></div>
+        <p class="help-note">${isES ? 'Esto se hace una sola vez, y ocurre en Last.fm, no acá: nadie puede conectar tu Spotify por ti. Si ya usabas Last.fm, ya está hecho.' : 'You only do this once, and it happens on Last.fm, not here: nobody can connect your Spotify for you. If you already used Last.fm, it is already done.'}</p>
         <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
       </div>`;
     document.body.appendChild(overlay);
