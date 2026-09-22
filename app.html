@@ -6,8 +6,8 @@
 
   <!-- ── SEO básico ── -->
   <title>RAdAR — la música que te gusta, o no.</title>
-  <meta name="description" content="la música que te gusta, o no. Cerca de ti, en tiempo real, para conversar o escuchar. Conecta tu Spotify o Last.fm.">
-  <meta name="keywords" content="app música social, radar musical, descubrir música, Spotify social, conocer personas por música, música cerca, qué escuchan cerca, conectar por música, red social musical">
+  <meta name="description" content="la música que te gusta, o no. En tiempo real, cerca de ti o al otro lado del mundo, para escuchar y conversar. Conecta tu Last.fm.">
+  <meta name="keywords" content="app música social, radar musical, descubrir música, Last.fm social, conocer personas por música, música en tiempo real, qué escuchan cerca, conectar por música, red social musical">
   <meta name="author" content="RAdAR">
   <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://radarpin.me/app">
@@ -57,9 +57,9 @@
       "priceCurrency": "USD"
     },
     "featureList": [
-      "Detección de música en tiempo real vía Spotify",
-      "Compatibilidad con Last.fm, Apple Music y YouTube Music",
-      "Chat anónimo con personas cercanas",
+      "Detección de música en tiempo real vía Last.fm",
+      "Last.fm sincroniza Spotify, Apple Music y YouTube Music",
+      "Chat anónimo, con los más cerca primero",
       "Funciona como app instalable (PWA)"
     ]
   }
@@ -514,7 +514,6 @@
     /* Login buttons */
     .btn-login  { font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 1px; padding: 18px; border-radius: 14px; width: 100%; transition: opacity 0.15s, transform 0.1s; }
     .btn-login:active { opacity: 0.85; transform: scale(0.98); }
-    .btn-spotify { background: #1DB954; color: #fff; }
     .btn-lastfm  { background: #d51007; color: #fff; }
     .login-buttons { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
@@ -912,10 +911,9 @@ const T = {
   chats:        isES ? 'CHATS'            : 'CHATS',
   noChat:       isES ? 'Sin chat activo.' : 'No active chat.',
   tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
-  connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
   connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
-  listenSub:    isES ? 'cerca de ti · en tiempo real · para conversar o escuchar'
-                     : 'near you · in real time · to talk or just listen',
+  listenSub:    isES ? 'en tiempo real · cerca o al otro lado del mundo · para escuchar y conversar'
+                     : 'in real time · nearby or across the world · to listen and talk',
   lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
                      : 'Last.fm syncs with Apple Music, YouTube Music and more',
 };
@@ -2023,7 +2021,7 @@ function showHelp() {
       <div class="help-sheet">
         <div class="help-sheet-title">${isES ? 'CÓMO FUNCIONA' : 'HOW IT WORKS'}</div>
         <div class="help-step"><div class="help-step-num">01</div><div class="help-step-text">${isES ? 'Conecta <strong>Last.fm</strong> y activa tu ubicación.' : 'Connect <strong>Last.fm</strong> and allow location.'}</div></div>
-        <div class="help-step"><div class="help-step-num">02</div><div class="help-step-text">${isES ? 'RAdAR muestra las personas cerca tuyo que están escuchando música ahora mismo.' : 'RAdAR shows people near you listening to music right now.'}</div></div>
+        <div class="help-step"><div class="help-step-num">02</div><div class="help-step-text">${isES ? 'RAdAR muestra a quien está escuchando música ahora mismo, con los más cerca primero.' : 'RAdAR shows whoever is listening right now, closest first.'}</div></div>
         <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
         <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tienen unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
         <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>

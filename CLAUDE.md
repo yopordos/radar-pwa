@@ -25,7 +25,7 @@ Deploy by pushing to `main` — Cloudflare Pages auto-deploys from GitHub.
 | `index.html` | Marketing/landing page — CRT grain aesthetic, dark |
 | `app.html` | The PWA itself — all app logic lives here |
 | `admin.html` | Password-protected admin dashboard, `noindex` |
-| `sw.js` | Service worker — cache name `radar-v54` |
+| `sw.js` | Service worker — cache name `radar-v55` |
 | `manifest.json` | PWA manifest (`start_url: ./app.html`) |
 | `netlify.toml` | Cache headers (HTML: no-cache, assets: immutable, SW: no-cache) |
 
@@ -69,7 +69,7 @@ Fonts: **Poppins** (UI, weight 400/700/900) + **IBM Plex Mono** (landing page on
 
 ## Service Worker
 
-Cache name is `radar-v54`. Two-page architecture:
+Cache name is `radar-v55`. Two-page architecture:
 - `/app.html` or `/app` → serves cached `./app` (canonical URL — Cloudflare Pages redirects `/app.html` → `/app`)
 - All other paths (landing page, etc.) → NOT intercepted by SW, browser fetches from network directly
 - `./app` is pre-cached (not `./app.html`) to avoid caching a redirect response (`redirected: true` causes WebKit/Safari to throw "Response served by service worker has redirections")
