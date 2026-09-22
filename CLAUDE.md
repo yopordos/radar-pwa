@@ -25,7 +25,7 @@ Deploy by pushing to `main` — Cloudflare Pages auto-deploys from GitHub.
 | `index.html` | Marketing/landing page — CRT grain aesthetic, dark |
 | `app.html` | The PWA itself — all app logic lives here |
 | `admin.html` | Password-protected admin dashboard, `noindex` |
-| `sw.js` | Service worker — cache name `radar-v51` |
+| `sw.js` | Service worker — cache name `radar-v52` |
 | `manifest.json` | PWA manifest (`start_url: ./app.html`) |
 | `netlify.toml` | Cache headers (HTML: no-cache, assets: immutable, SW: no-cache) |
 
@@ -41,9 +41,10 @@ Everything is self-contained in one file: styles inline in `<style>`, logic in `
 - `GET /notifications?userId=` and `GET /my-chats?userId=`
 - `POST /lastfm/session` and `GET /lastfm/now-playing?username=`
 - `GET /lastfm/login?redirect=` — OAuth redirect
+- `POST /spotify/refresh` — renews the Spotify access token (`{ userId, spotifyKey }`)
 - Spotify API called directly from the client (`https://api.spotify.com/v1/me/player`)
 
-**State**: A single global `S` object holds all runtime state (`S.userId`, `S.spotifyToken`, `S.lastfmUsername`, `S.mySong`, `S.feed`, `S.notifications`, `S.chats`, etc.). Auth is persisted to `localStorage` under the key `radarAuth` via `saveAuth()` / `loadAuth()`.
+**State**: A single global `S` object holds all runtime state (`S.userId`, `S.spotifyToken`, `S.lastfmUsername`, `S.mySong`, `S.feed`, `S.notifications`, `S.chats`, etc.). Auth is persisted to `localStorage` under the key `radar_auth` via `saveAuth()` / `loadAuth()`.
 
 **Screens**: `listen` → `feed` → `inbox` → `chat`. Switched by `setScreen(name)`. `render()` dispatches to per-screen renderers.
 
@@ -68,7 +69,7 @@ Fonts: **Poppins** (UI, weight 400/700/900) + **IBM Plex Mono** (landing page on
 
 ## Service Worker
 
-Cache name is `radar-v50`. Two-page architecture:
+Cache name is `radar-v52`. Two-page architecture:
 - `/app.html` or `/app` → serves cached `./app` (canonical URL — Cloudflare Pages redirects `/app.html` → `/app`)
 - All other paths (landing page, etc.) → NOT intercepted by SW, browser fetches from network directly
 - `./app` is pre-cached (not `./app.html`) to avoid caching a redirect response (`redirected: true` causes WebKit/Safari to throw "Response served by service worker has redirections")
@@ -77,17 +78,20 @@ Auth callback URLs (`?access_token=`, `?lastfm_token=`, etc.) land in the addres
 
 ## Auth Flow
 
-1. **Spotify**: OAuth redirect via backend → `?access_token=` or `?code=` param on return → stored in `S.spotifyToken`
+1. **Spotify**: OAuth redirect via backend → `?access_token=` + `?spotify_key=` params on return → stored in `S.spotifyToken` / `S.spotifyKey`
 2. **Last.fm**: OAuth redirect via `SERVER/lastfm/login` → `?lastfm_token=` param on return → exchanged for session via `POST /lastfm/session`
-3. **Spotify token TTL**: 3500s (`SPOTIFY_TOKEN_TTL`). If token is older or missing timestamp, it's cleared and user is prompted to reconnect.
+3. **Spotify token TTL**: 3500s (`SPOTIFY_TOKEN_TTL`). When it expires the token is renewed silently via `POST /spotify/refresh` (backend holds the `refresh_token` in Firestore `spotify_tokens/{userId}`; `S.spotifyKey` authorizes the call). The user is only asked to reconnect if that fails — Spotify expires refresh tokens after 6 months.
+   Use `hasSpotify()` — not `S.spotifyToken` — to check for a live Spotify session, since the token is briefly null while renewing.
 4. No email/password — userId is either the Spotify user ID or the Last.fm username.
 5. OAuth redirect URI sent to backend is always `window.location.origin + '/app'` (canonical, avoids Cloudflare redirect loop).
+6. **Spotify quota**: the API quota is counted per *developer account*. On `429` both frontend and backend back off until `Retry-After` (`S.spotifyQuotaUntil` / `spotifyQuota.blockedUntil`) instead of retrying. `/update-location` returns `spotify: { status: 'ok' | 'nothing' | 'reauth' | 'quota' }`.
+7. **Quota saving**: if the frontend already resolved a song it sends it in the request body and the backend skips its own `/me/player` call — only one Spotify request per user per cycle.
 
 ## Key Constraints
 
 - **No build tooling** — don't introduce npm, webpack, or any bundler. Keep it a single HTML file per page.
 - **Spanish UI copy** — all user-facing text is in Spanish (Chile locale, `es_CL`). Keep it that way.
-- **SW cache version** — if you add or rename a cached asset, bump `radar-v50` in `sw.js` to force cache invalidation.
+- **SW cache version** — if you add or rename a cached asset, bump the version in `sw.js` to force cache invalidation.
 - **Hard-coded design tokens** — tokens are duplicated across `index.html` and `app.html`. When changing colors/fonts, update both files.
 - **Backend is separate** — this repo is frontend-only. The Render.com backend is not here.
 - **Cloudflare Pages pretty URLs** — `/app.html` redirects to `/app`. Always use `/app` as the canonical URL in SW and OAuth redirects.

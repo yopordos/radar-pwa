@@ -810,6 +810,8 @@ const S = {
   screen: 'listen',
   userId: null,
   spotifyToken: null,
+  spotifyKey: null,       // autoriza a renovar el token sin reautorizar en Spotify
+  spotifyQuotaUntil: 0,   // ms epoch: hasta cuándo Spotify nos tiene en 429
   lastfmUsername: null,
   feed: [],
   feedLoaded: false,
@@ -839,12 +841,17 @@ let feedClickHandler = null;
 // ── Persist ──
 const SPOTIFY_TOKEN_TTL = 3500 * 1000; // 3500s (~58min) — expire slightly early
 
+// Hay sesión de Spotify mientras exista token o spotifyKey: el token vencido se
+// renueva solo, así que la UI no debe tratarlo como desconexión.
+function hasSpotify() { return !!(S.spotifyToken || S.spotifyKey); }
+
 function saveAuth() {
   try {
     localStorage.setItem('radar_auth', JSON.stringify({
       userId: S.userId,
       spotifyToken: S.spotifyToken,
       spotifyTokenAt: S.spotifyToken ? Date.now() : null,
+      spotifyKey: S.spotifyKey,
       lastfmUsername: S.lastfmUsername,
     }));
   } catch(e) {}
@@ -853,15 +860,17 @@ function loadAuth() {
   try {
     const raw = localStorage.getItem('radar_auth');
     if (!raw) return;
-    const { userId, spotifyToken, spotifyTokenAt, lastfmUsername } = JSON.parse(raw);
+    const { userId, spotifyToken, spotifyTokenAt, spotifyKey, lastfmUsername } = JSON.parse(raw);
     // No timestamp = token saved before tracking was added → treat as expired
     const noTimestamp = spotifyToken && !spotifyTokenAt;
     const tooOld      = spotifyToken && spotifyTokenAt && (Date.now() - spotifyTokenAt > SPOTIFY_TOKEN_TTL);
     const badToken    = noTimestamp || tooOld;
     S.userId         = userId || null;
     S.spotifyToken   = badToken ? null : (spotifyToken || null);
+    S.spotifyKey     = spotifyKey || null;
     S.lastfmUsername = lastfmUsername || null;
-    if (badToken && !S.lastfmUsername) {
+    // Con spotifyKey el token vencido se renueva solo: no hay nada que avisar.
+    if (badToken && !S.lastfmUsername && !S.spotifyKey) {
       // Keep userId — user stays on feed with reconnect prompt, token just needs renewal
       showToast(T.tokenExpired);
     }
@@ -896,6 +905,7 @@ const T = {
   reconnectLfm: isES ? 'Reconectar Last.fm' : 'Reconnect Last.fm',
   waitingLfm:   isES ? 'Esperando canción de Last.fm...' : 'Waiting for Last.fm song...',
   tokenExpired: isES ? 'sesión de Spotify expirada' : 'Spotify session expired',
+  spotifyQuota: isES ? 'spotify saturado — reintentando en un rato' : 'spotify rate limited — retrying shortly',
   activeChats:  isES ? 'CHATS ACTIVOS'    : 'ACTIVE CHATS',
   delConfirm:   isES ? '¿Eliminar esta conversación?' : 'Delete this conversation?',
   loading:      isES ? 'CARGANDO...'      : 'LOADING...',
@@ -1135,7 +1145,53 @@ function stopPolling() {
   pollInterval = null; songInterval = null;
 }
 
-async function fetchSpotifyCurrentTrack(token) {
+// Pide un access_token nuevo al backend, que guarda el refresh_token.
+// Devuelve el token, o null si hay que reautorizar en Spotify.
+let renewInFlight = null;
+async function renewSpotifyToken() {
+  if (!S.userId || !S.spotifyKey) return null;
+  if (renewInFlight) return renewInFlight;   // el polling no debe disparar dos renovaciones
+  const pending = (async () => {
+    try {
+      const res = await fetch(`${SERVER}/spotify/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: S.userId, spotifyKey: S.spotifyKey }),
+      });
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        noteSpotifyQuota(data.retryAfter);
+        return null;
+      }
+      if (!res.ok) {
+        // El refresh_token expiró (6 meses) o fue revocado: solo queda reconectar.
+        S.spotifyToken = null; S.spotifyKey = null; saveAuth();
+        showToast(T.tokenExpired);
+        return null;
+      }
+      const data = await res.json();
+      if (!data.access_token) return null;
+      S.spotifyToken = data.access_token; saveAuth();
+      return data.access_token;
+    } catch(e) { return null; }
+    finally { renewInFlight = null; }
+  })();
+  renewInFlight = pending;
+  return pending;
+}
+
+function noteSpotifyQuota(retryAfter) {
+  const secs = Number(retryAfter) > 0 ? Number(retryAfter) : 60;
+  S.spotifyQuotaUntil = Date.now() + secs * 1000;
+  showToast(T.spotifyQuota);
+}
+
+function spotifyQuotaBlocked() {
+  return Date.now() < S.spotifyQuotaUntil;
+}
+
+async function fetchSpotifyCurrentTrack(token, retried) {
+  if (spotifyQuotaBlocked()) return null;
   try {
     // /me/player includes paused state (covers iOS where OAuth pauses playback briefly)
     const res = await fetch('https://api.spotify.com/v1/me/player', {
@@ -1144,6 +1200,16 @@ async function fetchSpotifyCurrentTrack(token) {
     if (res.status === 200) {
       const data = await res.json();
       if (data?.item) return { song: data.item.name, artist: data.item.artists?.[0]?.name || '' };
+      return null;
+    }
+    if (res.status === 401 && !retried) {
+      const fresh = await renewSpotifyToken();
+      if (fresh) return fetchSpotifyCurrentTrack(fresh, true);
+      return null;
+    }
+    if (res.status === 429) {
+      // Cuota por cuenta de desarrollador: insistir solo alarga el bloqueo.
+      noteSpotifyQuota(res.headers.get('Retry-After'));
     }
   } catch(e) {}
   return null;
@@ -1165,11 +1231,15 @@ async function fetchLastfmNowPlaying(username) {
 }
 
 async function updateLocation(uid, token, lf) {
-  if (!uid || (!token && !lf)) return;
+  // El token puede haberse renovado después de arrancar el polling; S manda.
+  token = S.spotifyToken || token;
+  if (!uid || (!token && !lf && !S.spotifyKey)) return;
 
+  let freshTrack = null;   // solo mandamos al backend lo leído en este ciclo
   // Buscar canción independiente del GPS (igual que Spotify)
-  if (token) {
+  if (token || S.spotifyKey) {
     const track = await fetchSpotifyCurrentTrack(token);
+    freshTrack = track;
     if (track) {
       S.mySong = track.song; S.myArtist = track.artist;
       S._nullSongCount = 0;
@@ -1180,6 +1250,7 @@ async function updateLocation(uid, token, lf) {
     }
   } else if (lf) {
     const track = await fetchLastfmNowPlaying(lf);
+    freshTrack = track;
     if (track) {
       S.mySong = track.song; S.myArtist = track.artist;
       S._nullSongCount = 0;
@@ -1196,9 +1267,16 @@ async function updateLocation(uid, token, lf) {
       userId: uid,
       ...(c ? { lat: c.lat, lng: c.lng } : {}),
       token: token || null, lastfmUsername: lf || null,
-      song: S.mySong || null, artist: S.myArtist || null,
+      song: freshTrack ? freshTrack.song : null,
+      artist: freshTrack ? freshTrack.artist : null,
       deviceId: getDeviceId(),
     });
+    if (res.spotify?.status === 'quota') {
+      noteSpotifyQuota(res.spotify.retryAfter);
+    } else if (res.spotify?.status === 'reauth') {
+      S.spotifyToken = null; S.spotifyKey = null; saveAuth();
+      showToast(T.tokenExpired);
+    }
     if (res.song) {
       S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying();
     } else if (!S.mySong) {
@@ -1295,12 +1373,14 @@ async function handleCallback() {
   // New flow: backend exchanges code server-side, passes token directly in URL
   const accessToken = params.get('access_token');
   const userId      = params.get('user_id');
+  const spotifyKey  = params.get('spotify_key');
   const authError   = params.get('auth_error');
   const lfToken     = params.get('lastfm_token');
   // Legacy: backend passed raw code (kept as fallback for old redirects)
   const code        = params.get('code');
 
   if (accessToken) {
+    if (spotifyKey) S.spotifyKey = spotifyKey;
     if (userId) {
       S.spotifyToken = accessToken; S.userId = userId; saveAuth();
       afterLogin();
@@ -1343,7 +1423,9 @@ async function handleCallback() {
     try {
       const res = await apiFetch('POST', '/exchange-token', { code });
       if (!res.access_token || !res.userId) throw new Error('invalid');
-      S.spotifyToken = res.access_token; S.userId = res.userId; saveAuth();
+      S.spotifyToken = res.access_token; S.userId = res.userId;
+      if (res.spotify_key) S.spotifyKey = res.spotify_key;
+      saveAuth();
       showLoading(false); afterLogin();
     } catch(e) {
       showLoading(false); setScreen('listen');
@@ -1566,8 +1648,8 @@ function buildDesktopTopbar() {
   const hasActivity = notifCount > 0 || S.chats.length > 0;
   // [6] Ecualizador en el topbar cuando hay canción sonando
   const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-  const _tbExpired   = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
-  const _tbNoSession = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+  const _tbExpired   = !S.mySong && hasSpotify() && (S._nullSongCount || 0) >= 3;
+  const _tbNoSession = !S.mySong && !hasSpotify() && !S.lastfmUsername;
   const _tbWaitLfm   = !S.mySong && S.lastfmUsername;
   const npHtml = S.mySong
     ? `<span class="topbar-np-label">${T.nowPlaying}</span>${eqHtml}<span class="topbar-np-song">${esc(S.mySong)}</span><span class="topbar-np-artist">— ${esc(S.myArtist || '')}</span>`
@@ -1699,8 +1781,8 @@ function patchNowPlaying() {
   const el = document.getElementById('topbar-np');
   if (el) {
     const eqHtml = `<span class="eq eq-light"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></span>`;
-    const spotifyExpired = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
-    const notLoggedIn = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+    const spotifyExpired = !S.mySong && hasSpotify() && (S._nullSongCount || 0) >= 3;
+    const notLoggedIn = !S.mySong && !hasSpotify() && !S.lastfmUsername;
     const needsReconnect = spotifyExpired || notLoggedIn;
     const waitingLfm = !S.mySong && S.lastfmUsername;
     if (S.mySong) {
@@ -1797,7 +1879,7 @@ function renderFeed(container) {
   document.getElementById('bottom-song-btn').onclick  = () => {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
-    } else if (!S.lastfmUsername && (!S.spotifyToken || (S._nullSongCount || 0) >= 3)) {
+    } else if (!S.lastfmUsername && (!hasSpotify() || (S._nullSongCount || 0) >= 3)) {
       loginWithSpotify();
     }
   };
@@ -1918,11 +2000,11 @@ function buildBottomSong() {
     </div>
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
   // Not logged in at all
-  if (!S.spotifyToken && !S.lastfmUsername) {
+  if (!hasSpotify() && !S.lastfmUsername) {
     return `<div class="bottom-label">${isES ? 'SIN SESIÓN' : 'NOT CONNECTED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
   }
   // Spotify token expired
-  if (S.spotifyToken && (S._nullSongCount || 0) >= 3) {
+  if (hasSpotify() && (S._nullSongCount || 0) >= 3) {
     return `<div class="bottom-label">${isES ? 'SESIÓN EXPIRADA' : 'SESSION EXPIRED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
   }
   // Last.fm connected but no nowplaying yet
@@ -1985,8 +2067,8 @@ function patchFeedList() {
 function patchBottomBar() {
   const btn = document.getElementById('bottom-song-btn');
   if (!btn) return;
-  const expired = !S.mySong && S.spotifyToken && (S._nullSongCount || 0) >= 3;
-  const noSession = !S.mySong && !S.spotifyToken && !S.lastfmUsername;
+  const expired = !S.mySong && hasSpotify() && (S._nullSongCount || 0) >= 3;
+  const noSession = !S.mySong && !hasSpotify() && !S.lastfmUsername;
   btn.classList.toggle('reconnect', expired || noSession);
   btn.innerHTML = buildBottomSong();
 }
