@@ -1,4 +1,4 @@
-const CACHE = 'radar-v57';
+const CACHE = 'radar-v58';
 const ASSETS = ['./app', './manifest.json', './icon-192.png', './icon-512.png', './icon.png', './favicon.png'];
 
 self.addEventListener('install', e => {

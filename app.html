@@ -1289,8 +1289,13 @@ async function updateLocation(uid, token, lf) {
     }
     if (res.song) {
       S.mySong = res.song; S.myArtist = res.artist || null; S._nullSongCount = 0; patchNowPlaying();
-    } else if (!S.mySong) {
-      S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar();
+    } else {
+      // El backend ya aplica el TTL y tolera baches cortos: si dice que no hay
+      // canción, no hay. Mantenerla aquí era mostrarle al usuario algo que dejó
+      // de escuchar hace rato.
+      S.mySong = null; S.myArtist = null;
+      S._nullSongCount = (S._nullSongCount || 0) + 1;
+      patchBottomBar();
     }
   } catch(e) {
     if (!S.mySong) { S._nullSongCount = (S._nullSongCount || 0) + 1; patchBottomBar(); }
