@@ -516,15 +516,6 @@
     .btn-login:active { opacity: 0.85; transform: scale(0.98); }
     .btn-spotify { background: #1DB954; color: #fff; }
     .btn-lastfm  { background: #d51007; color: #fff; }
-    .listen-note { width: 100%; max-width: 340px; margin: 2px 0 0; font-size: 11.5px; line-height: 1.6; text-align: center; color: rgba(245,240,232,0.6); }
-    .listen-howto { width: 100%; max-width: 340px; }
-    .listen-howto > summary { list-style: none; cursor: pointer; font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent); padding: 8px 0; text-align: center; }
-    .listen-howto > summary::-webkit-details-marker { display: none; }
-    .listen-howto > summary::before { content: '+ '; }
-    .listen-howto[open] > summary::before { content: '\2212\00a0'; }
-    .listen-howto > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-    .listen-howto ol { margin: 2px 0 0; padding: 12px 14px 12px 32px; font-size: 11.5px; line-height: 1.8; color: rgba(245,240,232,0.6); text-align: left; border: 1px solid rgba(245,240,232,0.12); border-radius: 12px; }
-    .listen-howto a { color: var(--accent); }
     .login-buttons { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
     @media (min-width: 1024px) {
@@ -923,15 +914,6 @@ const T = {
   tagline:      isES ? 'la música que te gusta, <em>o no.</em>' : 'the music you like, <em>or not.</em>',
   connectSpot:  isES ? 'Continuar con Spotify' : 'Continue with Spotify',
   connectLfm:   isES ? 'Continuar con Last.fm' : 'Continue with Last.fm',
-  spotLimit:    isES ? 'necesitamos 250.000 usuarios para que spotify nos deje tener usuarios.<br>entremedio: last.fm.'
-                     : 'we need 250,000 users before spotify lets us have users.<br>in between: last.fm.',
-  spotViaLfm:   isES ? 'conectar spotify vía last.fm' : 'connect spotify through last.fm',
-  spotStep1:    isES ? 'crea una cuenta en <a href="https://www.last.fm/join" target="_blank" rel="noopener">last.fm</a> (gratis)'
-                     : 'create a <a href="https://www.last.fm/join" target="_blank" rel="noopener">last.fm</a> account (free)',
-  spotStep2:    isES ? 'abre <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener">settings → applications</a> y conecta spotify'
-                     : 'open <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener">settings → applications</a> and connect spotify',
-  spotStep3:    isES ? 'funciona con spotify free y premium' : 'works with spotify free and premium',
-  spotStep4:    isES ? 'vuelve acá y entra con last.fm' : 'come back here and sign in with last.fm',
   listenSub:    isES ? 'cerca de ti · en tiempo real · para conversar o escuchar'
                      : 'near you · in real time · to talk or just listen',
   lfmNote:      isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más'
@@ -1838,19 +1820,8 @@ function renderListen(container) {
         <div class="listen-tagline">${T.tagline}</div>
         <div class="listen-sub">${T.listenSub}</div>
         <div class="listen-connect-btns">
-          <button class="btn-login btn-lastfm"  id="listen-lastfm">${T.connectLfm}</button>
-          <button class="btn-login btn-spotify" id="listen-spotify">${T.connectSpot}</button>
+          <button class="btn-login btn-lastfm" id="listen-lastfm">${T.connectLfm}</button>
         </div>
-        <p class="listen-note">${T.spotLimit}</p>
-        <details class="listen-howto">
-          <summary>${T.spotViaLfm}</summary>
-          <ol>
-            <li>${T.spotStep1}</li>
-            <li>${T.spotStep2}</li>
-            <li>${T.spotStep3}</li>
-            <li>${T.spotStep4}</li>
-          </ol>
-        </details>
         <div class="listen-or">
           <div class="listen-or-line"></div>
           <span class="listen-or-text">${isES ? 'O' : 'OR'}</span>
@@ -1863,7 +1834,6 @@ function renderListen(container) {
         <button id="help-btn" class="help-btn" style="color:#e8ff47;margin-top:20px;opacity:0.7;">${isES ? '¿cómo funciona?' : 'how does it work?'}</button>
       </div>
     </div>`;
-  document.getElementById('listen-spotify').onclick = loginWithSpotify;
   document.getElementById('listen-lastfm').onclick  = loginWithLastfm;
   document.getElementById('listen-detect').onclick  = detectWithMic;
   document.getElementById('help-btn').onclick       = showHelp;
@@ -1908,7 +1878,8 @@ function renderFeed(container) {
     if (S.mySong) {
       window.location.href = S.lastfmUsername ? `https://www.last.fm/user/${encodeURIComponent(S.lastfmUsername)}` : 'https://open.spotify.com/';
     } else if (!S.lastfmUsername && (!hasSpotify() || (S._nullSongCount || 0) >= 3)) {
-      loginWithSpotify();
+      // Quien ya tiene Spotify puede reconectarlo; el resto entra por Last.fm.
+      hasSpotify() ? loginWithSpotify() : loginWithLastfm();
     }
   };
   attachFeedEvents();
@@ -2029,7 +2000,7 @@ function buildBottomSong() {
     <div class="bottom-artist">${esc(S.myArtist || '')}</div>`;
   // Not logged in at all
   if (!hasSpotify() && !S.lastfmUsername) {
-    return `<div class="bottom-label">${isES ? 'SIN SESIÓN' : 'NOT CONNECTED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnect}</div></div>`;
+    return `<div class="bottom-label">${isES ? 'SIN SESIÓN' : 'NOT CONNECTED'}</div><div class="bottom-song-row"><div class="bottom-song-title" style="font-size:13px;">↺ ${T.reconnectLfm}</div></div>`;
   }
   // Spotify token expired
   if (hasSpotify() && (S._nullSongCount || 0) >= 3) {
@@ -2051,12 +2022,12 @@ function showHelp() {
     overlay.innerHTML = `
       <div class="help-sheet">
         <div class="help-sheet-title">${isES ? 'CÓMO FUNCIONA' : 'HOW IT WORKS'}</div>
-        <div class="help-step"><div class="help-step-num">01</div><div class="help-step-text">${isES ? 'Conecta <strong>Spotify</strong> o <strong>Last.fm</strong> y activa tu ubicación.' : 'Connect <strong>Spotify</strong> or <strong>Last.fm</strong> and allow location.'}</div></div>
+        <div class="help-step"><div class="help-step-num">01</div><div class="help-step-text">${isES ? 'Conecta <strong>Last.fm</strong> y activa tu ubicación.' : 'Connect <strong>Last.fm</strong> and allow location.'}</div></div>
         <div class="help-step"><div class="help-step-num">02</div><div class="help-step-text">${isES ? 'RAdAR muestra las personas cerca tuyo que están escuchando música ahora mismo.' : 'RAdAR shows people near you listening to music right now.'}</div></div>
         <div class="help-step"><div class="help-step-num">03</div><div class="help-step-text">${isES ? 'Toca <strong>♫</strong> para buscar esa canción en Spotify.' : 'Tap <strong>♫</strong> to search that song on Spotify.'}</div></div>
-        <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tenéis unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
+        <div class="help-step"><div class="help-step-num">04</div><div class="help-step-text">${isES ? 'Toca <strong>CHAT</strong> para enviarle una señal. Si acepta, tienen unos minutos para hablar.' : 'Tap <strong>CHAT</strong> to send a signal. If they accept, you have a few minutes to talk.'}</div></div>
         <div class="help-step"><div class="help-step-num">05</div><div class="help-step-text">${isES ? 'El chat desaparece cuando termina la canción. Sin rastro.' : 'The chat disappears when the song ends. No trace.'}</div></div>
-        <div class="help-step" style="margin-top:8px;padding-top:16px;border-top:1px solid #222;"><div class="help-step-num" style="color:#888;">·</div><div class="help-step-text" style="color:#555;">${isES ? 'Last.fm sincroniza con Apple Music, YouTube Music y más.' : 'Last.fm syncs with Apple Music, YouTube Music and more.'}</div></div>
+        <div class="help-step" style="margin-top:8px;padding-top:16px;border-top:1px solid #222;"><div class="help-step-num" style="color:#888;">·</div><div class="help-step-text" style="color:#999;">${isES ? 'Last.fm sincroniza con Spotify, Apple Music, YouTube Music y más: se conecta una vez en <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm/settings/applications</a>.' : 'Last.fm syncs with Spotify, Apple Music, YouTube Music and more: connect it once at <a href="https://www.last.fm/settings/applications" target="_blank" rel="noopener" style="color:#e8ff47;">last.fm/settings/applications</a>.'}</div></div>
         <button class="help-close" id="help-close">${isES ? 'CERRAR' : 'CLOSE'}</button>
       </div>`;
     document.body.appendChild(overlay);
